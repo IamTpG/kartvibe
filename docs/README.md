@@ -22,7 +22,7 @@ Tài liệu gốc của dự án. Codebase tuân theo các tài liệu này; khi
 - [ARCHITECTURE.md](ARCHITECTURE.md): thành phần, giao tiếp, vòng đời request, cấu trúc repo
 - [domain/](domain/README.md): dữ liệu và quy tắc nghiệp vụ theo domain (catalog, cart, ...)
 - [decisions/](decisions/README.md): các quyết định kỹ thuật (ADR)
-- [blocks/](blocks/): bản chụp theo block (hiện có `block-01`)
+- [blocks/](blocks/): tài liệu theo block: `block-01` là bản chụp nộp bài; `block-02`, `block-03` là ghi chú chuẩn bị (chưa xác nhận yêu cầu với giảng viên)
 
 **Riêng `api` (`api/`)**
 - [api/docs/CONVENTIONS.md](../api/docs/CONVENTIONS.md): quy ước API, error contract, cấu trúc module
