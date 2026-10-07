@@ -1,0 +1,1860 @@
+{
+  "info": {
+    "name": "Kartvibe API Acceptance Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('[F2] has X-Request-Id header', () => pm.response.to.have.header('X-Request-Id'));",
+          "pm.test('[F2] X-Request-Id is a UUID', () => pm.expect(pm.response.headers.get('X-Request-Id')).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i));",
+          "if (pm.response.code >= 400) {",
+          "  pm.test('[F1] error matches Error Contract', () => pm.response.to.have.jsonSchema({type:'object',required:['code','message','details','request_id'],additionalProperties:false,properties:{code:{type:'string'},message:{type:'string'},details:{type:'array',items:{type:'object',required:['field','issue'],additionalProperties:false,properties:{field:{type:'string'},issue:{type:'string'}}}},request_id:{type:'string'}}}));",
+          "  pm.test('[F2] header X-Request-Id == body.request_id', () => {",
+          "    const b = pm.response.json();",
+          "    pm.expect(b.request_id).to.eql(pm.response.headers.get('X-Request-Id'));",
+          "    pm.environment.set('lastRequestId', b.request_id);",
+          "    console.log('request_id=' + b.request_id);",
+          "  });",
+          "  pm.test('[E1] no stack trace / SQL leaked', () => {",
+          "    const t = pm.response.text();",
+          "    ['Error:', ' at ', 'SELECT ', 'INSERT ', 'ECONNREFUSED', 'prisma'].forEach(k => pm.expect(t).to.not.include(k));",
+          "  });",
+          "}",
+          "if ([200, 201].includes(pm.response.code) && pm.response.headers.get('Content-Type')?.includes('json')) {",
+          "  const b = pm.response.json();",
+          "  if (b && b.items) pm.test('[F1] Cart matches schema', () => pm.response.to.have.jsonSchema({type:'object',additionalProperties:false,required:['id','status','items','subtotal_cents'],properties:{id:{type:'string',format:'uuid'},status:{enum:['open','checked_out']},subtotal_cents:{type:'integer',minimum:0},items:{type:'array',items:{type:'object',additionalProperties:false,required:['product_id','sku','name','price_cents','quantity','subtotal_cents'],properties:{product_id:{type:'string'},sku:{type:'string'},name:{type:'string'},price_cents:{type:'integer'},quantity:{type:'integer'},subtotal_cents:{type:'integer'}}}}}}));",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "D - Happy Path",
+      "item": [
+        {
+          "name": "D1 — GET /products [CAT-01, CAT-02, CAT-03]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D1: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('4 active products, total=4, limit=20, offset=0', () => { pm.expect(j.data.length).to.eql(4); pm.expect(j.total).to.eql(4); pm.expect(j.limit).to.eql(20); pm.expect(j.offset).to.eql(0); pm.expect(j.data.map(p=>p.id)).to.not.include('10000000-0000-4000-8000-000000000005'); pm.expect(JSON.stringify(j)).to.not.include('is_active'); }); pm.test('sorted by sku', () => { const k=j.data.map(p=>p.sku); pm.expect(k).to.eql([...k].sort()); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D2 — pagination [CAT-03]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D2: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.expect(j.data.length).to.eql(2); pm.environment.set('page1', j.data.map(p=>p.id).join(','));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?limit=2&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "2"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "D2b — pagination page 2 [CAT-03]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D2b: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('page 2 disjoint from page 1', () => { pm.expect(j.data.length).to.eql(2); const p1=pm.environment.get('page1').split(','); j.data.forEach(p => pm.expect(p1).to.not.include(p.id)); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?limit=2&offset=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "2"
+                },
+                {
+                  "key": "offset",
+                  "value": "2"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "D2c — offset beyond total gives empty page [CAT-04]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D2c: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('empty page, total still 4', () => { pm.expect(j.data).to.eql([]); pm.expect(j.total).to.eql(4); pm.expect(j.offset).to.eql(100); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?offset=100",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "offset",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "D3 — POST /carts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D3: status 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json(); pm.test('D3 body + Location', () => { pm.response.to.have.header('Location'); pm.expect(pm.response.headers.get('Location')).to.eql('/carts/'+j.id); pm.expect(j).to.deep.include({status:'open',subtotal_cents:0}); pm.expect(j.items).to.eql([]); }); pm.environment.set('activeCartId', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D4 — GET empty cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D4: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.expect(j.items).to.eql([]); pm.expect(j.subtotal_cents).to.eql(0);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D5 — add SP1 x2 [CART-03]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D5: status 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json(); pm.test('subtotal 10000', () => { pm.expect(j.items.length).to.eql(1); pm.expect(j.items[0]).to.deep.include({product_id:'10000000-0000-4000-8000-000000000001',price_cents:5000,quantity:2,subtotal_cents:10000}); pm.expect(j.subtotal_cents).to.eql(10000); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product1Id}}\",\"quantity\":2}"
+            }
+          }
+        },
+        {
+          "name": "D6 — add SP2 x1 [CART-03]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D6: status 201', () => pm.response.to.have.status(201));",
+                  "pm.expect(pm.response.json().subtotal_cents).to.eql(25000);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product2Id}}\",\"quantity\":1}"
+            }
+          }
+        },
+        {
+          "name": "D6b — GET cart (25000) [CART-03, CART-10]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D6b: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.expect(j.items.length).to.eql(2); pm.expect(j.subtotal_cents).to.eql(25000); pm.test('items sorted by name', () => pm.expect(j.items.map(i=>i.product_id)).to.eql(['10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002']));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D7 — PATCH SP1 -> 3 [CART-03, CART-07]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D7: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.expect(j.items.find(i=>i.product_id==='10000000-0000-4000-8000-000000000001')).to.deep.include({quantity:3,subtotal_cents:15000}); pm.expect(j.subtotal_cents).to.eql(30000);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items/{{product1Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items",
+                "{{product1Id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\":3}"
+            }
+          }
+        },
+        {
+          "name": "D7b — PATCH same quantity is still 200 [CART-07]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D7b: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.expect(j.items.find(i=>i.product_id==='10000000-0000-4000-8000-000000000001')).to.deep.include({quantity:3,subtotal_cents:15000}); pm.expect(j.subtotal_cents).to.eql(30000);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items/{{product1Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items",
+                "{{product1Id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\":3}"
+            }
+          }
+        },
+        {
+          "name": "D8 — DELETE SP2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D8: status 204', () => pm.response.to.have.status(204));",
+                  "pm.test('empty body', () => pm.expect(pm.response.text()).to.eql(''));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items/{{product2Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items",
+                "{{product2Id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D9 — GET cart (15000) [CART-03]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D9: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.expect(j.items.length).to.eql(1); pm.expect(j.items[0].quantity).to.eql(3); pm.expect(j.subtotal_cents).to.eql(15000);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D10 — create second cart [CART-12]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D10: status 201', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('secondCartId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D11 — add SP1 x3 to second cart (stock not deducted) [CART-12]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D11: status 201', () => pm.response.to.have.status(201));",
+                  "pm.expect(pm.response.json().subtotal_cents).to.eql(15000);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{secondCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{secondCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product1Id}}\",\"quantity\":3}"
+            }
+          }
+        },
+        {
+          "name": "D12 — checked_out cart still lists and counts its items [CART-04]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D12: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('closed cart keeps items', () => { pm.expect(j.status).to.eql('checked_out'); pm.expect(j.items.length).to.eql(1); pm.expect(j.items[0]).to.deep.include({product_id:'10000000-0000-4000-8000-000000000001',quantity:2,subtotal_cents:10000}); pm.expect(j.subtotal_cents).to.eql(10000); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{checkedOutCartId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{checkedOutCartId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D13 — inactive product still listed and counted [CART-04]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('D13: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('inactive product kept in cart', () => { pm.expect(j.items.length).to.eql(1); pm.expect(j.items[0]).to.deep.include({product_id:'10000000-0000-4000-8000-000000000005',quantity:1,subtotal_cents:25000}); pm.expect(j.subtotal_cents).to.eql(25000); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{cartWithInactiveId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{cartWithInactiveId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "A - Schema Validation",
+      "item": [
+        {
+          "name": "A1 — quantity=0",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A1: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A1: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('details point to quantity', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('quantity'));pm.test('only quantity', () => pm.expect(pm.response.json().details.length).to.eql(1));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product1Id}}\",\"quantity\":0}"
+            }
+          }
+        },
+        {
+          "name": "A2 — quantity=11",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A2: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A2: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('details point to quantity', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('quantity'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product1Id}}\",\"quantity\":11}"
+            }
+          }
+        },
+        {
+          "name": "A3 — quantity=\"2\"",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A3: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A3: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('details point to quantity', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('quantity'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"10000000-0000-4000-8000-000000000001\",\"quantity\":\"2\"}"
+            }
+          }
+        },
+        {
+          "name": "A4 — missing product_id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A4: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A4: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('details point to product_id', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('product_id'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\":2}"
+            }
+          }
+        },
+        {
+          "name": "A5 — unknown field [CART-02]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A5: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A5: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('details point to price', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('price'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product2Id}}\",\"quantity\":2,\"price\":999}"
+            }
+          }
+        },
+        {
+          "name": "A5b — DB unchanged",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A5b: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.expect(j.items.length).to.eql(1); pm.expect(j.subtotal_cents).to.eql(15000);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A6 — cartId not UUID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A6: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A6: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('details point to cartId', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('cartId'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/abc-123-not-uuid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "abc-123-not-uuid"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A7 — PATCH quantity=0",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A7: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A7: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('details point to quantity', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('quantity'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items/{{product1Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items",
+                "{{product1Id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\":0}"
+            }
+          }
+        },
+        {
+          "name": "A8 — empty body {}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A8: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A8: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "A9 — limit=0&offset=-1 [CAT-03]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A9: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A9: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('details point to limit', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('limit'));pm.test('details point to offset', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('offset'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?limit=0&offset=-1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "0"
+                },
+                {
+                  "key": "offset",
+                  "value": "-1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "A10 — productId not UUID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A10: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A10: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('details point to productId', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('productId'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items/not-a-uuid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items",
+                "not-a-uuid"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A11 — broken JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A11: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A11: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('details point to body', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('body'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\": "
+            }
+          }
+        },
+        {
+          "name": "A12 — unknown query param",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A12: status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('A12: code VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('details point to page', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('page'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?page=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "B - 404 Not Found",
+      "item": [
+        {
+          "name": "B1 — GET unknown cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('B1: status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('B1: code CART_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('CART_NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{notFoundUuid}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{notFoundUuid}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "B2 — POST item to unknown cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('B2: status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('B2: code CART_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('CART_NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{notFoundUuid}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{notFoundUuid}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product1Id}}\",\"quantity\":1}"
+            }
+          }
+        },
+        {
+          "name": "B3 — DELETE item not in cart [CART-09]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('B3: status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('B3: code ITEM_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('ITEM_NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items/{{product2Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items",
+                "{{product2Id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "B4 — PATCH item not in cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('B4: status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('B4: code ITEM_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('ITEM_NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items/{{product2Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items",
+                "{{product2Id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\":2}"
+            }
+          }
+        },
+        {
+          "name": "B5 — DELETE on unknown cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('B5: status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('B5: code CART_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('CART_NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{notFoundUuid}}/items/{{product1Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{notFoundUuid}}",
+                "items",
+                "{{product1Id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "B6 — unknown route",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('B6: status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('B6: code ROUTE_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('ROUTE_NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/foo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "foo"
+              ]
+            }
+          }
+        },
+        {
+          "name": "B7 — method not allowed",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('B7: status 405', () => pm.response.to.have.status(405));",
+                  "pm.test('B7: code METHOD_NOT_ALLOWED', () => pm.expect(pm.response.json().code).to.eql('METHOD_NOT_ALLOWED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "C - Business Rules",
+      "item": [
+        {
+          "name": "C1 — inactive product [CART-05]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C1: status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('C1: code PRODUCT_UNAVAILABLE', () => pm.expect(pm.response.json().code).to.eql('PRODUCT_UNAVAILABLE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product5Id}}\",\"quantity\":1}"
+            }
+          }
+        },
+        {
+          "name": "C1b — unknown product [CART-05]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C1b: status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('C1b: code PRODUCT_UNAVAILABLE', () => pm.expect(pm.response.json().code).to.eql('PRODUCT_UNAVAILABLE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{notFoundUuid}}\",\"quantity\":1}"
+            }
+          }
+        },
+        {
+          "name": "C2 — out of stock (SP4) [CART-11]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C2: status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('C2: code INSUFFICIENT_STOCK', () => pm.expect(pm.response.json().code).to.eql('INSUFFICIENT_STOCK'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product4Id}}\",\"quantity\":1}"
+            }
+          }
+        },
+        {
+          "name": "C3 — qty > stock (SP3 qty=2) [CART-11]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C3: status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('C3: code INSUFFICIENT_STOCK', () => pm.expect(pm.response.json().code).to.eql('INSUFFICIENT_STOCK'));",
+                  "pm.test('details point to quantity', () => pm.expect(pm.response.json().details.map(d => d.field)).to.include('quantity'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product3Id}}\",\"quantity\":2}"
+            }
+          }
+        },
+        {
+          "name": "C3a — add SP3 qty=1 (ok)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C3a: status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product3Id}}\",\"quantity\":1}"
+            }
+          }
+        },
+        {
+          "name": "C3b — PATCH SP3 qty=2 > stock [CART-11]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C3b: status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('C3b: code INSUFFICIENT_STOCK', () => pm.expect(pm.response.json().code).to.eql('INSUFFICIENT_STOCK'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items/{{product3Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items",
+                "{{product3Id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\":2}"
+            }
+          }
+        },
+        {
+          "name": "C4 — already in cart (SP1) [CART-06]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C4: status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('C4: code ITEM_ALREADY_IN_CART', () => pm.expect(pm.response.json().code).to.eql('ITEM_ALREADY_IN_CART'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product1Id}}\",\"quantity\":1}"
+            }
+          }
+        },
+        {
+          "name": "C4b — already in cart wins over stock [CART-06, CART-13]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C4b: status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('C4b: code ITEM_ALREADY_IN_CART', () => pm.expect(pm.response.json().code).to.eql('ITEM_ALREADY_IN_CART'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{activeCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{activeCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product1Id}}\",\"quantity\":4}"
+            }
+          }
+        },
+        {
+          "name": "C5 — POST to checked_out cart [CART-01]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C5: status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('C5: code CART_CLOSED', () => pm.expect(pm.response.json().code).to.eql('CART_CLOSED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{checkedOutCartId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{checkedOutCartId}}",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{product1Id}}\",\"quantity\":1}"
+            }
+          }
+        },
+        {
+          "name": "C6 — PATCH on checked_out cart [CART-01, CART-13]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C6: status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('C6: code CART_CLOSED', () => pm.expect(pm.response.json().code).to.eql('CART_CLOSED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{checkedOutCartId}}/items/{{product1Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{checkedOutCartId}}",
+                "items",
+                "{{product1Id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\":2}"
+            }
+          }
+        },
+        {
+          "name": "C7 — DELETE on checked_out cart [CART-01, CART-13]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C7: status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('C7: code CART_CLOSED', () => pm.expect(pm.response.json().code).to.eql('CART_CLOSED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{checkedOutCartId}}/items/{{product1Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{checkedOutCartId}}",
+                "items",
+                "{{product1Id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C8 — GET checked_out cart is readable [CART-01]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C8: status 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().status).to.eql('checked_out');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{checkedOutCartId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{checkedOutCartId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C9 — PATCH item of inactive product is still allowed [CART-08]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('C9: status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('quantity 2, subtotal 50000', () => { pm.expect(j.items[0]).to.deep.include({product_id:'10000000-0000-4000-8000-000000000005',quantity:2,subtotal_cents:50000}); pm.expect(j.subtotal_cents).to.eql(50000); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{cartWithInactiveId}}/items/{{product5Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{cartWithInactiveId}}",
+                "items",
+                "{{product5Id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\":2}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "E - Server Error 500",
+      "item": [
+        {
+          "name": "E1 — DB down → 500 (chạy riêng)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('E1: status 500', () => pm.response.to.have.status(500));",
+                  "pm.test('E1: code INTERNAL_ERROR', () => pm.expect(pm.response.json().code).to.eql('INTERNAL_ERROR'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

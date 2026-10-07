@@ -1,0 +1,41 @@
+{
+  "name": "kartvibe-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "build": "tsc --noEmit",
+    "migrate": "bash scripts/migrate.sh",
+    "seed": "bash scripts/seed.sh",
+    "reset": "bash scripts/reset.sh",
+    "db:reset": "bash scripts/reset.sh",
+    "evidence": "bash evidence/run-all.sh",
+    "openapi:generate": "tsx src/openapi/generate.ts",
+    "postinstall": "prisma generate",
+    "start:log": "mkdir -p logs && tsx src/server.ts 2>&1 | tee -a logs/server.log"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.3",
+    "@types/pg": "^8.23.1",
+    "@types/swagger-ui-express": "^4.1.8",
+    "newman": "^6.2.2",
+    "prisma": "^7.10.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1",
+    "pg": "^8.23.1",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.6.5"
+  }
+}

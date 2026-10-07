@@ -1,0 +1,7 @@
+[
+  {"alias": "SP1", "id": "10000000-0000-4000-8000-000000000001", "sku": "SKU-001", "name": "Bút bi xanh", "priceCents": 5000, "stock": 3, "isActive": true},
+  {"alias": "SP2", "id": "10000000-0000-4000-8000-000000000002", "sku": "SKU-002", "name": "Vở kẻ ngang", "priceCents": 15000, "stock": 50, "isActive": true},
+  {"alias": "SP3", "id": "10000000-0000-4000-8000-000000000003", "sku": "SKU-003", "name": "Thước kẻ 30cm", "priceCents": 8000, "stock": 1, "isActive": true},
+  {"alias": "SP4", "id": "10000000-0000-4000-8000-000000000004", "sku": "SKU-004", "name": "Bút xóa", "priceCents": 12000, "stock": 0, "isActive": true},
+  {"alias": "SP5", "id": "10000000-0000-4000-8000-000000000005", "sku": "SKU-005", "name": "Compa", "priceCents": 25000, "stock": 10, "isActive": false}
+]

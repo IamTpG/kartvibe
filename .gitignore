@@ -1,0 +1,11 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Môi trường (api/.gitignore xử lý riêng cho api)
+.env
+.env.*
+!.env.example
+
+node_modules/
