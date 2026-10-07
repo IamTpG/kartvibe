@@ -22,6 +22,10 @@
 
 Dashboard của một người dùng cần: thông tin người dùng (User Service), các đơn hàng gần đây (Order Service), và thông tin sản phẩm trong các đơn đó (Product Service). Nếu viết ngây thơ, trình duyệt gọi tuần tự: user → orders → với mỗi order/item gọi product. Đó là điều bài thực hành muốn bạn thấy và sửa.
 
+## Sân thử để thực hành
+
+Có sẵn một baseline "chậm có chủ đích" (User, Order, Product Service và một dashboard gọi tuần tự) để tự đo bốn chỉ số trước khi làm BFF hoặc GraphQL: xem [services/README.md](../../../services/README.md). Kịch bản này là phỏng đoán, không phải yêu cầu của giảng viên.
+
 ## Khái niệm
 
 | Khái niệm | Ý nghĩa |
@@ -94,3 +98,71 @@ Query lấy 20 order, mỗi order có field `product`. Nếu resolver của `pro
 - [ ] Đọc khái niệm trên và tự trả lời 4 câu hỏi.
 - [ ] Thử đo một trang bất kỳ bằng DevTools Network.
 - [ ] Chạy thử một GraphQL server tối giản trên máy (không gắn vào dự án).
+
+---
+
+# Kiến thức đã học (tự tổng hợp)
+
+> Tổng hợp sau khi tự học và đo trên sân thử `services/`. Chưa xác nhận với giảng viên. Phần cài đặt BFF/GraphQL **chưa làm**, sẽ giao cho coding agent khi làm bài trên lớp.
+
+## 1. Vấn đề ban đầu và cách đo
+
+Dashboard gọi tuần tự `user → orders → product (mỗi item một lần)`. Với dữ liệu mặc định (20 đơn × 3 item):
+
+| Chỉ số | Giá trị | Giải thích |
+|---|---:|---|
+| Request từ browser (`measure.mjs`) | 62 | 1 (user) + 1 (orders) + 60 (product) |
+| Truy vấn DB | 63 | 1 + 2 (order: đơn rồi item) + 60 |
+| Lần gọi service | 62 | bằng số request vì browser gọi thẳng service |
+| Thời gian (độ trễ 50 ms) | ~3414 ms | 62 × (50 + ~5 ms xử lý) |
+
+- Trên tab Network của Chrome thấy **69 request**: 62 + 7 request thừa của chính trang (1 tải HTML, 3 `reset`, 3 `GET /_metrics`). Khi so sánh trước/sau phải dùng **cùng một định nghĩa**, nên lấy số của `measure.mjs`.
+- Đổi quy mô thì số liệu **tăng tuyến tính**: 40 đơn → 122 / 123 / 122 request, ~6653 ms (trên browser: 129 request).
+- Đổi độ trễ chỉ làm **thời gian** tăng, số request không đổi: 100 ms → ~12 789 ms (≈ 122 × 105). Tỉ lệ 1,92 chứ không đúng 2 vì phần xử lý cố định vài ms không tăng theo độ trễ giả.
+- Kết luận: thời gian ở đây phụ thuộc chủ yếu vào **số lời gọi tuần tự × độ trễ mỗi lời gọi**, không phải khối lượng công việc DB. Đó là lý do waterfall là vấn đề.
+
+## 2. BFF
+
+- Là một **lớp (hoặc service)** phục vụ một giao diện cụ thể, gom và định hình dữ liệu từ nhiều nguồn, đứng giữa client và các service.
+- **Không** được định nghĩa bởi số endpoint. Một endpoint cho cả trang và một endpoint cho mỗi widget đều là BFF hợp lệ:
+  - Một endpoint cho cả trang: ít request nhất, nhưng một phần chậm hoặc lỗi dễ kéo cả trang.
+  - Mỗi widget một endpoint: song song được, lỗi độc lập, cache theo phần, nhưng nhiều request hơn.
+- Nếu các endpoint `/dashboard/...` chỉ truy vấn một DB của cùng backend thì chúng chỉ là endpoint báo cáo thông thường, chưa hẳn là BFF.
+- **Cái bẫy:** BFF vẫn gọi Product 120 lần thì browser chỉ còn 1 request nhưng số lần gọi service và số truy vấn DB **không giảm**.
+
+## 3. GraphQL: xử lý một truy vấn
+
+1. **Parse**: chuỗi query thành cây (AST).
+2. **Validate**: so với schema; sai thì trả lỗi, **không chạy resolver nào**.
+3. **Execute**: đi từ gốc xuống, gọi resolver của từng field; với danh sách, resolver con chạy **một lần cho mỗi phần tử**. Mỗi resolver nhận (dữ liệu cha, tham số, `context`).
+4. **Lắp kết quả** đúng hình dạng query; field lỗi thành `null` và lỗi ghi vào mảng `errors` (kết quả một phần).
+
+- **N+1**: resolver `product` chạy 60 lần, mỗi lần một lời gọi, cộng 1 lần lấy đơn.
+- **DataLoader (batching)**: `load(id)` không gọi ngay mà gom id trong cùng một lượt xử lý, rồi gọi **một** lần (`IN (...)`), bỏ id trùng, trả kết quả đúng thứ tự. Tạo loader **mới cho mỗi request** để không dùng chung cache giữa các người dùng.
+- Điều kiện: service phải có cách lấy nhiều id một lúc. Nếu không, thêm DataLoader cũng không giảm được số lời gọi.
+- Rủi ro khác: query quá sâu/nặng (cần giới hạn độ sâu và độ phức tạp); thường chỉ có `POST /graphql` nên khó cache HTTP.
+
+## 4. Bản chất: join ở tầng ứng dụng
+
+- Mỗi service sở hữu dữ liệu riêng, không có khóa ngoại giữa chúng, nên không thể `JOIN` trong DB. Lớp gom phải **join bằng mã** ("API Composition").
+- Đối chiếu với các kiểu join: N+1 giống vòng lặp lồng nhau; batching giống tra theo danh sách `IN (...)`; dedupe là bỏ khóa trùng.
+- Cái giá: chậm hơn join trong DB (có độ trễ mạng), không có giao dịch bao trùm, khó lọc/sắp xếp/phân trang xuyên service, và phải quyết định khi một service lỗi.
+- Truy vấn thẳng DB của service khác là có thể làm nhưng không nên, vì phá ranh giới sở hữu dữ liệu.
+
+## 5. Mục đích của BFF và GraphQL (đã chỉnh)
+
+- Giảm số request từ client đến **lớp gom** (không phải số lời gọi xuống service).
+- Ẩn cấu trúc và logic bên trong khỏi client; định hình dữ liệu cho đúng nhu cầu (tránh over/under-fetch).
+- **Không tự giảm** công việc phía sau. Muốn giảm số lời gọi service và truy vấn DB cần cả hai: service cung cấp cách lấy nhiều bản ghi, và lớp gom biết gom id, bỏ trùng, gọi song song.
+- Với GraphQL, N+1 là rủi ro do mô hình resolver gây ra; BFF/GraphQL chỉ tạo ra **chỗ** để sửa nó.
+- Một process thì vẫn có thể có "lớp tổng hợp", nhưng lời gọi giữa các phần là gọi hàm và có thể dùng `JOIN` SQL, nên phần lớn vấn đề của block này không xuất hiện.
+
+> Tóm tắt một câu: *BFF/GraphQL gom nhiều lời gọi của client thành một và che cấu trúc bên trong; chúng không tự giảm công việc phía sau, nên phải chủ động gom id, gọi song song và dùng endpoint lấy nhiều bản ghi.*
+
+## 6. Ghi chú công cụ
+- Cột **Waterfall** hiện mặc định trong tab Network của Chrome. Firefox khó tìm hơn; có thể thay bằng các cột Start/End/Duration.
+
+## 7. Còn lại cho buổi học
+- [ ] Bảng dự đoán BFF/BFF + batch/dedupe chưa điền (xem lịch sử trao đổi); điền trước hoặc ngay trên lớp.
+- [ ] Giao agent: làm BFF và/hoặc GraphQL; thêm chế độ vào `services/measure.mjs`; so sánh với baseline.
+- [ ] Tự kiểm chứng bằng checklist ở trên: có số trước/sau, đo cả truy vấn DB, gọi song song, N+1 đã hết (đếm truy vấn), giải thích được lựa chọn và giới hạn.

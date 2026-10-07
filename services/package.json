@@ -1,0 +1,14 @@
+{
+  "name": "kartvibe-services",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["user", "order", "product"],
+  "scripts": {
+    "seed": "node seed.mjs",
+    "measure": "node measure.mjs",
+    "build": "npm run build --workspaces",
+    "start:all": "bash start-all.sh",
+    "stop:all": "bash stop-all.sh"
+  }
+}

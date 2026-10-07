@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kartvibe Dashboard (baseline)</title>
+<style>
+  body { font: 15px/1.5 system-ui, sans-serif; margin: 0 auto; max-width: 860px; padding: 16px; color: #1a1a1a; background: #fff; }
+  button { font: inherit; padding: 6px 14px; margin-right: 8px; cursor: pointer; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0 16px; }
+  th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
+  th { background: #f3f3f3; }
+  td.num, th.num { text-align: right; }
+  .muted { color: #666; }
+  .err { color: #b00020; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #16181c; color: #e6e6e6; }
+    th { background: #23262b; } th, td { border-color: #444; } .muted { color: #9aa; }
+  }
+</style>
+</head>
+<body>
+<h1>Dashboard (baseline, gọi tuần tự)</h1>
+<p class="muted">Luồng: user → orders → mỗi item một <code>GET /products/:id</code>. Mở DevTools → Network để xem waterfall.</p>
+<p>
+  <button id="load">Tải dashboard</button>
+  <button id="reset">Reset số liệu</button>
+</p>
+<div id="status" class="muted"></div>
+
+<h2>Số liệu</h2>
+<table id="metrics">
+  <tr><th>Request từ browser</th><th>Truy vấn DB</th><th>Lần gọi service</th><th class="num">Thời gian (ms)</th></tr>
+  <tr><td id="m-browser">-</td><td id="m-db">-</td><td id="m-svc">-</td><td id="m-ms" class="num">-</td></tr>
+</table>
+
+<h2 id="user">Người dùng</h2>
+<div id="orders"></div>
+
+<script>
+const USER = 'http://localhost:4001', ORDER = 'http://localhost:4002', PRODUCT = 'http://localhost:4003';
+const SERVICES = [USER, ORDER, PRODUCT];
+const $ = (id) => document.getElementById(id);
+const money = (cents) => (cents / 100).toLocaleString('vi-VN', { minimumFractionDigits: 2 });
+
+let browserRequests = 0;
+// Mọi lời gọi của trang đều qua hàm này để đếm số request.
+async function api(url) {
+  browserRequests++;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${res.status} ${url}`);
+  return res.json();
+}
+const resetAll = () => Promise.all(SERVICES.map((u) => fetch(`${u}/_metrics/reset`, { method: 'POST' })));
+
+async function load() {
+  $('status').textContent = 'Đang tải...';
+  $('status').className = 'muted';
+  try {
+    await resetAll();
+    browserRequests = 0;
+    const t0 = performance.now();
+
+    const user = await api(`${USER}/users/1`);
+    const { data: orders } = await api(`${ORDER}/orders?userId=${user.id}`);
+    const rows = [];
+    for (const order of orders) {            // tuần tự có chủ đích: đây là baseline cần cải thiện
+      const lines = [];
+      for (const item of order.items) {
+        const product = await api(`${PRODUCT}/products/${item.productId}`);
+        lines.push({ product, quantity: item.quantity });
+      }
+      rows.push({ order, lines });
+    }
+    const ms = Math.round(performance.now() - t0);
+
+    render(user, rows);
+    const m = await Promise.all(SERVICES.map((u) => fetch(`${u}/_metrics`).then((r) => r.json())));
+    $('m-browser').textContent = browserRequests;
+    $('m-db').textContent = m.reduce((s, x) => s + x.dbQueries, 0);
+    $('m-svc').textContent = m.reduce((s, x) => s + x.requests, 0);
+    $('m-ms').textContent = ms;
+    $('status').textContent = `Xong: ${orders.length} đơn.`;
+  } catch (e) {
+    $('status').textContent = `Lỗi: ${e.message}`;
+    $('status').className = 'err';
+  }
+}
+
+function render(user, rows) {
+  $('user').textContent = `${user.name} (${user.email}) - ${rows.length} đơn`;
+  $('orders').replaceChildren(...rows.map(({ order, lines }) => {
+    const total = lines.reduce((s, l) => s + l.product.priceCents * l.quantity, 0);
+    const box = document.createElement('div');
+    const title = document.createElement('strong');
+    title.textContent = `Đơn #${order.id} (${order.status}) - tổng ${money(total)}`;
+    const list = document.createElement('ul');
+    for (const l of lines) {
+      const li = document.createElement('li');
+      li.textContent = `${l.product.name} x ${l.quantity}`;
+      list.append(li);
+    }
+    box.append(title, list);
+    return box;
+  }));
+}
+
+$('load').addEventListener('click', load);
+$('reset').addEventListener('click', async () => {
+  await resetAll();
+  for (const id of ['m-browser', 'm-db', 'm-svc', 'm-ms']) $(id).textContent = '-';
+  $('status').textContent = 'Đã reset số liệu phía service.';
+});
+</script>
+</body>
+</html>
