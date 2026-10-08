@@ -1,0 +1,145 @@
+{
+  "variant": "baseline",
+  "client": "web",
+  "size": "S",
+  "mode": "warm",
+  "run": 1,
+  "clientRequests": 17,
+  "payloadBytes": 5093,
+  "requestId": "9fd73182-dca4-45a1-9b3e-abd29913812d",
+  "calls": [
+    {
+      "url": "http://localhost:4001/users/1",
+      "status": 200,
+      "bytes": 34,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4002/orders?userId=1",
+      "status": 200,
+      "bytes": 888,
+      "ms": 40
+    },
+    {
+      "url": "http://localhost:4003/products/8",
+      "status": 200,
+      "bytes": 277,
+      "ms": 40
+    },
+    {
+      "url": "http://localhost:4003/products/9",
+      "status": 200,
+      "bytes": 277,
+      "ms": 40
+    },
+    {
+      "url": "http://localhost:4003/products/10",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/5",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/6",
+      "status": 200,
+      "bytes": 277,
+      "ms": 40
+    },
+    {
+      "url": "http://localhost:4003/products/7",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/2",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/3",
+      "status": 200,
+      "bytes": 277,
+      "ms": 39
+    },
+    {
+      "url": "http://localhost:4003/products/4",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/9",
+      "status": 200,
+      "bytes": 277,
+      "ms": 40
+    },
+    {
+      "url": "http://localhost:4003/products/10",
+      "status": 200,
+      "bytes": 285,
+      "ms": 40
+    },
+    {
+      "url": "http://localhost:4003/products/1",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/6",
+      "status": 200,
+      "bytes": 277,
+      "ms": 40
+    },
+    {
+      "url": "http://localhost:4003/products/7",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/8",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    }
+  ],
+  "completeMs": 655,
+  "partial": false,
+  "services": {
+    "user": {
+      "service": "user",
+      "requests": 1,
+      "dbQueries": 1
+    },
+    "order": {
+      "service": "order",
+      "requests": 1,
+      "dbQueries": 2
+    },
+    "product": {
+      "service": "product",
+      "requests": 15,
+      "dbQueries": 15
+    },
+    "bff": {
+      "service": "bff",
+      "requests": 0,
+      "dbQueries": 0
+    },
+    "graphql": {
+      "service": "graphql",
+      "requests": 0,
+      "dbQueries": 0
+    }
+  },
+  "measuredAt": "2026-10-08T14:04:21.831Z",
+  "testAdapter": false
+}

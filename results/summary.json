@@ -1,0 +1,5158 @@
+{
+  "complete": true,
+  "missing": [],
+  "groups": [
+    {
+      "key": "baseline/web/S",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "baseline",
+          "client": "web",
+          "size": "S",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 17,
+          "payloadBytes": 5093,
+          "requestId": "b0094247-ef34-42f7-80c1-97b6a156d74c",
+          "calls": [
+            {
+              "url": "http://localhost:4001/users/1",
+              "status": 200,
+              "bytes": 34,
+              "ms": 64
+            },
+            {
+              "url": "http://localhost:4002/orders?userId=1",
+              "status": 200,
+              "bytes": 888,
+              "ms": 70
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            }
+          ],
+          "completeMs": 712,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 15,
+              "dbQueries": 15
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 0,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468259-6858931b",
+          "measuredAt": "2026-10-08T14:04:21.142Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 655,
+        "range": [
+          647,
+          662
+        ]
+      },
+      "payloadBytes": {
+        "median": 5093,
+        "range": [
+          5093,
+          5093
+        ]
+      },
+      "clientRequests": {
+        "median": 17,
+        "range": [
+          17,
+          17
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 15,
+            "range": [
+              15,
+              15
+            ]
+          },
+          "dbQueries": {
+            "median": 15,
+            "range": [
+              15,
+              15
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "baseline/web/L",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "baseline",
+          "client": "web",
+          "size": "L",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 202,
+          "payloadBytes": 66964,
+          "requestId": "e5b20ab8-503e-4296-95b3-c5f2aea4f993",
+          "calls": [
+            {
+              "url": "http://localhost:4001/users/1",
+              "status": 200,
+              "bytes": 34,
+              "ms": 65
+            },
+            {
+              "url": "http://localhost:4002/orders?userId=1",
+              "status": 200,
+              "bytes": 10402,
+              "ms": 69
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 40
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 40
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 40
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 40
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 34
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 34
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 35
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 35
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 35
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 40
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 40
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            }
+          ],
+          "completeMs": 7706,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 200,
+              "dbQueries": 200
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 0,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468303-8f3842d2",
+          "measuredAt": "2026-10-08T14:05:11.906Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 7516,
+        "range": [
+          7503,
+          7549
+        ]
+      },
+      "payloadBytes": {
+        "median": 66964,
+        "range": [
+          66964,
+          66964
+        ]
+      },
+      "clientRequests": {
+        "median": 202,
+        "range": [
+          202,
+          202
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 200,
+            "range": [
+              200,
+              200
+            ]
+          },
+          "dbQueries": {
+            "median": 200,
+            "range": [
+              200,
+              200
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "baseline/mobile/S",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "baseline",
+          "client": "mobile",
+          "size": "S",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 16,
+          "payloadBytes": 5059,
+          "requestId": "336d8a41-8be8-40e7-8eb6-1f13a19cd20f",
+          "calls": [
+            {
+              "url": "http://localhost:4002/orders?userId=1",
+              "status": 200,
+              "bytes": 888,
+              "ms": 67
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            }
+          ],
+          "completeMs": 647,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 15,
+              "dbQueries": 15
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 0,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468267-f06d3d78",
+          "measuredAt": "2026-10-08T14:04:28.670Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 608,
+        "range": [
+          594,
+          611
+        ]
+      },
+      "payloadBytes": {
+        "median": 5059,
+        "range": [
+          5059,
+          5059
+        ]
+      },
+      "clientRequests": {
+        "median": 16,
+        "range": [
+          16,
+          16
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 15,
+            "range": [
+              15,
+              15
+            ]
+          },
+          "dbQueries": {
+            "median": 15,
+            "range": [
+              15,
+              15
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "baseline/mobile/L",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "baseline",
+          "client": "mobile",
+          "size": "L",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 201,
+          "payloadBytes": 66930,
+          "requestId": "5de076aa-f2d6-4a96-baf6-f67354b989d3",
+          "calls": [
+            {
+              "url": "http://localhost:4002/orders?userId=1",
+              "status": 200,
+              "bytes": 10402,
+              "ms": 62
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 35
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 40
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 35
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 35
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 35
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 35
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 34
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 35
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 35
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/28",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/5",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/9",
+              "status": 200,
+              "bytes": 277,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/20",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/1",
+              "status": 200,
+              "bytes": 277,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/12",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/16",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/27",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/8",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/19",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/23",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/4",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/15",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/26",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/30",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/11",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/22",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/3",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/7",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/18",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/29",
+              "status": 200,
+              "bytes": 285,
+              "ms": 39
+            },
+            {
+              "url": "http://localhost:4003/products/10",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/14",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/25",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/6",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/17",
+              "status": 200,
+              "bytes": 285,
+              "ms": 37
+            },
+            {
+              "url": "http://localhost:4003/products/21",
+              "status": 200,
+              "bytes": 285,
+              "ms": 36
+            },
+            {
+              "url": "http://localhost:4003/products/2",
+              "status": 200,
+              "bytes": 277,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/13",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            },
+            {
+              "url": "http://localhost:4003/products/24",
+              "status": 200,
+              "bytes": 285,
+              "ms": 38
+            }
+          ],
+          "completeMs": 7609,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 200,
+              "dbQueries": 200
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 0,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468353-12da7c0c",
+          "measuredAt": "2026-10-08T14:06:01.557Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 7478,
+        "range": [
+          7451,
+          7512
+        ]
+      },
+      "payloadBytes": {
+        "median": 66930,
+        "range": [
+          66930,
+          66930
+        ]
+      },
+      "clientRequests": {
+        "median": 201,
+        "range": [
+          201,
+          201
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 200,
+            "range": [
+              200,
+              200
+            ]
+          },
+          "dbQueries": {
+            "median": 200,
+            "range": [
+              200,
+              200
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "bff/web/S",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "bff",
+          "client": "web",
+          "size": "S",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 1670,
+          "requestId": "0e7aa759-2855-4b27-aabc-22629fe4170b",
+          "calls": [
+            {
+              "url": "http://localhost:4004/bff/web/dashboard?userId=1",
+              "status": 200,
+              "bytes": 1670,
+              "ms": 142
+            }
+          ],
+          "completeMs": 144,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 1,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 0,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468274-334aa39f",
+          "measuredAt": "2026-10-08T14:04:35.712Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 80,
+        "range": [
+          73,
+          83
+        ]
+      },
+      "payloadBytes": {
+        "median": 1670,
+        "range": [
+          1670,
+          1670
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "bff/web/L",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "bff",
+          "client": "web",
+          "size": "L",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 20124,
+          "requestId": "e95b94bb-8158-476d-b4d5-29999bd395d2",
+          "calls": [
+            {
+              "url": "http://localhost:4004/bff/web/dashboard?userId=1",
+              "status": 200,
+              "bytes": 20124,
+              "ms": 153
+            }
+          ],
+          "completeMs": 157,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 1,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 0,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468401-41cb0c54",
+          "measuredAt": "2026-10-08T14:06:42.900Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 90,
+        "range": [
+          81,
+          93
+        ]
+      },
+      "payloadBytes": {
+        "median": 20124,
+        "range": [
+          20124,
+          20124
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "bff/mobile/S",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "bff",
+          "client": "mobile",
+          "size": "S",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 1523,
+          "requestId": "135958ec-850c-4d3d-a235-d3b4cb8ae092",
+          "calls": [
+            {
+              "url": "http://localhost:4004/bff/mobile/orders?userId=1",
+              "status": 200,
+              "bytes": 1523,
+              "ms": 143
+            }
+          ],
+          "completeMs": 144,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 1,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 0,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468279-0aab6096",
+          "measuredAt": "2026-10-08T14:04:40.286Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 81,
+        "range": [
+          76,
+          86
+        ]
+      },
+      "payloadBytes": {
+        "median": 1523,
+        "range": [
+          1523,
+          1523
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "bff/mobile/L",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "bff",
+          "client": "mobile",
+          "size": "L",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 19332,
+          "requestId": "e27e6e91-74aa-4d59-bdf7-a41fb57a1eb9",
+          "calls": [
+            {
+              "url": "http://localhost:4004/bff/mobile/orders?userId=1",
+              "status": 200,
+              "bytes": 19332,
+              "ms": 154
+            }
+          ],
+          "completeMs": 159,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 1,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 0,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468406-9815ceba",
+          "measuredAt": "2026-10-08T14:06:47.509Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 86,
+        "range": [
+          84,
+          89
+        ]
+      },
+      "payloadBytes": {
+        "median": 19332,
+        "range": [
+          19332,
+          19332
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "graphql-naive/web/S",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "graphql-naive",
+          "client": "web",
+          "size": "S",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 1651,
+          "requestId": "80353230-7f9c-4eab-8d6f-461cbf2348cd",
+          "calls": [
+            {
+              "url": "http://localhost:4005/graphql?dataloader=off",
+              "status": 200,
+              "bytes": 1651,
+              "ms": 207
+            }
+          ],
+          "completeMs": 209,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 15,
+              "dbQueries": 15
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 1,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468283-5845918d",
+          "measuredAt": "2026-10-08T14:04:44.944Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 98,
+        "range": [
+          87,
+          102
+        ]
+      },
+      "payloadBytes": {
+        "median": 1651,
+        "range": [
+          1651,
+          1651
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 15,
+            "range": [
+              15,
+              15
+            ]
+          },
+          "dbQueries": {
+            "median": 15,
+            "range": [
+              15,
+              15
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "graphql-naive/web/L",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "graphql-naive",
+          "client": "web",
+          "size": "L",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 20105,
+          "requestId": "c4c66bab-0312-4469-9945-781b174cec58",
+          "calls": [
+            {
+              "url": "http://localhost:4005/graphql?dataloader=off",
+              "status": 200,
+              "bytes": 20105,
+              "ms": 421
+            }
+          ],
+          "completeMs": 424,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 200,
+              "dbQueries": 200
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 1,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468411-a5b8ba70",
+          "measuredAt": "2026-10-08T14:06:52.414Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 205,
+        "range": [
+          196,
+          289
+        ]
+      },
+      "payloadBytes": {
+        "median": 20105,
+        "range": [
+          20105,
+          20105
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 200,
+            "range": [
+              200,
+              200
+            ]
+          },
+          "dbQueries": {
+            "median": 200,
+            "range": [
+              200,
+              200
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "graphql-naive/mobile/S",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "graphql-naive",
+          "client": "mobile",
+          "size": "S",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 1504,
+          "requestId": "c7b93ba2-b960-4cd7-8351-d249aa043e69",
+          "calls": [
+            {
+              "url": "http://localhost:4005/graphql?dataloader=off",
+              "status": 200,
+              "bytes": 1504,
+              "ms": 227
+            }
+          ],
+          "completeMs": 228,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 15,
+              "dbQueries": 15
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 1,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468288-7aaf732d",
+          "measuredAt": "2026-10-08T14:04:49.536Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 104,
+        "range": [
+          95,
+          108
+        ]
+      },
+      "payloadBytes": {
+        "median": 1504,
+        "range": [
+          1504,
+          1504
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 15,
+            "range": [
+              15,
+              15
+            ]
+          },
+          "dbQueries": {
+            "median": 15,
+            "range": [
+              15,
+              15
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "graphql-naive/mobile/L",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "graphql-naive",
+          "client": "mobile",
+          "size": "L",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 19313,
+          "requestId": "6e895b0a-9726-4ece-86cb-0ffa60e4842d",
+          "calls": [
+            {
+              "url": "http://localhost:4005/graphql?dataloader=off",
+              "status": 200,
+              "bytes": 19313,
+              "ms": 434
+            }
+          ],
+          "completeMs": 435,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 200,
+              "dbQueries": 200
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 1,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468416-2a430feb",
+          "measuredAt": "2026-10-08T14:06:58.001Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 225,
+        "range": [
+          204,
+          278
+        ]
+      },
+      "payloadBytes": {
+        "median": 19313,
+        "range": [
+          19313,
+          19313
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 200,
+            "range": [
+              200,
+              200
+            ]
+          },
+          "dbQueries": {
+            "median": 200,
+            "range": [
+              200,
+              200
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "graphql-fixed/web/S",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "graphql-fixed",
+          "client": "web",
+          "size": "S",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 1651,
+          "requestId": "6c61324c-01e8-413e-9864-3d2bbd997090",
+          "calls": [
+            {
+              "url": "http://localhost:4005/graphql?dataloader=on",
+              "status": 200,
+              "bytes": 1651,
+              "ms": 165
+            }
+          ],
+          "completeMs": 166,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 1,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468293-f7784238",
+          "measuredAt": "2026-10-08T14:04:54.109Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 85,
+        "range": [
+          83,
+          89
+        ]
+      },
+      "payloadBytes": {
+        "median": 1651,
+        "range": [
+          1651,
+          1651
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "graphql-fixed/web/L",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "graphql-fixed",
+          "client": "web",
+          "size": "L",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 20105,
+          "requestId": "6fd68f19-5c02-4ae4-83eb-59f4b0b00074",
+          "calls": [
+            {
+              "url": "http://localhost:4005/graphql?dataloader=on",
+              "status": 200,
+              "bytes": 20105,
+              "ms": 176
+            }
+          ],
+          "completeMs": 179,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 1,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468422-19f831ba",
+          "measuredAt": "2026-10-08T14:07:03.391Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 88,
+        "range": [
+          87,
+          97
+        ]
+      },
+      "payloadBytes": {
+        "median": 20105,
+        "range": [
+          20105,
+          20105
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "graphql-fixed/mobile/S",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "graphql-fixed",
+          "client": "mobile",
+          "size": "S",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 1504,
+          "requestId": "b9f1d660-1eda-4c88-af0d-50026414f877",
+          "calls": [
+            {
+              "url": "http://localhost:4005/graphql?dataloader=on",
+              "status": 200,
+              "bytes": 1504,
+              "ms": 172
+            }
+          ],
+          "completeMs": 172,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 1,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468297-990368e2",
+          "measuredAt": "2026-10-08T14:04:58.686Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 84,
+        "range": [
+          79,
+          85
+        ]
+      },
+      "payloadBytes": {
+        "median": 1504,
+        "range": [
+          1504,
+          1504
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    },
+    {
+      "key": "graphql-fixed/mobile/L",
+      "count": 6,
+      "cold": [
+        {
+          "variant": "graphql-fixed",
+          "client": "mobile",
+          "size": "L",
+          "mode": "cold",
+          "run": 1,
+          "clientRequests": 1,
+          "payloadBytes": 19313,
+          "requestId": "380a629c-1b1b-4bda-9edd-8a993537809e",
+          "calls": [
+            {
+              "url": "http://localhost:4005/graphql?dataloader=on",
+              "status": 200,
+              "bytes": 19313,
+              "ms": 175
+            }
+          ],
+          "completeMs": 178,
+          "partial": false,
+          "services": {
+            "user": {
+              "service": "user",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "order": {
+              "service": "order",
+              "requests": 1,
+              "dbQueries": 2
+            },
+            "product": {
+              "service": "product",
+              "requests": 1,
+              "dbQueries": 1
+            },
+            "bff": {
+              "service": "bff",
+              "requests": 0,
+              "dbQueries": 0
+            },
+            "graphql": {
+              "service": "graphql",
+              "requests": 1,
+              "dbQueries": 0
+            }
+          },
+          "coldSession": "cold-1791468427-8abf957a",
+          "measuredAt": "2026-10-08T14:07:07.975Z",
+          "testAdapter": false
+        }
+      ],
+      "completeMs": {
+        "median": 92,
+        "range": [
+          82,
+          96
+        ]
+      },
+      "payloadBytes": {
+        "median": 19313,
+        "range": [
+          19313,
+          19313
+        ]
+      },
+      "clientRequests": {
+        "median": 1,
+        "range": [
+          1,
+          1
+        ]
+      },
+      "services": {
+        "user": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "order": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 2,
+            "range": [
+              2,
+              2
+            ]
+          }
+        },
+        "product": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          }
+        },
+        "bff": {
+          "requests": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        },
+        "graphql": {
+          "requests": {
+            "median": 1,
+            "range": [
+              1,
+              1
+            ]
+          },
+          "dbQueries": {
+            "median": 0,
+            "range": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "partialRuns": 0
+    }
+  ]
+}
