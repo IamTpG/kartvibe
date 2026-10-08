@@ -1,0 +1,20 @@
+{
+  "size": "S",
+  "loader": "off",
+  "startedAt": "2026-10-08T14:17:51.592Z",
+  "checks": [
+    {
+      "client": "web",
+      "partial": false,
+      "pass": true,
+      "productRequests": 15
+    },
+    {
+      "client": "mobile",
+      "partial": false,
+      "pass": true,
+      "productRequests": 15
+    }
+  ],
+  "pass": true
+}

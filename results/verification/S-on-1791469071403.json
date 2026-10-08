@@ -1,0 +1,56 @@
+{
+  "size": "S",
+  "loader": "on",
+  "startedAt": "2026-10-08T14:17:32.719Z",
+  "checks": [
+    {
+      "client": "web",
+      "partial": false,
+      "pass": true,
+      "productRequests": 1
+    },
+    {
+      "client": "web",
+      "partial": false,
+      "pass": true,
+      "scenario": "slow"
+    },
+    {
+      "client": "web",
+      "partial": true,
+      "pass": true,
+      "scenario": "timeout"
+    },
+    {
+      "client": "web",
+      "partial": true,
+      "pass": true,
+      "scenario": "error"
+    },
+    {
+      "client": "mobile",
+      "partial": false,
+      "pass": true,
+      "productRequests": 1
+    },
+    {
+      "client": "mobile",
+      "partial": false,
+      "pass": true,
+      "scenario": "slow"
+    },
+    {
+      "client": "mobile",
+      "partial": true,
+      "pass": true,
+      "scenario": "timeout"
+    },
+    {
+      "client": "mobile",
+      "partial": true,
+      "pass": true,
+      "scenario": "error"
+    }
+  ],
+  "pass": true
+}

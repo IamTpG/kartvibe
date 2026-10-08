@@ -1,0 +1,49 @@
+{
+  "variant": "graphql-naive",
+  "client": "mobile",
+  "size": "S",
+  "mode": "warm",
+  "run": 2,
+  "clientRequests": 1,
+  "payloadBytes": 1504,
+  "requestId": "96124d9a-c979-4ecc-8e35-41cb8dea4583",
+  "calls": [
+    {
+      "url": "http://localhost:4005/graphql?dataloader=off",
+      "status": 200,
+      "bytes": 1504,
+      "ms": 107
+    }
+  ],
+  "completeMs": 108,
+  "partial": false,
+  "services": {
+    "user": {
+      "service": "user",
+      "requests": 0,
+      "dbQueries": 0
+    },
+    "order": {
+      "service": "order",
+      "requests": 1,
+      "dbQueries": 2
+    },
+    "product": {
+      "service": "product",
+      "requests": 15,
+      "dbQueries": 15
+    },
+    "bff": {
+      "service": "bff",
+      "requests": 0,
+      "dbQueries": 0
+    },
+    "graphql": {
+      "service": "graphql",
+      "requests": 1,
+      "dbQueries": 0
+    }
+  },
+  "measuredAt": "2026-10-08T14:04:49.811Z",
+  "testAdapter": false
+}

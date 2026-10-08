@@ -1,0 +1,49 @@
+{
+  "variant": "bff",
+  "client": "mobile",
+  "size": "L",
+  "mode": "warm",
+  "run": 3,
+  "clientRequests": 1,
+  "payloadBytes": 19332,
+  "requestId": "ac624aea-f999-486d-b94e-a17ea28bf1e8",
+  "calls": [
+    {
+      "url": "http://localhost:4004/bff/mobile/orders?userId=1",
+      "status": 200,
+      "bytes": 19332,
+      "ms": 82
+    }
+  ],
+  "completeMs": 84,
+  "partial": false,
+  "services": {
+    "user": {
+      "service": "user",
+      "requests": 0,
+      "dbQueries": 0
+    },
+    "order": {
+      "service": "order",
+      "requests": 1,
+      "dbQueries": 2
+    },
+    "product": {
+      "service": "product",
+      "requests": 1,
+      "dbQueries": 1
+    },
+    "bff": {
+      "service": "bff",
+      "requests": 1,
+      "dbQueries": 0
+    },
+    "graphql": {
+      "service": "graphql",
+      "requests": 0,
+      "dbQueries": 0
+    }
+  },
+  "measuredAt": "2026-10-08T14:06:47.842Z",
+  "testAdapter": false
+}

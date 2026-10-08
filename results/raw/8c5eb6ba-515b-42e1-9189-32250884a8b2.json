@@ -1,0 +1,1255 @@
+{
+  "variant": "baseline",
+  "client": "web",
+  "size": "L",
+  "mode": "warm",
+  "run": 4,
+  "clientRequests": 202,
+  "payloadBytes": 66964,
+  "requestId": "2fd33285-aaa1-490c-9942-74fc884000a5",
+  "calls": [
+    {
+      "url": "http://localhost:4001/users/1",
+      "status": 200,
+      "bytes": 34,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4002/orders?userId=1",
+      "status": 200,
+      "bytes": 10402,
+      "ms": 42
+    },
+    {
+      "url": "http://localhost:4003/products/8",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/19",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/30",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/11",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/15",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/26",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/7",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/18",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/22",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/3",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/14",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/25",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/29",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/10",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/21",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/2",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/6",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/17",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/28",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/9",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/13",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/24",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/5",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/16",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/20",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/1",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/12",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/23",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/27",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/8",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/19",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/30",
+      "status": 200,
+      "bytes": 285,
+      "ms": 39
+    },
+    {
+      "url": "http://localhost:4003/products/4",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/15",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/26",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/7",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/11",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/22",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/3",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/14",
+      "status": 200,
+      "bytes": 285,
+      "ms": 39
+    },
+    {
+      "url": "http://localhost:4003/products/18",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/29",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/10",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/21",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/25",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/6",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/17",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/28",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/2",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/13",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/24",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/5",
+      "status": 200,
+      "bytes": 277,
+      "ms": 39
+    },
+    {
+      "url": "http://localhost:4003/products/9",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/20",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/1",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/12",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/16",
+      "status": 200,
+      "bytes": 285,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/27",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/8",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/19",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/23",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/4",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/15",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/26",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/30",
+      "status": 200,
+      "bytes": 285,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/11",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/22",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/3",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/7",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/18",
+      "status": 200,
+      "bytes": 285,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/29",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/10",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/14",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/25",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/6",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/17",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/21",
+      "status": 200,
+      "bytes": 285,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/2",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/13",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/24",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/28",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/9",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/20",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/1",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/5",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/16",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/27",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/8",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/12",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/23",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/4",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/15",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/19",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/30",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/11",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/22",
+      "status": 200,
+      "bytes": 285,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/26",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/7",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/18",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/29",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/3",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/14",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/25",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/6",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/10",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/21",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/2",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/13",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/17",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/28",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/9",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/20",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/24",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/5",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/16",
+      "status": 200,
+      "bytes": 285,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/27",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/1",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/12",
+      "status": 200,
+      "bytes": 285,
+      "ms": 46
+    },
+    {
+      "url": "http://localhost:4003/products/23",
+      "status": 200,
+      "bytes": 285,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/4",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/8",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/19",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/30",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/11",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/15",
+      "status": 200,
+      "bytes": 285,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/26",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/7",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/18",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/22",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/3",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/14",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/25",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/29",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/10",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/21",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/2",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/6",
+      "status": 200,
+      "bytes": 277,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/17",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/28",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/9",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/13",
+      "status": 200,
+      "bytes": 285,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/24",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/5",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/16",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/20",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/1",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/12",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/23",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/27",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/8",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/19",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/30",
+      "status": 200,
+      "bytes": 285,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/4",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/15",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/26",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/7",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/11",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/22",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/3",
+      "status": 200,
+      "bytes": 277,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/14",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/18",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/29",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/10",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/21",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/25",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/6",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/17",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/28",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/2",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/13",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/24",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/5",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/9",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/20",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/1",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/12",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/16",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/27",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/8",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/19",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/23",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/4",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/15",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/26",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/30",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/11",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/22",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/3",
+      "status": 200,
+      "bytes": 277,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/7",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/18",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/29",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/10",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/14",
+      "status": 200,
+      "bytes": 285,
+      "ms": 35
+    },
+    {
+      "url": "http://localhost:4003/products/25",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/6",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/17",
+      "status": 200,
+      "bytes": 285,
+      "ms": 37
+    },
+    {
+      "url": "http://localhost:4003/products/21",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/2",
+      "status": 200,
+      "bytes": 277,
+      "ms": 38
+    },
+    {
+      "url": "http://localhost:4003/products/13",
+      "status": 200,
+      "bytes": 285,
+      "ms": 36
+    },
+    {
+      "url": "http://localhost:4003/products/24",
+      "status": 200,
+      "bytes": 285,
+      "ms": 38
+    }
+  ],
+  "completeMs": 7516,
+  "partial": false,
+  "services": {
+    "user": {
+      "service": "user",
+      "requests": 1,
+      "dbQueries": 1
+    },
+    "order": {
+      "service": "order",
+      "requests": 1,
+      "dbQueries": 2
+    },
+    "product": {
+      "service": "product",
+      "requests": 200,
+      "dbQueries": 200
+    },
+    "bff": {
+      "service": "bff",
+      "requests": 0,
+      "dbQueries": 0
+    },
+    "graphql": {
+      "service": "graphql",
+      "requests": 0,
+      "dbQueries": 0
+    }
+  },
+  "measuredAt": "2026-10-08T14:05:42.137Z",
+  "testAdapter": false
+}

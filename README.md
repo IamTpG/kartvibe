@@ -1,22 +1,23 @@
 # Kartvibe
 
-Ứng dụng web thực hành cho môn **Phát triển ứng dụng web nâng cao**. Dự án được xây dựng từng bước qua các block của môn học, bắt đầu từ một REST API giỏ hàng.
+Ứng dụng web thực hành cho môn **Phát triển ứng dụng web nâng cao**. Repo hiện có hai dự án độc lập, chưa liên kết với nhau: **`api`** (REST API giỏ hàng) và **`services` + `web`** (ba service User, Order, Product cùng BFF và GraphQL).
 
 ## Trạng thái
 
 | Thành phần | Trạng thái |
 |---|---|
 | `api`: REST API giỏ hàng (sản phẩm, giỏ, mục trong giỏ, tính tổng tiền) | Có, đã qua bộ test nghiệm thu |
+| `services` + `web`: ba service (User, Order, Product), BFF, GraphQL, hai trang web, công cụ đo | Có, đã qua bộ kiểm tra hợp đồng; số đo nhiều lần chưa hoàn tất |
 | Đăng nhập, checkout, thanh toán, trừ tồn kho | Chưa làm |
-| Frontend, BFF/GraphQL, worker, broker, cache | Chưa làm, sẽ thêm khi tới block tương ứng |
+| Worker, broker, cache | Chưa làm, sẽ thêm khi cần |
 
 Kiến trúc và các thành phần có thể thêm: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Công nghệ
 
-Node.js 20+ (đã thử trên 24), Express 5, TypeScript (chạy bằng `tsx`), Zod (validate và sinh OpenAPI từ cùng một schema), Prisma 7, PostgreSQL 17, pino-http, Swagger UI. Lý do chọn: [docs/decisions/](docs/decisions/README.md).
+Node.js 20+ (đã thử trên 24), Express 5, TypeScript (chạy bằng `tsx`), Zod (validate và sinh OpenAPI từ cùng một schema), Prisma 7, PostgreSQL 17, pino-http, Swagger UI. Lý do chọn: [docs/decisions/](docs/decisions/README.md). `services`: Node.js 22+, Express 4/5, GraphQL (graphql-js, DataLoader), một database Postgres riêng cho mỗi service, trang web tĩnh không framework.
 
-## Bắt đầu nhanh
+## Bắt đầu nhanh: `api`
 
 Cần Node.js và Docker (hoặc một PostgreSQL ≥ 14 tự cài). Chạy trong thư mục `api/`:
 
@@ -71,15 +72,38 @@ npm run evidence
 
 **Lưu ý:** lệnh này **reset database** (xóa dữ liệu, migrate và seed lại) trên DB trong `.env`. Chi tiết các nhóm test và cách chạy: [api/docs/TESTING.md](api/docs/TESTING.md).
 
+## `services` (API composition)
+
+Ba service REST (mỗi service một database riêng), BFF và GraphQL, so với baseline là trình duyệt gọi trực tiếp. Cần Docker bật và container `kartvibe-postgres` (tạo ở bước `api` ở trên). Chạy trong thư mục `services/`:
+
+```bash
+cd services
+npm install
+bash start-all.sh     # tạo database còn thiếu; chạy 5 service
+npm run seed:s        # dữ liệu nhỏ (npm run seed:l cho dữ liệu lớn)
+```
+
+Web chạy riêng, ở terminal khác (từ gốc repo):
+
+```bash
+cd web
+npm start             # cổng 4000, giữ chạy; Ctrl+C để dừng
+```
+
+Mở http://localhost:4000/dashboard.html, chọn chế độ (Baseline, BFF, GraphQL), bấm **Tải dữ liệu**; kiểm tra bằng `npm run check -- --size S`. Dừng bằng `bash stop-all.sh`. Hướng dẫn đầy đủ (demo, kiểm tra, đo, xử lý sự cố): [services/README.md](services/README.md).
+
 ## Cấu trúc repo
 
 ```
 kartvibe/
-  api/     REST API (mã nguồn, migration, seed, test nghiệm thu, tài liệu riêng)
-  docs/    tài liệu gốc của dự án
+  api/        REST API (mã nguồn, migration, seed, test nghiệm thu, tài liệu riêng)
+  services/   user, order, product, bff, graphql, công cụ kiểm tra và đo (tools/)
+  web/        Trang dashboard, mobile và bộ chạy đo
+  results/    Bằng chứng và kết quả đo của services
+  docs/       Tài liệu gốc của dự án; docs/blocks/block-NN: tài liệu theo từng block
 ```
 
-Các thư mục mới (ví dụ `web/`, `worker/`) chỉ được tạo khi tới block cần chúng.
+Hai dự án độc lập, chưa liên kết; có thể khác kiến trúc. Việc viết thành ba service riêng (User, Order, Product) là yêu cầu của đề; việc đặt chung một repo là quyết định của nhóm. Về sau có thể dùng lại một dự án hoặc thêm thư mục cấp trên mới khi cần.
 
 ## Tài liệu
 
@@ -94,11 +118,13 @@ Tài liệu gốc luôn phản ánh trạng thái hiện tại của dự án; m
 | Cách chạy và hiểu bộ test | [api/docs/TESTING.md](api/docs/TESTING.md) |
 | Dữ liệu seed | [api/seeds/README.md](api/seeds/README.md) |
 | Thuật ngữ | [docs/GLOSSARY.md](docs/GLOSSARY.md) |
-| Tài liệu gốc của Block 1 (bản chụp) | [docs/blocks/block-01/](docs/blocks/block-01/) |
+| Chạy, demo, kiểm tra và đo `services` | [services/README.md](services/README.md), [services/tools/README.md](services/tools/README.md) |
+| Tài liệu theo từng block (đề, hợp đồng, Plan, bản chụp, ghi chú trình bày, sơ đồ) | [docs/blocks/](docs/blocks/) |
 
 ## Quy ước làm việc
 
 - **Tài liệu và mã đi cùng nhau:** đổi quy tắc nghiệp vụ thì cập nhật `docs/domain/`; đổi công nghệ hoặc cách làm lớn thì thêm ADR mới. Bảng "khi thay đổi thì cập nhật tài liệu nào" ở [docs/README.md](docs/README.md).
 - **Bản chụp theo block** (`docs/blocks/`) giữ nguyên bản, không sửa sau khi chốt.
 - **Không commit `.env`:** chỉ `.env.example` được commit.
-- **Đặt tên:** tên nằm trong không gian dùng chung thì có tiền tố `kartvibe` (database `kartvibe`, container `kartvibe-postgres`, package `kartvibe-api`); thư mục trong repo để tên ngắn (`api`, `docs`).
+- **Đặt tên:** tên nằm trong không gian dùng chung thì có tiền tố `kartvibe` (database `kartvibe`, `kartvibe_user`..., container `kartvibe-postgres`, package `kartvibe-api`); thư mục trong repo để tên ngắn (`api`, `services`, `docs`).
+- **Một repo, nhiều dự án độc lập:** mỗi dự án tự chạy được và có README riêng; bài nộp mỗi block nằm ở `docs/blocks/block-NN/` và gắn tag `block-NN`.

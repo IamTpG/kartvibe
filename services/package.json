@@ -1,0 +1,37 @@
+{
+  "name": "kartvibe-services",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "user",
+    "order",
+    "product",
+    "bff",
+    "graphql"
+  ],
+  "scripts": {
+    "seed:s": "npm run seed:s -w user -w order -w product",
+    "seed:l": "npm run seed:l -w user -w order -w product",
+    "start:all": "bash start-all.sh",
+    "start:measure": "bash tools/start-measure.sh",
+    "stop:all": "bash stop-all.sh",
+    "build": "npm run build --workspaces --if-present",
+    "check": "node tools/check-contract.mjs",
+    "check:equality": "node tools/check-equality.mjs",
+    "check:live": "node tools/verify-live.mjs",
+    "trace": "node tools/export-trace.mjs",
+    "matrix": "node tools/run-matrix.mjs",
+    "report": "node tools/report.mjs",
+    "collector": "node tools/measure.mjs collect",
+    "mock": "node tools/mock-services.mjs",
+    "test:tools": "node --test tools/tests/measure.test.mjs tools/tests/contracts.test.mjs",
+    "contracts": "node tools/contracts.mjs",
+    "contracts:check": "node tools/contracts.mjs --check"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "openapi-typescript": "^7.13.0"
+  }
+}

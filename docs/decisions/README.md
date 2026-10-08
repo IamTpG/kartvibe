@@ -14,3 +14,6 @@ Trạng thái: đề xuất · chấp nhận · bị thay thế bởi NNNN
 | [0006](0006-feature-based-structure.md) | Tổ chức mã theo domain | chấp nhận |
 | [0007](0007-postman-newman-evidence.md) | Bằng chứng nghiệm thu bằng Postman + newman | chấp nhận |
 | [0008](0008-row-lock-cart.md) | Khóa dòng cart khi sửa giỏ hàng | chấp nhận |
+| [0009](0009-log-stdout-moc-do-sau-co.md) | Log ra stdout, gom ngoài mã sản phẩm; móc đo và test sau cờ môi trường | chấp nhận |
+| [0010](0010-mot-repo-hai-du-an-doc-lap.md) | Một repo, hai dự án độc lập (`api` và `services` + `web`) | chấp nhận |
+| [0011](0011-hop-dong-openapi-do-service-so-huu.md) | Hợp đồng do từng service sở hữu: Zod → OpenAPI 3.1, bên tiêu thụ sinh kiểu từ spec | chấp nhận |
