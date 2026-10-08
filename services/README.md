@@ -1,95 +1,144 @@
-# Sân thử Block 2 (baseline)
+# services: API composition
 
-> **Đây là sân thử để học và đo, không phải yêu cầu của giảng viên.** Kịch bản dưới đây là phỏng đoán, chưa xác nhận với giảng viên. Mã nằm trên nhánh `lab/block-02-03`, không thuộc `api` và có thể bỏ đi bất cứ lúc nào.
+Ba service REST (**User**, **Order**, **Product**, mỗi service một database riêng) cùng hai cách ghép dữ liệu ở server (**BFF** và **GraphQL**), và hai trang web (dashboard, mobile) để so sánh với cách gọi trực tiếp (**baseline**). Viết thành ba service riêng là yêu cầu của đề. Trong repo này nó **độc lập** với các dự án khác và chưa liên kết với chúng; việc đặt chung một repo là quyết định của nhóm.
 
-Mục đích: có sẵn một dashboard "chậm có chủ đích" để tự đo bốn chỉ số của Block 2 (request từ browser, truy vấn DB, lần gọi service, thời gian) trước khi làm BFF hoặc GraphQL, rồi so sánh trước/sau. Ghi chú lý thuyết: [docs/blocks/block-02](../docs/blocks/block-02/README.md).
+Đề bài, hợp đồng chung, Plan, ghi chú trình bày và sơ đồ: [`../docs/blocks/block-02/`](../docs/blocks/block-02/). Công cụ kiểm tra và đo: [`tools/README.md`](tools/README.md).
 
-## Kịch bản
-
-Dashboard của một người dùng cần ba nguồn dữ liệu và gọi **tuần tự**:
-
+```mermaid
+flowchart LR
+    subgraph C["Trình duyệt (web :4000)"]
+        W["dashboard.html"]
+        M["mobile.html"]
+    end
+    U["user :4001"] --- DU[("kartvibe_user")]
+    O["order :4002"] --- DO[("kartvibe_order")]
+    P["product :4003"] --- DP[("kartvibe_product")]
+    C -. "baseline: gọi trực tiếp, tuần tự" .-> U & O & P
+    C -- "1 request" --> BFF["bff :4004"] --> U & O & P
+    C -- "1 request" --> GQL["graphql :4005"] --> U & O & P
 ```
-browser ──▶ user    GET /users/1
-        ──▶ order   GET /orders?userId=1        (các đơn, mỗi đơn có items [{productId, quantity}])
-        ──▶ product GET /products/:id           (một lời gọi cho MỖI item, không dedupe)
-```
 
-Với dữ liệu mặc định (20 đơn × 3 item) có 62 request tuần tự: 1 (user) + 1 (orders) + 60 (product).
+| Thành phần | Cổng | Database | Ghi chú |
+|---|---|---|---|
+| `user` | 4001 | `kartvibe_user` | `GET /users/:id` |
+| `order` | 4002 | `kartvibe_order` | `GET /orders?userId=`, luôn 2 truy vấn DB |
+| `product` | 4003 | `kartvibe_product` | `GET /products/:id`, `GET /products?ids=` (lấy nhiều, loại id trùng, 1 truy vấn), công tắc gây lỗi `/_fault` |
+| `bff` | 4004 | không | `GET /bff/web/dashboard`, `GET /bff/mobile/orders` |
+| `graphql` | 4005 | không | `POST /graphql` (query `Web`, `Mobile`), công tắc `DATALOADER` |
+| `../web` | 4000 | không | Trang `dashboard.html`, `mobile.html`. **Không** do `start-all.sh` chạy: chạy riêng bằng `npm start` trong `web/`; `npm run matrix` tự bật nếu chưa chạy |
+| bộ thu kết quả | 4010 | không | Nhận từng lần đo từ trang (`tools/measure.mjs`). **Chỉ chạy khi cần đo**: `npm run collector`, hoặc tự khởi động bởi `npm run matrix` |
 
-| Thành phần | Thư mục | Cổng | Schema DB | Endpoint |
-|---|---|---|---|---|
-| User Service | `services/user` | 4001 | `user_svc` | `GET /users/:id` |
-| Order Service | `services/order` | 4002 | `order_svc` | `GET /orders?userId=` |
-| Product Service | `services/product` | 4003 | `product_svc` | `GET /products/:id` |
-| Dashboard | `web` | 4000 | | trang tĩnh `index.html` |
+Mọi service có thêm `GET /health`, `GET /_metrics` (số request và truy vấn DB), `POST /_metrics/reset`.
 
-Mỗi service còn có `GET /health`, `GET /_metrics` (`{ requests, dbQueries }`) và `POST /_metrics/reset`. Cố ý **không** có endpoint lấy nhiều sản phẩm cùng lúc, để bài toán N+1 còn nguyên. JSON dùng `camelCase` (khác với `api` dùng `snake_case`).
+## Yêu cầu
 
-Mỗi service chỉ truy cập schema của mình và không có khóa ngoại giữa các schema (mỗi service sở hữu dữ liệu của nó). Cả ba dùng chung một database `kartvibe_lab` trong container `kartvibe-postgres`.
+- Node.js 22 trở lên (đã thử trên 24).
+- Docker với container Postgres `kartvibe-postgres` ở cổng **5434**. Chưa có thì tạo một lần (các database của `services` do `start-all.sh` tự tạo):
+
+  ```bash
+  docker run -d --name kartvibe-postgres -e POSTGRES_PASSWORD=postgres -p 5434:5432 postgres:17
+  ```
+- Các cổng 4000 đến 4005 và 4010 còn trống.
 
 ## Chạy
 
-Cần container Postgres đang chạy (xem [README gốc](../README.md)) và database `kartvibe_lab`:
-
 ```bash
-docker exec kartvibe-postgres psql -U postgres -c "CREATE DATABASE kartvibe_lab"   # chỉ lần đầu
 cd services
-npm install          # cài cho cả ba service (npm workspaces)
-npm run seed         # nạp dữ liệu (idempotent: drop và tạo lại 3 schema)
-bash start-all.sh    # chạy nền user, order, product, web; log ở services/.run/
+npm install              # lần đầu (npm workspaces: một lần cho cả 5 service)
+bash start-all.sh        # tạo database còn thiếu; chạy 5 service (như bình thường)
+npm run start:measure    # thay cho start-all.sh khi cần demo lỗi, đo hoặc chạy các kiểm tra (xem dưới)
+npm run seed:s           # nạp dữ liệu nhỏ (npm run seed:l cho dữ liệu lớn)
+bash stop-all.sh         # dừng năm service
 ```
 
-Mở http://localhost:4000, bấm "Tải dashboard" và xem tab Network của DevTools (waterfall). Dừng bằng `bash stop-all.sh` (xóa luôn `.run/`).
+Trang web chạy riêng, ở terminal khác: `cd ../web && npm start` (cổng 4000).
 
-Chạy từng service thủ công: `cd services/user && npm run dev` (tương tự `order`, `product`); web: `cd web && npm start`. Type-check: `npm run build` trong `services/`.
+Thứ tự lần đầu là `start-all.sh` (tạo database) rồi `seed`. `start-all.sh` chạy service như bình thường, không có độ trễ giả hay điểm vào gây lỗi; các móc đó là phần cắm thêm của `npm run start:measure`. Đổi dữ liệu S hoặc L không cần khởi động lại service. PID nằm ở `.run/`; log của từng service (stdout do `start-all.sh` ghi) nằm ở `logs/` (không commit, đổi bằng `LOG_DIR`).
+
+| Dữ liệu | Đơn | Item mỗi đơn | Product | Tổng item |
+|---|---:|---:|---:|---:|
+| S (nhỏ, dùng để demo) | 5 | 3 | 10 | 15 |
+| L (lớn) | 50 | 4 | 30 | 200 |
+
+## Demo
+
+Để thấy waterfall rõ và dùng ba nút lỗi của Product, chạy bằng `npm run start:measure` (độ trễ giả 30 ms và điểm vào `/_fault`); `start-all.sh` thuần không có hai thứ đó. Mở http://localhost:4000/dashboard.html (hoặc `/mobile.html`), chọn **Chế độ**, bấm **Tải dữ liệu**. Trang hiện số request client, payload, thời gian hoàn tất, bảng **số liệu phía từng service** và lịch sử so sánh các lần tải. Có ba nút bật/tắt lỗi cho Product (bình thường, chậm 1500 ms, lỗi 500).
+
+Số kỳ vọng với dữ liệu S, web (mobile: baseline 16 request):
+
+| Chế độ | Request client | Product nhận (request / truy vấn DB) |
+|---|---:|---|
+| Baseline REST | 17 | 15 / 15 |
+| BFF | 1 | 1 / 1 |
+| GraphQL (DataLoader tắt, N+1) | 1 | 15 / 15 |
+| GraphQL (đã sửa, DataLoader bật) | 1 | 1 / 1 |
+
+Đây là số đếm tính từ hợp đồng và đã kiểm chứng; số đo thời gian nhiều lần xem mục **Đo**. Để xem waterfall: DevTools (Chrome) → Network → *Disable cache*.
+
+## Kiểm tra
+
+Chạy từ `services/` khi các service đang chạy bằng `npm run start:measure` (các kiểm tra cần `/_fault` của Product; thiếu thì `check` báo ngay). Chi tiết từng lệnh: [`tools/README.md`](tools/README.md):
+
+| Lệnh | Kiểm tra |
+|---|---|
+| `npm run check -- --size S` | Cả 5 service đúng hợp đồng chung (80 kiểm tra khi đủ 5 service; response được kiểm theo `openapi.json` của từng service) |
+| `npm run check:equality` | Baseline = BFF = GraphQL cho web và mobile; mobile chỉ có trường mobile |
+| `npm run check:live -- S on [--faults]` | Đối chiếu và chạy lỗi (chậm, 500); báo cáo ở `../results/verification/` |
+| `npm run trace -- --size S` | Xuất trace N+1 và call graph BFF từ log thật vào `../results/evidence/` |
+| `npm run contracts:check` | `openapi.json` và kiểu sinh ra khớp với `src/contract.ts` (sửa hợp đồng thì chạy `npm run contracts`) |
+| `npm run test:tools` | Test của bộ đo và của hợp đồng |
+| `cd graphql && npm test -- --size S` | Bộ kiểm tra riêng của GraphQL (N+1 trước/sau, policy lỗi) |
 
 ## Đo
 
-```bash
-cd services
-node measure.mjs                 # mặc định 5 lần, in từng lần và trung vị
-node measure.mjs --runs 10 --user-id 1
+Số liệu đo nhiều lần (4 biến thể × 2 client × 2 kích thước, mỗi cấu hình 1 lần lạnh + 5 lần ấm) chạy **trong trình duyệt thật**:
+
+- **Từng cấu hình:** mở một terminal chạy `npm run collector` (bộ thu kết quả, giữ chạy); ở terminal khác `bash tools/restart-cold.sh [on|off]` (khởi động lại lạnh, in `COLD_SESSION=...`; `off` cho biến thể `graphql-naive`), rồi mở trang và dùng ô "Công cụ đo số liệu" (thu gọn ở cuối trang): dán cold session, chọn biến thể và kích thước, bấm **Chạy 1 lạnh + 5 ấm**.
+- **Cả ma trận:** `npm run matrix` (tự nạp dữ liệu, khởi động lại lạnh, tự bật web nếu chưa chạy, mở trang bằng trình duyệt mặc định, chờ kết quả; thêm `--dry` để xem kế hoạch). Giữ cửa sổ trình duyệt ở nền trước và không làm việc khác trên máy.
+- **Báo cáo:** `npm run report` tạo `../results/evidence/measurements.md` từ `../results/raw/`.
+
+Cách đếm các chỉ số, định nghĩa "màn hình hoàn tất", lạnh/ấm và giới hạn của phép đo: [hợp đồng chung](../docs/blocks/block-02/hop-dong-chung.md) (mục 7) và [ghi chú trình bày](../docs/blocks/block-02/TRINH-BAY.md).
+
+## Cấu hình thường dùng
+
+Mỗi service có `.env.example` riêng. Muốn đổi cấu hình, sao chép thành `.env` **trong thư mục của service đó** (`user/.env`, `order/.env`, ...); `.env` không commit. Service tự nạp `.env` ở thư mục chạy nếu có (`src/env.ts`); biến đã đặt trong shell hoặc do `start-all.sh` đặt được ưu tiên hơn file. Không có `.env` thì dùng giá trị mặc định trong mã. Không đặt `DATABASE_URL` dùng chung: mỗi service một database riêng.
+
+| Biến | Mặc định | Ý nghĩa |
+|---|---|---|
+| `LATENCY_MS` | `0`; `npm run start:measure` đặt 30 | Độ trễ giả mỗi request nghiệp vụ của user, order, product |
+| `DATALOADER` | `on` | GraphQL: `off` là bản ngây thơ (N+1); ghi đè từng request bằng `POST /graphql?dataloader=off\|on` |
+| `PRODUCT_TIMEOUT_MS` | 1000 | BFF và GraphQL coi Product quá hạn là lỗi (trả một phần) |
+| `REQUIRE_POSTGRES` | mã: tắt; `start-all.sh` đặt `1` | Product báo lỗi thay vì tự chuyển sang dữ liệu trong bộ nhớ khi mất kết nối Postgres |
+| `NO_DOCKER` | không đặt | `1` để `start-all.sh` bỏ qua bước Docker/Postgres |
+| `ENABLE_TEST_HOOKS` | tắt; `npm run start:measure` đặt `1` | Bật `/_fault` và `/_seed` của Product (demo lỗi, đo và test) |
+| `LOG_DIR` | `services/logs` | Nơi `start-all.sh` ghi log (stdout) của từng service; công cụ thu bằng chứng đọc từ đây |
+
+Policy lỗi: Product lỗi hoặc quá hạn thì `product` là `null`, `partial` là `true` (BFF) hoặc có mục trong `errors` (GraphQL); **không điền tên hay giá giả**. User hoặc Order lỗi thì lỗi toàn bộ.
+
+## Cấu trúc
+
+```
+services/
+  user/ order/ product/ bff/ graphql/   năm service (README, .env.example riêng)
+                                        mỗi service: src/index.ts (điểm vào), env.ts, logger.ts, db.ts + seed.ts (nếu có DB), test/
+  start-all.sh  stop-all.sh             chạy và dừng tất cả
+  package.json  package-lock.json       npm workspaces (một lần npm install)
+  */src/contract.ts  */openapi.json     hợp đồng do từng service sở hữu (Zod → OpenAPI 3.1, ADR 0011)
+  tools/                                công cụ kiểm tra và đo (xem tools/README.md)
+../web/                                 trang dashboard, mobile và bộ chạy đo trong trang
+../results/                             bằng chứng: evidence/, verification/, raw/
 ```
 
-`measure.mjs` chạy đúng luồng tuần tự của trang web, reset bộ đếm trước mỗi lần. Để thêm cách gọi mới (ví dụ BFF), thêm một hàm vào đối tượng `modes` trong file rồi chạy `--mode <tên>`.
+## Xử lý sự cố
 
-| Chỉ số | Cách tính |
+| Triệu chứng | Nguyên nhân thường gặp |
 |---|---|
-| `browserRequests` | Số request client gửi đi (đếm phía client) |
-| `dbQueries` | Tổng truy vấn DB của ba service (đếm trong wrapper `pg`) |
-| `serviceCalls` | Tổng request mà ba service xử lý (không tính `/health`, `/_metrics`) |
-| `ms` | Thời gian cả luồng, đo bằng `performance.now()` |
+| `Docker không chạy` khi `start-all.sh` | Bật Docker Desktop, hoặc đặt `NO_DOCKER=1` nếu không cần DB |
+| Trang báo lỗi 500 khi gọi Product | Công tắc lỗi của Product đang bật: bấm "Product bình thường" hoặc `curl -X POST localhost:4003/_fault -H 'Content-Type: application/json' -d '{}'` |
+| Một service "CHƯA phản hồi" | Xem `logs/<tên>.log`; thường do cổng bị chiếm hoặc chưa tạo database/bảng (chạy `npm run seed:s`) |
+| Số đo không giống kỳ vọng | Kiểm tra dữ liệu đang là S hay L, và công tắc lỗi/DATALOADER |
 
-Hiện `browserRequests` bằng `serviceCalls` vì browser gọi thẳng service. Khi có BFF, hai số này sẽ tách ra.
+## Giới hạn đã biết
 
-### Baseline đã đo (20 đơn × 3 item, độ trễ 50 ms)
-
-| Chỉ số | Đo được (trung vị 5 lần) | Phép tính tay |
-|---|---:|---|
-| `browserRequests` | 62 | 1 + 1 + 60 |
-| `dbQueries` | 63 | 1 (user) + 2 (order: đơn, rồi item) + 60 (product) |
-| `serviceCalls` | 62 | bằng số request |
-| `ms` | ~3414 | 62 × (50 ms trễ giả + ~5 ms xử lý) |
-
-Quy mô khác cho kết quả tuyến tính: 5 đơn (15 item) cho 17 / 18 / 17 / ~937 ms; 40 đơn (120 item) cho 122 / 123 / 122 / ~6652 ms.
-
-## Đổi quy mô và độ trễ
-
-Biến môi trường (không cần file `.env`, các service không đọc `.env`):
-
-| Biến | Mặc định | Dùng ở | Ý nghĩa |
-|---|---|---|---|
-| `ORDERS` | 20 | seed | Số đơn |
-| `ITEMS_PER_ORDER` | 3 | seed | Số item mỗi đơn (không lớn hơn `PRODUCTS`) |
-| `PRODUCTS` | 30 | seed | Số sản phẩm |
-| `LATENCY_MS` | 50 | service | Độ trễ giả mỗi request nghiệp vụ |
-| `LAB_DATABASE_URL` | `postgresql://postgres:postgres@localhost:5434/kartvibe_lab` | seed, service | Kết nối DB |
-| `PORT` | 4001-4003 / 4000 | service, web | Cổng |
-
-Ví dụ: `ORDERS=40 npm run seed`; `LATENCY_MS=100 bash start-all.sh`. Dữ liệu sinh bằng hạt giống cố định nên chạy lại cho cùng kết quả; sản phẩm được tham chiếu nhiều lần giữa các đơn (với mặc định: 26 sản phẩm khác nhau cho 60 item), đây là điều cần cho việc gom lời gọi sau này. Đổi quy mô rồi chạy lại `npm run seed` là đủ, không cần khởi động lại service.
-
-## Hạn chế
-
-- Đơn giản hơn thực tế: một người dùng, không đăng nhập, dữ liệu nhỏ, độ trễ cố định. Số liệu chỉ có ý nghĩa để **so sánh trước/sau**, không phải con số tuyệt đối.
-- Ba service dùng chung một database (khác schema) cho tiện; thực tế mỗi service thường có DB riêng.
-- Trang web chỉ kiểm tra bằng cách chạy logic JavaScript của nó với DOM giả; chưa mở bằng trình duyệt thật.
+- Toàn bộ dữ liệu là giả; mật khẩu Postgres `postgres`/`postgres` chỉ dùng cục bộ.
+- Độ trễ mỗi service là giả lập cố định và mọi thứ chạy trên một máy, nên chênh lệch tuyệt đối không phản ánh môi trường thật.

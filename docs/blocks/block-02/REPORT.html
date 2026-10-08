@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Báo cáo Block 2: API composition</title>
+<style>
+:root{color-scheme:light;--bg:#fff;--fg:#1a1a1a;--line:#d0d0d0;--card:#fafafa;--code:#f1f1f1}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#16181d;--fg:#e8e8e8;--line:#3a3d44;--card:#1e2128;--code:#12141a}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:1.5rem}
+h1{margin:.2rem 0 1rem}
+section{margin:0 0 2rem;padding:1rem 1.25rem;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+h2{margin:.2rem 0 .75rem;font-size:1.25rem}
+h3{margin:1.25rem 0 .5rem;font-size:1.05rem}
+h4{margin:1rem 0 .4rem;font-size:1rem}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:6px}
+a{color:inherit}
+ol,ul{padding-left:1.4rem}
+.mermaid{background:transparent;text-align:center;overflow-x:auto}
+code{background:rgba(128,128,128,.18);padding:0 .25em;border-radius:4px}
+pre.code{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:.75rem 1rem;overflow-x:auto}
+pre.code code{background:none;padding:0;font:14px/1.5 ui-monospace,Consolas,monospace}
+table{border-collapse:collapse;width:100%;margin:.5rem 0;font-size:.95rem}
+th,td{border:1px solid var(--line);padding:.4rem .6rem;text-align:left;vertical-align:top}
+th{background:rgba(128,128,128,.12)}
+blockquote{margin:.5rem 0;padding:.4rem .9rem;border-left:4px solid var(--line);opacity:.85}
+.note{opacity:.75;font-size:.9rem}
+#theme-toggle{position:fixed;top:.75rem;right:.75rem;z-index:10;padding:.4rem .8rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);font:inherit;cursor:pointer}
+#theme-toggle:hover{border-color:var(--fg)}
+</style></head>
+<body><button id="theme-toggle" type="button" aria-pressed="false">Chế độ tối</button><main>
+<h1>Báo cáo Block 2: API composition</h1>
+<p class="note">Cần internet để tải thư viện Mermaid cho sơ đồ. Cách chạy lại: README.md.</p>
+<section><h2>1. Tóm tắt</h2>
+<p>Dashboard cần dữ liệu từ ba service (User, Order, Product), mỗi service một database riêng. Ở baseline, trình duyệt gọi lần lượt từng service rồi tự ghép. Nhóm đưa việc ghép sang server bằng hai cách (BFF và GraphQL), rồi đo số request của client, số lời gọi và truy vấn DB ở từng service, thời gian hoàn tất màn hình và kích thước payload, trên hai cỡ dữ liệu (S: 5 đơn, 15 item; L: 50 đơn, 200 item) và hai loại client (web, mobile).</p>
+<p>Kết quả chính (client web, dữ liệu S, chạy ấm, median của 5 lần):</p>
+<table><thead><tr><th>Biến thể</th><th>Request từ client</th><th>Product nhận (request / truy vấn DB)</th><th>Thời gian hoàn tất</th></tr></thead><tbody><tr><td>Baseline</td><td>17</td><td>15 / 15</td><td>655 ms</td></tr><tr><td>BFF</td><td>1</td><td>1 / 1</td><td>80 ms</td></tr><tr><td>GraphQL, DataLoader tắt (N+1)</td><td>1</td><td>15 / 15</td><td>98 ms</td></tr><tr><td>GraphQL, đã sửa (DataLoader bật)</td><td>1</td><td>1 / 1</td><td>85 ms</td></tr></tbody></table>
+<p>Điều đáng chú ý nhất: GraphQL ngây thơ chỉ có <strong>1 request từ client</strong> nhưng Product vẫn nhận 15 lời gọi (200 ở dữ liệu L). Giảm request ở trình duyệt <strong>chưa</strong> đồng nghĩa giảm truy vấn ở backend. Sau khi sửa N+1, số lời gọi tới Product là 1 và không tăng theo số đơn (S: 1, L: 1).</p>
+</section>
+<section><h2>2. Kiến trúc</h2>
+<pre class="mermaid">flowchart TB
+    subgraph CL["Trình duyệt"]
+        W["web :4000&lt;br/&gt;dashboard.html, mobile.html"]
+    end
+    subgraph CP["Lớp ghép dữ liệu (không có database)"]
+        BFF["bff :4004&lt;br/&gt;GET /bff/web/dashboard&lt;br/&gt;GET /bff/mobile/orders"]
+        GQL["graphql :4005&lt;br/&gt;POST /graphql&lt;br/&gt;query Web, Mobile&lt;br/&gt;DATALOADER on/off"]
+    end
+    subgraph SV["Service nghiệp vụ"]
+        U["user :4001"]
+        O["order :4002"]
+        P["product :4003&lt;br/&gt;GET /products/:id&lt;br/&gt;GET /products?ids="]
+    end
+    subgraph PG["Postgres 17 (một server, cổng 5434)"]
+        DU[("kartvibe_user")]
+        DO[("kartvibe_order")]
+        DP[("kartvibe_product")]
+    end
+    W -. "baseline: gọi trực tiếp, tuần tự" .-&gt; U
+    W -. "baseline" .-&gt; O
+    W -. "baseline" .-&gt; P
+    W -- "1 request" --&gt; BFF
+    W -- "1 request" --&gt; GQL
+    BFF -- "song song" --&gt; U
+    BFF -- "song song" --&gt; O
+    BFF -- "1 lần, id đã loại trùng" --&gt; P
+    GQL --&gt; U
+    GQL --&gt; O
+    GQL -- "DataLoader bật: 1 lần&lt;br/&gt;tắt: mỗi item một lần" --&gt; P
+    U --- DU
+    O --- DO
+    P --- DP</pre>
+<p>Ba biến thể cùng đọc ba service; khác biệt duy nhất là <strong>nơi ghép dữ liệu</strong>: ở trình duyệt (baseline), ở BFF, hoặc ở GraphQL. BFF và GraphQL chỉ gọi service qua REST, không truy vấn database.</p>
+</section>
+<section><h2>3. Các lựa chọn và lý do</h2>
+<p>Mỗi mục: nhóm chọn gì, vì sao, và vì sao không chọn các phương án khác.</p>
+<h3>3.1 Ngôn ngữ và khung chạy</h3>
+<p>Nhóm chọn <strong>Node.js + Express 5 + TypeScript</strong> (chạy trực tiếp bằng <code>tsx</code>, kiểm kiểu bằng <code>tsc</code>).</p>
+<ul><li>Cả năm service, trang web, bộ đo và công cụ kiểm tra dùng chung một ngôn ngữ, nên hợp đồng và kiểu có thể sinh ra rồi dùng lại ở mọi nơi.</li><li>Express đủ cho các service chỉ có vài endpoint; dự án trước của nhóm cũng dùng Node và Express nên không tốn thời gian làm quen.</li><li>Không chọn <strong>Spring Boot</strong> hay <strong>.NET</strong>: mạnh hơn về hệ sinh thái, nhưng thêm một ngôn ngữ và một bộ công cụ build cho bài chỉ có 65 phút thực hành.</li><li>Không chọn <strong>NestJS</strong> hay <strong>Fastify</strong>: thêm tầng trừu tượng (module, decorator, plugin) mà bài không cần, còn mục tiêu là nhìn thấy rõ từng lời gọi và từng truy vấn.</li></ul>
+<h3>3.2 Cơ sở dữ liệu</h3>
+<p>Nhóm chọn <strong>PostgreSQL 17 trong Docker, ba database riêng</strong> (<code>kartvibe_user</code>, <code>kartvibe_order</code>, <code>kartvibe_product</code>) <strong>trên cùng một server</strong>, truy cập bằng thư viện <strong><code>pg</code> với SQL viết tay</strong>.</p>
+<ul><li>Đề yêu cầu "mỗi service một CSDL". Ba database riêng bảo đảm không có truy vấn hay khóa ngoại xuyên service. Dùng chung một server để tiết kiệm tài nguyên máy.</li><li>SQL viết tay cho phép kiểm soát và đếm chính xác số câu truy vấn: Order luôn đúng 2 truy vấn, lấy nhiều product luôn đúng 1 truy vấn (<code>WHERE id = ANY(...)</code>). Bộ đếm này là số liệu chính của bài.</li><li>Không chọn <strong>ba server Postgres riêng</strong>: cô lập hơn nhưng tốn tài nguyên, không thay đổi kết quả cần chứng minh.</li><li>Không chọn <strong>ORM (Prisma...)</strong>: tiện hơn nhưng che giấu số câu SQL thật, khó chứng minh "đúng 1 truy vấn".</li><li>Không chọn <strong>SQLite hay dữ liệu trong bộ nhớ</strong>: khác công nghệ với hệ thống thật, làm số đo kém đáng tin.</li><li>Giới hạn: một server dùng chung nên không cô lập tài nguyên giữa các service (ghi ở mục 7).</li></ul>
+<h3>3.3 Giao tiếp giữa các service</h3>
+<p>Nhóm chọn <strong>REST/JSON đồng bộ</strong>. Đề yêu cầu REST ở bài này; gRPC và message queue chưa cần cho một dashboard chỉ đọc dữ liệu. Không chọn <strong>gRPC</strong> (thêm Protobuf và HTTP/2 mà chưa có lý do) hay <strong>hàng đợi sự kiện</strong> (dành cho tác vụ ghi bất đồng bộ, không phải đọc để hiển thị).</p>
+<h3>3.4 Thêm endpoint lấy nhiều product</h3>
+<p>Nhóm chọn thêm <strong><code>GET /products?ids=</code></strong> vào Product Service: loại id trùng, bỏ qua id không có, sắp theo id, <strong>một truy vấn</strong>.</p>
+<ul><li>Muốn giảm lời gọi và truy vấn tới Product thì chính service đó phải cho phép gom; lớp ghép không tự làm được.</li><li>Không chọn việc để BFF/GraphQL gọi từng <code>GET /products/:id</code>: đó chính là N+1.</li><li>Giá trị phải trả: Product phải thay đổi, và mọi lớp ghép phụ thuộc vào endpoint này.</li></ul>
+<h3>3.5 BFF</h3>
+<p>Nhóm chọn <strong>hai endpoint BFF, mỗi loại client một</strong>: <code>/bff/web/dashboard</code> (đủ trường) và <code>/bff/mobile/orders</code> (chỉ mã đơn, trạng thái, tên và thumbnail).</p>
+<ul><li>Mỗi màn hình nhận đúng dữ liệu của nó trong một request.</li><li>BFF gọi <strong>User và Order song song</strong>, rồi gọi Product <strong>một lần</strong> với id đã loại trùng. Mobile <strong>không gọi User</strong> vì danh sách đơn mobile không có thông tin người dùng.</li><li>Không chọn <strong>một endpoint chung trả đủ mọi trường cho cả hai client</strong>: mobile sẽ nhận dữ liệu thừa (over-fetch), trái với yêu cầu "chỉ chứa các trường mobile cần".</li></ul>
+<h3>3.6 GraphQL</h3>
+<p>Nhóm chọn <strong><code>graphql-js</code> 17 + <code>dataloader</code></strong>, một endpoint <code>POST /graphql</code> với hai query (<code>Web</code>, <code>Mobile</code>), chạy trên Express.</p>
+<ul><li>Dùng thư viện lõi để thấy rõ resolver nào chạy khi nào và tự viết tầng gom, nên N+1 và cách sửa nhìn thấy được trong log.</li><li>Công tắc <code>DATALOADER=on|off</code> (ghi đè từng request bằng <code>?dataloader=</code>) cho phép tái hiện N+1 rồi sửa trên cùng một mã.</li><li><strong>DataLoader tạo mới cho mỗi request</strong>: cache id chỉ sống trong một request, không rò dữ liệu giữa người dùng hay giữ dữ liệu cũ.</li><li>Không chọn <strong>Apollo Server</strong> hay <strong>GraphQL Yoga</strong>: thêm tính năng (cache, plugin, subscription) mà bài không dùng, làm khó thấy cơ chế cốt lõi.</li><li>Không chọn tự gom id bằng tay trong từng resolver: trùng lặp, dễ sai, và đó là việc DataLoader đã chuẩn hóa.</li></ul>
+<h3>3.7 Chính sách lỗi</h3>
+<p>Nhóm chọn <strong>trả dữ liệu một phần có đánh dấu lỗi</strong> cho cả BFF và GraphQL; <strong>không bao giờ điền tên hay giá giả</strong>.</p>
+<ul><li>Khi Product lỗi 500 hoặc quá <strong>1000 ms</strong>: các <code>product</code> bị ảnh hưởng thành <code>null</code>; BFF trả <code>partial: true</code> kèm <code>errors</code> (<code>PRODUCT_UNAVAILABLE</code>, danh sách <code>productIds</code>); GraphQL trả <code>errors[].extensions.code = PRODUCT_UNAVAILABLE</code>. Trang hiển thị "—" cho dòng thiếu.</li><li>Một Product lỗi không nên làm hỏng cả dashboard. User hoặc Order lỗi thì lỗi toàn bộ (BFF trả 502), vì không có dữ liệu chính để hiển thị.</li><li>Không chọn <strong>thất bại toàn bộ</strong>: đơn giản hơn nhưng một service phụ làm sập cả màn hình.</li><li>Ngưỡng 1000 ms là lựa chọn của nhóm. Hệ quả: Product có thể vẫn trả lời sau đó nhưng kết quả bị coi là lỗi.</li></ul>
+<h3>3.8 Hợp đồng giữa các service</h3>
+<p>Nhóm chọn <strong>mỗi service tự sở hữu hợp đồng của mình</strong>: <code>src/contract.ts</code> (Zod 4) sinh ra <code>openapi.json</code> (OpenAPI 3.1) đặt cạnh service. BFF và GraphQL <strong>sinh kiểu TypeScript từ <code>openapi.json</code> của User, Order, Product</strong> (<code>openapi-typescript</code>). Mọi bộ kiểm đều kiểm theo cùng các spec đó (<code>ajv</code>). <code>npm run contracts:check</code> báo nếu mã, spec và kiểu đã sinh lệch nhau.</p>
+<ul><li>Hợp đồng là dữ liệu có thể kiểm, thuộc về bên cung cấp; bên tiêu thụ phụ thuộc vào artifact đã công bố, <strong>không import mã của nhau</strong>, nên không đẩy hệ thống về phía "monolith phân tán".</li><li>Việc viết schema đã lộ ra một lỗi thật: service giả trong test của BFF trả product thiếu <code>sku</code> và <code>description</code> so với hợp đồng.</li><li>Không chọn <strong>chỉ một tài liệu văn bản</strong>: không máy nào kiểm được, bên tiêu thụ lệch mà không ai biết.</li><li>Không chọn <strong>package kiểu dùng chung</strong>: ràng buộc mã giữa các service.</li><li>Không chọn <strong>Pact</strong> (hợp đồng do bên tiêu thụ sinh): đúng bài bản nhưng nặng so với năm service do một nhóm sở hữu.</li><li>Không dựng <strong>Swagger UI</strong>: chưa cần giao diện xem tài liệu; <code>openapi.json</code> mở được bằng bất kỳ công cụ xem OpenAPI nào.</li></ul>
+<h3>3.9 Cách đo</h3>
+<p>Nhóm chọn <strong>đo ngay trong trang</strong> bằng hàm bọc <code>fetch</code> đếm request của client, kết hợp <strong>bộ đếm <code>/_metrics</code> của từng service</strong> (reset trước mỗi lần chạy) cho lời gọi và truy vấn DB, và <code>performance.mark</code> cho mốc "hoàn tất".</p>
+<ul><li>Các định nghĩa của đề (request từ client, DB query và service call ở từng service, màn hình hoàn tất) không có công cụ nào đo sẵn đúng như vậy, nên nhóm tự đếm và ghi rõ cách đếm (xem <code>results/evidence/measurements.md</code>, mục "Cách đếm").</li><li>Định nghĩa <strong>hoàn tất</strong>: lần cập nhật DOM cuối khi mọi đơn đã hiển thị đủ tên product. Payload là tổng byte thân phản hồi; ảnh thumbnail không được tải (chỉ là chuỗi) để không làm sai số request.</li><li><strong>Lạnh</strong>: lần chạy đầu sau khi khởi động lại các service (không khởi động lại Postgres). <strong>Ấm</strong>: 5 lần sau. Báo median và khoảng [min–max].</li><li>Không chọn <strong>Lighthouse</strong>: đo trải nghiệm trang nói chung, không đếm được lời gọi và truy vấn ở từng service.</li><li>Không chọn <strong>k6, ab, wrk</strong>: đo thông lượng khi có tải, trong khi bài cần số đếm xác định cho một lần tải màn hình.</li><li>Không chọn <strong>OpenTelemetry</strong> hay APM: hệ thống thu thập đầy đủ nhưng quá nặng cho năm tiến trình chạy cục bộ.</li></ul>
+<h3>3.10 Log và trace</h3>
+<p>Nhóm chọn <strong>mỗi service ghi một dòng JSON cho mỗi lời gọi ra stdout</strong> (<code>ts</code>, <code>service</code>, <code>requestId</code>, <code>method</code>, <code>path</code>, <code>status</code>, <code>ms</code>), và <strong><code>x-request-id</code> được truyền từ BFF/GraphQL xuống mọi service</strong>. Khi chạy cục bộ, <code>start-all.sh</code> ghi stdout của từng service vào <code>services/logs/&lt;service&gt;.log</code>. Trace N+1 và call graph được dựng bằng cách lọc log theo <code>requestId</code>.</p>
+<ul><li>Không chọn <strong>ELK / Loki</strong>: cần ít nhất ba thành phần chạy thêm để gom log của năm tiến trình trên một máy, trong khi lọc một thư mục log theo <code>requestId</code> là đủ để chứng minh N+1.</li><li>Không chọn <strong>ghi file trong mã service</strong>: đường dẫn log là việc của môi trường chạy, không phải của mã; đổi nơi lưu không phải sửa service.</li><li>Không chọn <strong>OpenTelemetry traces</strong>: cùng lý do như mục 3.9.</li></ul>
+<h3>3.11 Móc phục vụ test và đo</h3>
+<p>Nhóm chọn <strong>không bật mặc định</strong>, chỉ cắm thêm khi cần: <code>LATENCY_MS</code> (độ trễ giả mỗi request, mặc định 0) và <code>ENABLE_TEST_HOOKS=1</code> (điểm vào <code>/_fault</code> và <code>/_seed</code> của Product). <code>start-all.sh</code> chạy service như bình thường; <code>npm run start:measure</code> bật cả hai cho demo lỗi, đo và kiểm tra.</p>
+<ul><li>Mã chạy thật không nên mang sẵn công tắc gây lỗi hay độ trễ giả. Đổi lại, muốn demo lỗi hay chạy <code>npm run check</code> phải khởi động bằng <code>start:measure</code>.</li></ul>
+<h3>3.12 Tổ chức mã và trang web</h3>
+<ul><li><strong>npm workspaces</strong> (một <code>node_modules</code>, một <code>package-lock.json</code> cho năm service) thay vì năm thư mục cài riêng: nhất quán phiên bản, cài một lần. Đổi lại, nâng phiên bản một thư viện kéo theo cả năm.</li><li>Trang web dùng <strong>HTML + JavaScript thuần, không framework, không bước build</strong>: đếm request chính xác, không có request phụ từ công cụ build, và mã nhỏ đủ đọc. Web chạy riêng khỏi các service.</li><li>Không chọn <strong>React/Vite</strong>: thêm bước build và request phụ trong chế độ dev, làm nhiễu chính con số cần đo.</li><li>Không đóng gói service bằng <strong>docker-compose</strong>: số đo thời gian cần so sánh công bằng trên một máy, và Docker ở đây chỉ dùng cho Postgres.</li></ul>
+</section>
+<section><h2>4. Kết quả đo</h2>
+<p>Mọi số dưới đây lấy từ lần chạy ma trận thật bằng trình duyệt (Firefox): 4 biến thể × 2 client × 2 cỡ dữ liệu, mỗi cấu hình 1 lần lạnh + 5 lần ấm, tổng <strong>96 bản ghi</strong> (<code>results/raw/</code>). Cột "Ấm" là median [min–max] của 5 lần. Bảng đầy đủ kèm từng lần chạy: <code>results/evidence/measurements.md</code>.</p>
+<table><thead><tr><th>Dữ liệu</th><th>Client</th><th>Biến thể</th><th>Request client</th><th>Product (request / DB)</th><th>Payload (B)</th><th>Lạnh (ms)</th><th>Ấm (ms)</th></tr></thead><tbody><tr><td>S</td><td>web</td><td>baseline</td><td>17</td><td>15 / 15</td><td>5093</td><td>712</td><td>655 [647–662]</td></tr><tr><td>S</td><td>web</td><td>bff</td><td>1</td><td>1 / 1</td><td>1670</td><td>144</td><td>80 [73–83]</td></tr><tr><td>S</td><td>web</td><td>graphql-naive</td><td>1</td><td>15 / 15</td><td>1651</td><td>209</td><td>98 [87–102]</td></tr><tr><td>S</td><td>web</td><td>graphql-fixed</td><td>1</td><td>1 / 1</td><td>1651</td><td>166</td><td>85 [83–89]</td></tr><tr><td>S</td><td>mobile</td><td>baseline</td><td>16</td><td>15 / 15</td><td>5059</td><td>647</td><td>608 [594–611]</td></tr><tr><td>S</td><td>mobile</td><td>bff</td><td>1</td><td>1 / 1</td><td>1523</td><td>144</td><td>81 [76–86]</td></tr><tr><td>S</td><td>mobile</td><td>graphql-naive</td><td>1</td><td>15 / 15</td><td>1504</td><td>228</td><td>104 [95–108]</td></tr><tr><td>S</td><td>mobile</td><td>graphql-fixed</td><td>1</td><td>1 / 1</td><td>1504</td><td>172</td><td>84 [79–85]</td></tr><tr><td>L</td><td>web</td><td>baseline</td><td>202</td><td>200 / 200</td><td>66964</td><td>7706</td><td>7516 [7503–7549]</td></tr><tr><td>L</td><td>web</td><td>bff</td><td>1</td><td>1 / 1</td><td>20124</td><td>157</td><td>90 [81–93]</td></tr><tr><td>L</td><td>web</td><td>graphql-naive</td><td>1</td><td>200 / 200</td><td>20105</td><td>424</td><td>205 [196–289]</td></tr><tr><td>L</td><td>web</td><td>graphql-fixed</td><td>1</td><td>1 / 1</td><td>20105</td><td>179</td><td>88 [87–97]</td></tr><tr><td>L</td><td>mobile</td><td>baseline</td><td>201</td><td>200 / 200</td><td>66930</td><td>7609</td><td>7478 [7451–7512]</td></tr><tr><td>L</td><td>mobile</td><td>bff</td><td>1</td><td>1 / 1</td><td>19332</td><td>159</td><td>86 [84–89]</td></tr><tr><td>L</td><td>mobile</td><td>graphql-naive</td><td>1</td><td>200 / 200</td><td>19313</td><td>435</td><td>225 [204–278]</td></tr><tr><td>L</td><td>mobile</td><td>graphql-fixed</td><td>1</td><td>1 / 1</td><td>19313</td><td>178</td><td>92 [82–96]</td></tr></tbody></table>
+<p>Điều bảng cho thấy:</p>
+<ol><li><strong>Số request của client</strong> giảm từ 17 (S) và 202 (L) xuống còn 1 ở cả BFF lẫn GraphQL. Baseline tăng theo số item vì mỗi item một lời gọi Product.</li><li><strong>Số lời gọi và truy vấn ở Product</strong> là chỉ số quan trọng nhất. BFF và GraphQL đã sửa luôn chỉ 1 lời gọi, không tăng theo số đơn (S: 1, L: 1). GraphQL ngây thơ vẫn 15 (S) và 200 (L), tức N+1 đúng bằng số item.</li><li><strong>Mobile nhận ít byte hơn web</strong> ở BFF và GraphQL (ví dụ L: 19332 B so với 20124 B), vì chỉ có các trường mobile cần. Ở baseline hai client gần như bằng nhau vì client vẫn tải đủ dữ liệu từng Product.</li><li><strong>Thời gian</strong>: với cỡ L, baseline khoảng 7,5 giây còn BFF khoảng 90 ms. Với GraphQL, bản ngây thơ (205–225 ms) chậm hơn bản đã sửa (88–92 ms) khoảng 2,3 lần ở cỡ L, nhưng nhanh hơn baseline rất nhiều. Một giải thích hợp lý là các resolver của GraphQL chạy đồng thời nên 200 lời gọi Product không nối tiếp nhau; nhóm <strong>chưa kiểm chứng riêng</strong> giải thích này.</li><li>Mọi bản ghi có <code>partial: false</code> (không có lần chạy nào rơi vào trường hợp lỗi một phần trong bảng đo).</li></ol>
+<p>Dao động đáng chú ý: GraphQL ngây thơ ở cỡ L có khoảng rộng nhất (web: 196–289 ms), vì mỗi lần phải gánh 200 lời gọi.</p>
+</section>
+<section><h2>5. Bằng chứng</h2>
+<table><thead><tr><th>Yêu cầu của đề</th><th>Vị trí</th></tr></thead><tbody><tr><td>Bảng đo thô, từng lần chạy, kèm cách đếm</td><td><code>results/evidence/measurements.md</code>; bản ghi gốc <code>results/raw/</code> (96 tệp)</td></tr><tr><td>Trace N+1 trước và sau khi sửa (GraphQL)</td><td><code>results/evidence/trace-n1-S.md</code> (15 dòng log Product so với 1), <code>trace-n1-L.md</code> (200 so với 1)</td></tr><tr><td>Call graph nội bộ của BFF</td><td><code>results/evidence/call-graph-bff-S.md</code>, <code>call-graph-bff-L.md</code></td></tr><tr><td>Đối chiếu dữ liệu baseline = BFF = GraphQL cho cả web và mobile; mobile chỉ có trường mobile</td><td><code>results/verification/</code> (báo cáo <code>S-*</code> và <code>L-*</code>); chạy lại bằng <code>npm run check:equality</code></td></tr><tr><td>Kết quả khi Product chậm hoặc lỗi</td><td><code>results/verification/S-on-*.json</code>, <code>L-on-*.json</code> (các kịch bản <code>slow</code>, <code>timeout</code>, <code>error</code>, cả web lẫn mobile)</td></tr><tr><td>Waterfall của baseline, BFF, GraphQL cùng mốc hoàn tất</td><td><code>results/evidence/waterfall/</code></td></tr><tr><td>Plan viết trước khi hiện thực BFF và GraphQL</td><td><code>docs/blocks/block-02/PLAN.md</code></td></tr></tbody></table>
+<h3>Waterfall và mốc hoàn tất (dữ liệu S, Chrome, Disable cache)</h3>
+<p>Mỗi ảnh là <strong>một lần tải</strong> nên mốc hoàn tất khác median 5 lần ấm ở bảng đo vài chục ms là bình thường. Bộ lọc <code>/:400[1-5]\/(?!_)/</code> chỉ giữ lời gọi API (bỏ tệp tĩnh và <code>/_metrics</code>). Mốc hoàn tất là ô "Màn hình hoàn tất" của trang (<code>performance.mark('screen-complete')</code>).</p>
+<p><img src="results/evidence/waterfall/baseline.png" alt="Baseline: 17 request nối tiếp, waterfall bậc thang" loading="lazy"></p>
+<p><strong>Baseline</strong>: 17 request (1 User, 1 Order, 15 Product) xếp thành bậc thang vì request sau chờ request trước. Payload 5.093 B, <strong>hoàn tất sau 623 ms</strong>.</p>
+<p><img src="results/evidence/waterfall/bff.png" alt="BFF: 1 request" loading="lazy"></p>
+<p><strong>BFF</strong>: 1 request, payload 1.670 B, <strong>hoàn tất sau 94 ms</strong>.</p>
+<p><img src="results/evidence/waterfall/graphql.png" alt="GraphQL (DataLoader bật): 1 request" loading="lazy"></p>
+<p><strong>GraphQL (đã sửa, DataLoader bật)</strong>: 1 request, payload 1.651 B, <strong>hoàn tất sau 81 ms</strong>. DevTools hiện thêm một dòng <code>preflight</code> (204): trang ở cổng 4000 gọi chéo nguồn tới GraphQL ở cổng 4005 bằng <code>POST</code> JSON nên trình duyệt tự gửi <code>OPTIONS</code> trước. Bộ đếm "Request client" đếm lời gọi <code>fetch</code> của trang nên tính 1; preflight do trình duyệt gửi, không tính (xem mục 7). Baseline và BFF dùng <code>GET</code> đơn giản nên không có preflight.</p>
+<p>Trong waterfall của trình duyệt, GraphQL bật và tắt DataLoader trông <strong>giống hệt nhau</strong> vì client chỉ gửi 1 request. Khác biệt (Product nhận 1 so với 15 lời gọi) nằm ở phía server, xem <code>results/evidence/trace-n1-S.md</code>.</p>
+<h3>Kết quả khi Product chậm hoặc lỗi</h3>
+<p>Báo cáo trong <code>results/verification/</code> kiểm hai client với ba kịch bản:</p>
+<table><thead><tr><th>Kịch bản</th><th>Cách tạo</th><th>Hành vi mong đợi</th><th>Kết quả</th></tr></thead><tbody><tr><td><code>slow</code></td><td>Product chậm thêm 500 ms</td><td>Dưới ngưỡng 1000 ms nên dữ liệu đầy đủ, <code>partial: false</code></td><td>đạt</td></tr><tr><td><code>timeout</code></td><td>Product chậm thêm 1500 ms</td><td>Quá ngưỡng, mọi <code>product</code> là <code>null</code>, <code>partial: true</code></td><td>đạt</td></tr><tr><td><code>error</code></td><td>Product trả 500</td><td>Mọi <code>product</code> là <code>null</code>, <code>partial: true</code>, không có tên hoặc giá giả</td><td>đạt</td></tr></tbody></table>
+<p>Mỗi kịch bản so BFF với GraphQL: hai bên trả cùng dữ liệu và cùng hành vi.</p>
+<h3>Kiểm tra tự động đi kèm</h3>
+<p>Chạy từ <code>services/</code> khi các service đang chạy bằng <code>npm run start:measure</code>: <code>npm run check</code> (80 kiểm tra hợp đồng của cả 5 service), <code>npm run check:equality</code>, <code>npm run contracts:check</code>, <code>npm run test:tools</code> (11 test của bộ đo và hợp đồng), cùng test riêng của BFF, GraphQL và Product (<code>npm test</code>, <code>npm run verify</code> trong thư mục từng service).</p>
+</section>
+<section><h2>6. Trade-off</h2>
+<table><thead><tr><th></th><th>BFF</th><th>GraphQL</th></tr></thead><tbody><tr><td>Ưu</td><td>Đơn giản, dễ kiểm soát số lời gọi; hợp khi có ít màn hình</td><td>Một endpoint cho nhiều client; client tự chọn trường</td></tr><tr><td>Nhược</td><td>Mỗi màn hình thêm một endpoint; gắn chặt với giao diện</td><td>Dễ phát sinh N+1 nếu không gom; truy vấn có thể nặng; khó cache bằng HTTP</td></tr><tr><td>Chung</td><td>Cả hai là điểm tập trung: thêm một bước nhảy mạng và thêm một điểm có thể lỗi hoặc nghẽn</td><td></td></tr></tbody></table>
+<p>Quan điểm của nhóm cho riêng dashboard này (một web và một mobile cùng dữ liệu): BFF là đủ và đơn giản hơn. GraphQL đáng cân nhắc khi có nhiều client hơn với nhu cầu dữ liệu khác nhau, và chỉ khi có DataLoader hoặc cơ chế gom tương đương. GraphQL không mặc định tốt hơn REST.</p>
+<p>Các đánh đổi khác đã chấp nhận:</p>
+<ul><li>Thêm endpoint lấy nhiều product làm Product phụ thuộc vào lớp ghép (và ngược lại).</li><li>Chính sách "một phần" buộc client xử lý dữ liệu thiếu.</li><li>Timeout 1000 ms coi Product chậm là lỗi dù nó có thể trả lời sau đó.</li><li>Hợp đồng sinh từ mã nghĩa là đổi hợp đồng thường kéo theo sửa cả bên cung cấp lẫn bên tiêu thụ trong cùng một lần.</li></ul>
+</section>
+<section><h2>7. Giới hạn của phép đo và của bài làm</h2>
+<p>Nói thẳng những gì <strong>không</strong> chứng minh được:</p>
+<ul><li><strong>Chạy trên một máy</strong>: service, Postgres và trình duyệt cùng máy, cùng tranh tài nguyên.</li><li><strong>Độ trễ là giả lập cố định</strong> (30 ms mỗi request nghiệp vụ ở User, Order, Product), nên chênh lệch tuyệt đối giữa các biến thể không phản ánh môi trường thật. Con số đáng tin hơn là <strong>số đếm</strong> (request, lời gọi, truy vấn), vốn xác định.</li><li><strong>Lạnh chỉ khởi động lại ứng dụng</strong>: cache của Postgres và hệ điều hành còn nguyên.</li><li><strong>Mẫu nhỏ</strong>: 5 lần ấm mỗi cấu hình, theo ngưỡng đề xuất của bài, không phải quy chuẩn thống kê. Khoảng [min–max] cho thấy độ dao động nhưng không thay thế kiểm định.</li><li><strong>"Hoàn tất" là DOM đã cập nhật xong</strong>, chưa chắc trình duyệt đã vẽ xong.</li><li><strong>Preflight CORS không được tính</strong> vào "Request client": truy vấn GraphQL là <code>POST</code> chéo nguồn nên trình duyệt có thêm một request <code>OPTIONS</code> (thấy trong DevTools) mà hàm bọc <code>fetch</code> của trang không nhìn thấy. Số request ở tầng mạng của GraphQL vì vậy là 2 chứ không phải 1; baseline và BFF dùng <code>GET</code> đơn giản nên không có.</li><li><strong>Baseline không loại trùng ở client</strong>: mỗi item gọi Product một lần. Đây là giả định của nhóm; một client thông minh hơn có thể loại trùng.</li><li><strong>Dữ liệu giả</strong>, mật khẩu Postgres <code>postgres</code>/<code>postgres</code> chỉ dùng cục bộ.</li><li>Một server Postgres dùng chung nên không cô lập tài nguyên giữa các service.</li></ul>
+</section>
+</main>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const root = document.documentElement;
+const btn = document.getElementById('theme-toggle');
+const store = {
+  get() { try { return localStorage.getItem('theme'); } catch { return null; } },
+  set(v) { try { localStorage.setItem('theme', v); } catch { /* bỏ qua nếu bị chặn */ } },
+};
+let theme = store.get() || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+const nodes = [...document.querySelectorAll('.mermaid')];
+const sources = nodes.map((n) => n.textContent);
+
+function apply() {
+  root.dataset.theme = theme;
+  btn.textContent = theme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối';
+  btn.setAttribute('aria-pressed', String(theme === 'dark'));
+}
+async function render() {
+  mermaid.initialize({ startOnLoad: false, theme: theme === 'dark' ? 'dark' : 'default', securityLevel: 'strict', sequence: { mirrorActors: false, useMaxWidth: true } });
+  nodes.forEach((n, i) => { n.removeAttribute('data-processed'); n.textContent = sources[i]; });
+  await mermaid.run({ nodes });
+}
+btn.addEventListener('click', async () => {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  store.set(theme);
+  apply();
+  await render();
+});
+apply();
+await render();
+</script>
+</body></html>

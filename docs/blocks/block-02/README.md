@@ -22,9 +22,9 @@
 
 Dashboard của một người dùng cần: thông tin người dùng (User Service), các đơn hàng gần đây (Order Service), và thông tin sản phẩm trong các đơn đó (Product Service). Nếu viết ngây thơ, trình duyệt gọi tuần tự: user → orders → với mỗi order/item gọi product. Đó là điều bài thực hành muốn bạn thấy và sửa.
 
-## Sân thử để thực hành
+## Bài Block 2 trong repo
 
-Có sẵn một baseline "chậm có chủ đích" (User, Order, Product Service và một dashboard gọi tuần tự) để tự đo bốn chỉ số trước khi làm BFF hoặc GraphQL: xem [services/README.md](../../../services/README.md). Kịch bản này là phỏng đoán, không phải yêu cầu của giảng viên.
+Đề bài thật là `w02/BT_Block 2_ API composition.html`. Phần cài đặt nằm ở `services/` (User, Order, Product, BFF, GraphQL) và `web/` (hai trang), chạy và đo theo [services/README.md](../../../services/README.md). Kịch bản User/Order/Product ở trên là **phỏng đoán lúc chuẩn bị**, trước khi có đề; đề thật được viết ra trong [hop-dong-chung.md](hop-dong-chung.md) và [PLAN.md](PLAN.md).
 
 ## Khái niệm
 
@@ -103,7 +103,7 @@ Query lấy 20 order, mỗi order có field `product`. Nếu resolver của `pro
 
 # Kiến thức đã học (tự tổng hợp)
 
-> Tổng hợp sau khi tự học và đo trên sân thử `services/`. Chưa xác nhận với giảng viên. Phần cài đặt BFF/GraphQL **chưa làm**, sẽ giao cho coding agent khi làm bài trên lớp.
+> Tổng hợp trong lúc tự học, khi đo baseline (bản đầu của `services/`, trước khi có đề). Chưa xác nhận với giảng viên. Ở thời điểm ghi chú này BFF và GraphQL chưa làm; về sau chúng đã được cài đặt trong `services/` (xem [services/README.md](../../../services/README.md)).
 
 ## 1. Vấn đề ban đầu và cách đo
 

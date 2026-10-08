@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sơ đồ kiến trúc và quyết định: Block 2</title>
+<style>
+:root{color-scheme:light;--bg:#fff;--fg:#1a1a1a;--line:#d0d0d0;--card:#fafafa;--code:#f1f1f1}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#16181d;--fg:#e8e8e8;--line:#3a3d44;--card:#1e2128;--code:#12141a}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:1.5rem}
+h1{margin:.2rem 0 1rem}
+section{margin:0 0 2rem;padding:1rem 1.25rem;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+h2{margin:.2rem 0 .75rem;font-size:1.25rem}
+h3{margin:1.25rem 0 .5rem;font-size:1.05rem}
+h4{margin:1rem 0 .4rem;font-size:1rem}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:6px}
+a{color:inherit}
+ol,ul{padding-left:1.4rem}
+.mermaid{background:transparent;text-align:center;overflow-x:auto}
+code{background:rgba(128,128,128,.18);padding:0 .25em;border-radius:4px}
+pre.code{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:.75rem 1rem;overflow-x:auto}
+pre.code code{background:none;padding:0;font:14px/1.5 ui-monospace,Consolas,monospace}
+table{border-collapse:collapse;width:100%;margin:.5rem 0;font-size:.95rem}
+th,td{border:1px solid var(--line);padding:.4rem .6rem;text-align:left;vertical-align:top}
+th{background:rgba(128,128,128,.12)}
+blockquote{margin:.5rem 0;padding:.4rem .9rem;border-left:4px solid var(--line);opacity:.85}
+.note{opacity:.75;font-size:.9rem}
+#theme-toggle{position:fixed;top:.75rem;right:.75rem;z-index:10;padding:.4rem .8rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);font:inherit;cursor:pointer}
+#theme-toggle:hover{border-color:var(--fg)}
+</style></head>
+<body><button id="theme-toggle" type="button" aria-pressed="false">Chế độ tối</button><main>
+<h1>Sơ đồ kiến trúc và quyết định: Block 2</h1>
+<p class="note">Cần internet để tải thư viện Mermaid. Dùng Ctrl + cuộn chuột để phóng to khi trình bày.</p>
+<section><h2>1. Kiến trúc tổng quan</h2>
+<pre class="mermaid">flowchart LR
+    subgraph C["Trình duyệt: cùng dữ liệu, hai trang"]
+        W["Web dashboard&lt;br/&gt;đủ trường"]
+        M["Mobile&lt;br/&gt;chỉ mã đơn, trạng thái,&lt;br/&gt;tên và thumbnail"]
+    end
+
+    subgraph L["Lớp ghép dữ liệu"]
+        BFF["BFF :4004&lt;br/&gt;/bff/web/dashboard&lt;br/&gt;/bff/mobile/orders"]
+        GQL["GraphQL :4005&lt;br/&gt;POST /graphql&lt;br/&gt;query Web, Mobile"]
+    end
+
+    subgraph S["Ba service, mỗi service một database riêng"]
+        U["User :4001"] --- DU[("kartvibe_user")]
+        O["Order :4002"] --- DO[("kartvibe_order")]
+        P["Product :4003&lt;br/&gt;GET /products/:id&lt;br/&gt;GET /products?ids="] --- DP[("kartvibe_product")]
+    end
+
+    C -. "Baseline: gọi trực tiếp, tuần tự" .-&gt; S
+    C -- "1 request" --&gt; BFF
+    C -- "1 request" --&gt; GQL
+    BFF --&gt; S
+    GQL --&gt; S</pre>
+<p><strong>Điều cần nói:</strong> ba đường đi từ cùng một trình duyệt đến cùng ba service. Khác biệt duy nhất là <strong>nơi ghép dữ liệu</strong>: ở client (baseline), ở BFF, hoặc ở GraphQL. BFF và GraphQL chỉ gọi service qua REST, không đụng vào database.</p>
+</section>
+<section><h2>2. Baseline: trình duyệt gọi tuần tự (dữ liệu S: 17 request)</h2>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    participant B as Trình duyệt
+    participant U as User
+    participant O as Order
+    participant P as Product
+    B-&gt;&gt;U: GET /users/1
+    U--&gt;&gt;B: tên người dùng
+    B-&gt;&gt;O: GET /orders?userId=1
+    O--&gt;&gt;B: 5 đơn, 15 item
+    loop 15 lần, mỗi item một lần, nối tiếp
+        B-&gt;&gt;P: GET /products/:id
+        P--&gt;&gt;B: một product
+    end
+    Note over B,P: 1 + 1 + 15 = 17 request nối tiếp.&lt;br/&gt;Waterfall bậc thang. Client tự ghép.</pre>
+</section>
+<section><h2>3. BFF: gom ở server (1 request từ client)</h2>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    participant B as Trình duyệt
+    participant F as BFF
+    participant U as User
+    participant O as Order
+    participant P as Product
+    B-&gt;&gt;F: GET /bff/web/dashboard?userId=1
+    par User và Order gọi song song
+        F-&gt;&gt;U: GET /users/1
+        U--&gt;&gt;F: người dùng
+    and
+        F-&gt;&gt;O: GET /orders?userId=1
+        O--&gt;&gt;F: 5 đơn, 15 item
+    end
+    Note over F: Gom id product và loại trùng
+    F-&gt;&gt;P: GET /products?ids=... (MỘT lần)
+    P--&gt;&gt;F: các product, 1 truy vấn DB
+    F--&gt;&gt;B: JSON dashboard (1 response)
+    Note over B,P: Client 1 request. Product 1 lời gọi, 1 truy vấn.&lt;br/&gt;Mobile: không gọi User.</pre>
+</section>
+<section><h2>4. GraphQL: N+1 và cách sửa</h2>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    participant B as Trình duyệt
+    participant G as GraphQL
+    participant O as Order
+    participant P as Product
+    B-&gt;&gt;G: POST /graphql (1 request, query Web hoặc Mobile)
+    G-&gt;&gt;O: GET /orders?userId=1
+    O--&gt;&gt;G: 5 đơn, 15 item
+    Note over G: Resolver product chạy cho từng item
+    alt DataLoader TẮT (ngây thơ): N+1
+        loop 15 lần
+            G-&gt;&gt;P: GET /products/:id
+            P--&gt;&gt;G: một product
+        end
+        Note over G,P: Client chỉ 1 request nhưng Product nhận 15 lời gọi, 15 truy vấn
+    else DataLoader BẬT (đã sửa)
+        Note over G: Gom id trong cùng một request, loại trùng
+        G-&gt;&gt;P: GET /products?ids=... (MỘT lần)
+        P--&gt;&gt;G: các product
+        Note over G,P: Product nhận 1 lời gọi, 1 truy vấn
+    end
+    G--&gt;&gt;B: JSON theo đúng hình dạng query</pre>
+<p><strong>Điều cần nói:</strong> giảm request ở browser <strong>chưa</strong> đồng nghĩa giảm truy vấn ở backend. GraphQL ngây thơ chứng minh điều đó.</p>
+</section>
+<section><h2>5. Chính sách lỗi (BFF và GraphQL giống nhau)</h2>
+<pre class="mermaid">flowchart TD
+    A["Lớp ghép gọi Product"] --&gt; B{"Product lỗi 500&lt;br/&gt;hoặc quá 1000 ms?"}
+    B -- "Không" --&gt; C["Dữ liệu đầy đủ&lt;br/&gt;partial = false"]
+    B -- "Có" --&gt; D["Các product bị ảnh hưởng = null&lt;br/&gt;partial = true, errors = PRODUCT_UNAVAILABLE&lt;br/&gt;KHÔNG điền tên hoặc giá giả"]
+    D --&gt; E["Màn hình vẫn dùng được&lt;br/&gt;dòng thiếu hiện dấu gạch"]
+    A --&gt; F{"User hoặc Order lỗi?"}
+    F -- "Có" --&gt; G["Lỗi toàn bộ&lt;br/&gt;BFF: 502 UPSTREAM_ERROR"]
+    H["Baseline: client gọi từng Product"] --&gt; I["Một lỗi là hỏng cả lượt tải&lt;br/&gt;không có cơ chế một phần"]</pre>
+</section>
+<section><h2>6. Bản đồ quyết định: vấn đề → quyết định → kết quả</h2>
+<pre class="mermaid">flowchart LR
+    P1["Waterfall ở client&lt;br/&gt;nhiều request nối tiếp"] --&gt; D1["Ghép ở server:&lt;br/&gt;BFF hoặc GraphQL"] --&gt; E1["Client 1 request"]
+    P2["Product nhận quá nhiều lời gọi"] --&gt; D2["Endpoint lấy nhiều id&lt;br/&gt;và loại trùng"] --&gt; E2["Product 1 lời gọi&lt;br/&gt;1 truy vấn DB"]
+    P3["GraphQL tự sinh N+1"] --&gt; D3["DataLoader&lt;br/&gt;tạo mới mỗi request"] --&gt; E2
+    P4["Một service lỗi hoặc chậm"] --&gt; D4["Trả một phần,&lt;br/&gt;timeout 1000 ms,&lt;br/&gt;không giá trị giả"] --&gt; E4["Màn hình vẫn dùng được"]
+    P5["So sánh phải công bằng"] --&gt; D5["Cùng cách đếm, cùng dữ liệu,&lt;br/&gt;lạnh và ấm, 5 lần"] --&gt; E5["Số liệu so sánh được"]</pre>
+</section>
+<section><h2>7. Luồng đo và bằng chứng</h2>
+<pre class="mermaid">flowchart LR
+    R["restart-cold.sh&lt;br/&gt;khởi động lại lạnh"] --&gt; PG["Trang đo trong trình duyệt&lt;br/&gt;1 lạnh + 5 ấm"]
+    PG -- "mỗi lần chạy" --&gt; CO["Bộ thu kết quả :4010"]
+    PG -. "đọc bộ đếm" .-&gt; MT["/_metrics của từng service"]
+    CO --&gt; RAW["results/raw"]
+    RAW --&gt; REP["report.mjs"] --&gt; MD["results/evidence/&lt;br/&gt;measurements.md"]
+    LOG["services/logs&lt;br/&gt;stdout từng service (start-all.sh ghi), theo requestId"] --&gt; TR["export-trace.mjs"] --&gt; EV["results/evidence/&lt;br/&gt;trace N+1, call graph"]</pre>
+</section>
+<section><h2>8. DataLoader bên trong: vì sao gom được</h2>
+<p>DataLoader <strong>không chạm DB</strong>. Nó chỉ làm cho lớp ghép gửi <strong>một lô</strong> thay vì 15 lời gọi lẻ. DB nhẹ đi vì lô đó chỉ tốn một câu SQL nhờ endpoint lấy nhiều của Product.</p>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    participant R as 15 resolver product
+    participant L as DataLoader
+    participant H as Hàm gom
+    participant P as Product Service
+    participant D as Postgres
+    R-&gt;&gt;L: load(8), load(9), ..., load(8)
+    Note over R,L: 15 lần gọi trong cùng một nhịp.&lt;br/&gt;Chưa gọi đi đâu. Mỗi lần trả về một Promise đang chờ.
+    Note over L: Id trùng dùng chung một Promise.&lt;br/&gt;S: 15 item còn 10 id khác nhau.
+    Note over L: Hết nhịp, lấy mọi id trong hàng đợi
+    L-&gt;&gt;H: batch của 10 id
+    H-&gt;&gt;P: GET /products?ids=... (MỘT lời gọi)
+    P-&gt;&gt;D: SELECT ... WHERE id = ANY(...) (MỘT truy vấn)
+    D--&gt;&gt;P: 10 dòng
+    P--&gt;&gt;H: các product
+    H--&gt;&gt;L: danh sách đúng thứ tự id đã xin
+    L--&gt;&gt;R: giải quyết 15 Promise, mỗi resolver nhận đúng product</pre>
+<h3>Trước và sau khi gom</h3>
+<table><thead><tr><th></th><th>Không DataLoader</th><th>Có DataLoader</th></tr></thead><tbody><tr><td>GraphQL gọi Product (S: 15 item)</td><td>15 lời gọi</td><td><strong>1 lời gọi</strong> (10 id khác nhau)</td></tr><tr><td>Product truy vấn Postgres (S)</td><td>15 câu <code>WHERE id = $1</code></td><td><strong>1 câu</strong> <code>WHERE id = ANY($1)</code></td></tr><tr><td>GraphQL gọi Product (L: 200 item)</td><td>200 lời gọi</td><td><strong>1 lời gọi</strong> (30 id khác nhau)</td></tr><tr><td>Product truy vấn Postgres (L)</td><td>200 câu</td><td><strong>1 câu</strong></td></tr></tbody></table>
+<h3>Đoạn mã cốt lõi (<code>services/graphql/src/schema.ts</code>)</h3>
+<pre class="code"><code>const loader = new DataLoader(async (ids) =&gt; {
+  const list = await getProducts(ids, requestId);     // MỘT lời gọi: /products?ids=...
+  const byId = new Map(list.map((p) =&gt; [p.id, p]));
+  return ids.map((id) =&gt; byId.get(id) ?? null);       // trả đúng thứ tự id đã xin
+});
+// resolver của OrderItem.product:  return loader.load(item.productId)</code></pre>
+<h3>Hai lưu ý</h3>
+<ul><li><strong>Loader tạo mới cho mỗi request:</strong> cache id chỉ sống trong một request, không rò dữ liệu giữa người dùng hoặc giữ dữ liệu cũ.</li><li><strong>Giới hạn kích thước lô:</strong> hợp đồng cho phép tối đa 200 id mỗi lần và loader hiện không tách lô; có hơn 200 id khác nhau thì Product trả <code>400</code>. Dữ liệu S và L (10 và 30 id) không gặp vấn đề này.</li></ul>
+<p><strong>Một câu để nhớ:</strong> DataLoader đổi "N lời gọi nhỏ" thành "1 lời gọi lớn" bằng cách chờ một nhịp để gom id; DB nhẹ đi vì lời gọi lớn đó chỉ tốn một câu SQL.</p>
+</section>
+</main>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const root = document.documentElement;
+const btn = document.getElementById('theme-toggle');
+const store = {
+  get() { try { return localStorage.getItem('theme'); } catch { return null; } },
+  set(v) { try { localStorage.setItem('theme', v); } catch { /* bỏ qua nếu bị chặn */ } },
+};
+let theme = store.get() || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+const nodes = [...document.querySelectorAll('.mermaid')];
+const sources = nodes.map((n) => n.textContent);
+
+function apply() {
+  root.dataset.theme = theme;
+  btn.textContent = theme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối';
+  btn.setAttribute('aria-pressed', String(theme === 'dark'));
+}
+async function render() {
+  mermaid.initialize({ startOnLoad: false, theme: theme === 'dark' ? 'dark' : 'default', securityLevel: 'strict', sequence: { mirrorActors: false, useMaxWidth: true } });
+  nodes.forEach((n, i) => { n.removeAttribute('data-processed'); n.textContent = sources[i]; });
+  await mermaid.run({ nodes });
+}
+btn.addEventListener('click', async () => {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  store.set(theme);
+  apply();
+  await render();
+});
+apply();
+await render();
+</script>
+</body></html>
