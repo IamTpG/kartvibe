@@ -1,0 +1,423 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "GraphQL",
+    "version": "1.0.0",
+    "description": "Một endpoint cho cả hai loại client bằng hai query (Web, Mobile). Công tắc DATALOADER chọn bản ngây thơ (N+1) hay đã sửa."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4005"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false,
+        "description": "Lỗi chung của mọi service; không lộ stack trace."
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "Metrics": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string"
+          },
+          "requests": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dbQueries": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "service",
+          "requests",
+          "dbQueries"
+        ],
+        "additionalProperties": false,
+        "description": "Bộ đếm phục vụ đo; không tính /health và /_metrics."
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "WebOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "SHIPPED",
+              "DELIVERED",
+              "CANCELLED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "productId": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "product": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "price": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "price"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "productId",
+                "quantity",
+                "product"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "createdAt",
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": "product là null khi Product lỗi hoặc quá hạn (khi đó partial = true)."
+      },
+      "MobileOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "SHIPPED",
+              "DELIVERED",
+              "CANCELLED"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "thumbnail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "thumbnail"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "product"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": "Chỉ các trường mobile cần: không có price, createdAt, productId, quantity."
+      },
+      "WebData": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebOrder"
+            }
+          }
+        },
+        "required": [
+          "user",
+          "orders"
+        ],
+        "additionalProperties": false,
+        "description": "data của query Web: cùng hình dạng thân BFF web, bỏ partial và errors."
+      },
+      "MobileData": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MobileOrder"
+            }
+          }
+        },
+        "required": [
+          "orders"
+        ],
+        "additionalProperties": false,
+        "description": "data của query Mobile: cùng hình dạng thân BFF mobile, bỏ partial và errors."
+      },
+      "GraphQLRequest": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "variables": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "operationName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "GraphQLError": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          "extensions": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code"
+            ],
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "additionalProperties": {},
+        "description": "extensions.code = PRODUCT_UNAVAILABLE khi Product lỗi hoặc quá hạn."
+      },
+      "GraphQLResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WebData"
+              },
+              {
+                "$ref": "#/components/schemas/MobileData"
+              }
+            ]
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GraphQLError"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/graphql": {
+      "post": {
+        "summary": "Chạy query Web hoặc Mobile",
+        "description": "DataLoader bật mặc định; ghi đè từng request bằng ?dataloader=on|off.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "on",
+                "off"
+              ]
+            },
+            "required": false,
+            "name": "dataloader",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GraphQLRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả; product null kèm errors khi Product lỗi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphQLResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Còn sống",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_metrics": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Bộ đếm",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Metrics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_metrics/reset": {
+      "post": {
+        "responses": {
+          "204": {
+            "description": "Đã đặt lại bộ đếm"
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}

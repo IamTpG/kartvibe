@@ -1,0 +1,462 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "BFF",
+    "version": "1.0.0",
+    "description": "Một endpoint cho mỗi loại client. Chỉ gọi service qua REST. Product lỗi hoặc quá hạn thì trả một phần; User hoặc Order lỗi thì 502."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4004"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false,
+        "description": "Lỗi chung của mọi service; không lộ stack trace."
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "Metrics": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string"
+          },
+          "requests": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dbQueries": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "service",
+          "requests",
+          "dbQueries"
+        ],
+        "additionalProperties": false,
+        "description": "Bộ đếm phục vụ đo; không tính /health và /_metrics."
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "WebOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "SHIPPED",
+              "DELIVERED",
+              "CANCELLED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "productId": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "product": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "price": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "price"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "productId",
+                "quantity",
+                "product"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "createdAt",
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": "product là null khi Product lỗi hoặc quá hạn (khi đó partial = true)."
+      },
+      "MobileOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "SHIPPED",
+              "DELIVERED",
+              "CANCELLED"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "thumbnail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "thumbnail"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "product"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": "Chỉ các trường mobile cần: không có price, createdAt, productId, quantity."
+      },
+      "PartialError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "productIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false,
+        "description": "code = PRODUCT_UNAVAILABLE; productIds là các product bị ảnh hưởng."
+      },
+      "WebDashboard": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebOrder"
+            }
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartialError"
+            }
+          }
+        },
+        "required": [
+          "user",
+          "orders",
+          "partial",
+          "errors"
+        ],
+        "additionalProperties": false
+      },
+      "MobileOrders": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MobileOrder"
+            }
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartialError"
+            }
+          }
+        },
+        "required": [
+          "orders",
+          "partial",
+          "errors"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/bff/web/dashboard": {
+      "get": {
+        "summary": "Dashboard web: người dùng và đơn, đủ trường",
+        "description": "Gọi User và Order song song, rồi Product một lần với id đã loại trùng.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "required": true,
+            "name": "userId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard (có thể một phần)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebDashboard"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: userId không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "UPSTREAM_ERROR: User hoặc Order lỗi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bff/mobile/orders": {
+      "get": {
+        "summary": "Danh sách đơn cho mobile, chỉ trường mobile cần",
+        "description": "Không gọi User Service.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "required": true,
+            "name": "userId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách đơn (có thể một phần)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MobileOrders"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: userId không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "UPSTREAM_ERROR: User hoặc Order lỗi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Còn sống",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_metrics": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Bộ đếm",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Metrics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_metrics/reset": {
+      "post": {
+        "responses": {
+          "204": {
+            "description": "Đã đặt lại bộ đếm"
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}
