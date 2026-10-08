@@ -9,3 +9,5 @@
 !.env.example
 
 node_modules/
+
+# Log thô của các service nằm ở services/logs/ (xem services/.gitignore); results/ chỉ chứa bằng chứng sinh ra và được commit.

@@ -1,22 +1,30 @@
 {
-  "name": "kartvibe-order",
+  "name": "kartvibe-order-service",
   "version": "1.0.0",
-  "private": true,
-  "type": "module",
+  "description": "Order Service (API composition, port 4002)",
+  "main": "src/index.ts",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "start": "tsx src/server.ts",
-    "build": "tsc --noEmit"
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "seed": "tsx src/seed.ts",
+    "seed:s": "tsx src/seed.ts S",
+    "seed:l": "tsx src/seed.ts L",
+    "openapi": "tsx src/openapi.ts"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^5.2.1",
     "pg": "^8.23.1"
   },
   "devDependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.3",
     "@types/pg": "^8.23.1",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "zod": "^4.6.5"
   }
 }
