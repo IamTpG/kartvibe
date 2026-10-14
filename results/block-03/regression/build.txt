@@ -1,0 +1,46 @@
+# build (tsc mọi workspace)
+# lệnh: bash -c cd '<repo>/services' && npm run build
+# bắt đầu: 2026-10-14T22:53:54+07:00
+
+
+> kartvibe-services@1.0.0 build
+> npm run build --workspaces --if-present
+
+
+> kartvibe-user-service@1.0.0 build
+> tsc --noEmit
+
+
+> kartvibe-order-service@1.0.0 build
+> tsc --noEmit
+
+
+> kartvibe-product-service@1.0.0 build
+> tsc --noEmit
+
+
+> build
+> tsc --noEmit
+
+
+> kartvibe-graphql@1.0.0 build
+> tsc --noEmit
+
+
+> kartvibe-inventory-service@1.0.0 build
+> tsc --noEmit
+
+
+> kartvibe-order-v1-service@1.0.0 build
+> tsc --noEmit
+
+
+> kartvibe-inventory-v1-service@1.0.0 build
+> tsc --noEmit
+
+
+> kartvibe-tools-compat@1.0.0 build
+> tsc --noEmit
+
+
+# [exit 0] kết thúc: 2026-10-14T22:53:57+07:00

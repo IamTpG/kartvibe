@@ -1,0 +1,133 @@
+# proto v1/v2, diff và sinh code
+# lệnh: proto_step
+# bắt đầu: 2026-10-14T22:53:29+07:00
+
+== diff -u proto v1 -> v2
+--- <repo>/services/proto/inventory/v1/inventory.proto	2026-10-14 21:20:27.546637166 +0700
++++ <repo>/services/proto/inventory/v2/inventory.proto	2026-10-14 21:20:27.546998365 +0700
+@@ -1,5 +1,7 @@
+ syntax = "proto3";
+ 
++// Giữ nguyên package và tên service của v1: tên lời gọi là
++// /kartvibe.inventory.Inventory/Reserve, đổi package thì client v1 không gọi được.
+ package kartvibe.inventory;
+ 
+ service Inventory {
+@@ -13,4 +15,6 @@
+ 
+ message ReserveReply {
+   string reservation_id = 1;
++  // Thêm ở v2: số lượng còn lại sau khi giữ. Có presence (optional).
++  optional int32 available = 2;
+ }
+
+== sha256 của proto
+789b940230472113804db02829f4c198348aed497c044a76b31ff059d122918b  <repo>/services/proto/inventory/v1/inventory.proto
+a80b3bd11a19d1ec840958dbf6da5eee1c03bc11f1fb0149df02861cd5d1dbea  <repo>/services/proto/inventory/v2/inventory.proto
+
+== diff -u mã sinh v1 -> v2 (tools/block3/generated)
+--- <repo>/services/tools/block3/generated/v1/inventory.ts	2026-10-14 21:22:18.068582424 +0700
++++ <repo>/services/tools/block3/generated/v2/inventory.ts	2026-10-14 21:22:18.192583007 +0700
+@@ -28,6 +28,8 @@
+ 
+ export interface ReserveReply {
+   reservationId: string;
++  /** Thêm ở v2: số lượng còn lại sau khi giữ. Có presence (optional). */
++  available?: number | undefined;
+ }
+ 
+ function createBaseReserveRequest(): ReserveRequest {
+@@ -116,7 +118,7 @@
+ };
+ 
+ function createBaseReserveReply(): ReserveReply {
+-  return { reservationId: "" };
++  return { reservationId: "", available: undefined };
+ }
+ 
+ export const ReserveReply: MessageFns<ReserveReply> = {
+@@ -124,6 +126,9 @@
+     if (message.reservationId !== "") {
+       writer.uint32(10).string(message.reservationId);
+     }
++    if (message.available !== undefined) {
++      writer.uint32(16).int32(message.available);
++    }
+     return writer;
+   },
+ 
+@@ -148,6 +153,14 @@
+             message.reservationId = reader.string();
+             continue;
+           }
++          case 2: {
++            if (tag !== 16) {
++              break;
++            }
++
++            message.available = reader.int32();
++            continue;
++          }
+         }
+         if ((tag & 7) === 4 || tag === 0) {
+           break;
+@@ -167,6 +180,7 @@
+         : isSet(object.reservation_id)
+         ? globalThis.String(object.reservation_id)
+         : "",
++      available: isSet(object.available) ? globalThis.Number(object.available) : undefined,
+     };
+   },
+ 
+@@ -175,6 +189,9 @@
+     if (message.reservationId !== "") {
+       obj.reservationId = message.reservationId;
+     }
++    if (message.available !== undefined) {
++      obj.available = Math.round(message.available);
++    }
+     return obj;
+   },
+ 
+@@ -184,6 +201,7 @@
+   fromPartial<I extends Exact<DeepPartial<ReserveReply>, I>>(object: I): ReserveReply {
+     const message = createBaseReserveReply();
+     message.reservationId = object.reservationId ?? "";
++    message.available = object.available ?? undefined;
+     return message;
+   },
+ };
+
+== sinh lại code cho từng gói: kỳ vọng mã đã commit KHÔNG đổi
+--- npm run codegen -w kartvibe-inventory-service
+Proto: ../proto/inventory/v2/inventory.proto
+Output: src/generated
+Codegen completed successfully.
+KHÔNG ĐỔI  kartvibe-inventory-service
+--- npm run codegen -w kartvibe-order-service
+Proto: ../proto/inventory/v2/inventory.proto
+Output: src/generated
+Codegen completed successfully.
+KHÔNG ĐỔI  kartvibe-order-service
+--- npm run codegen -w kartvibe-tools-block3
+[codegen] v1: ../../proto/inventory/v1/inventory.proto -> generated/v1
+[codegen] v2: ../../proto/inventory/v2/inventory.proto -> generated/v2
+[codegen] Codegen completed successfully.
+KHÔNG ĐỔI  kartvibe-tools-block3
+--- npm run codegen -w kartvibe-inventory-v1-service
+
+$ node ../node_modules/grpc-tools/bin/protoc.js --plugin=protoc-gen-ts_proto=../node_modules/ts-proto/protoc-gen-ts_proto --ts_proto_out=src/generated --ts_proto_opt=outputServices=grpc-js,esModuleInterop=true -I ../proto/inventory/v1 ../proto/inventory/v1/inventory.proto
+[exit 0]
+KHÔNG ĐỔI  kartvibe-inventory-v1-service
+--- npm run codegen -w kartvibe-order-v1-service
+Proto v1: proto/inventory/v1/inventory.proto
+Output: src/generated
+Codegen completed successfully.
+KHÔNG ĐỔI  kartvibe-order-v1-service
+--- npm run codegen -w kartvibe-tools-compat
+[exit 0]
+$ node ../../node_modules/grpc-tools/bin/protoc.js --plugin=protoc-gen-ts_proto=../../node_modules/ts-proto/protoc-gen-ts_proto --ts_proto_out=test/generated/v2 --ts_proto_opt=outputServices=grpc-js,esModuleInterop=true -I ../../proto/inventory/v2 ../../proto/inventory/v2/inventory.proto
+[exit 0]
+KHÔNG ĐỔI  kartvibe-tools-compat
+
+# [exit 0] kết thúc: 2026-10-14T22:53:31+07:00

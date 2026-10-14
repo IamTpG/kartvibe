@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>So sánh đặt hàng REST và gRPC</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .controls .secondary { background: #e4ede4; color: #1d2926; }
+    .controls .danger { background: #f9d6cb; color: #8a2a10; }
+    .controls .sep { flex-basis: 100%; height: 0; }
+    .preset-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .preset-row span { font-size: .8rem; font-weight: 700; color: #51625a; }
+    .addresses { background: #fff; border: 1px solid #d9e1d9; border-radius: 18px; padding: 12px 18px; margin-bottom: 14px; }
+    .addresses summary { cursor: pointer; font-weight: 700; color: #245e4d; }
+    .addresses .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-top: 10px; }
+    .addresses label { display: grid; gap: 4px; font-size: .8rem; font-weight: 700; color: #51625a; }
+    .addresses input { border: 1px solid #c6d2c8; border-radius: 9px; padding: 8px 10px; font: inherit; }
+    .order-card dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 12px 0; font-size: .9rem; }
+    .order-card dt { color: #728077; }
+    .order-card dd { margin: 0; overflow-wrap: anywhere; }
+    .order-card pre { background: #f6f8f4; border-radius: 10px; padding: 10px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .85rem; min-height: 3em; }
+    .order-card .url { font-size: .75rem; color: #728077; margin: 4px 0 0; overflow-wrap: anywhere; }
+    .status.down { color: #9d411d; background: #fff0e9; }
+    .status.idle { color: #52655b; background: #eef2ec; }
+    .order-card .inside { margin-top: 12px; border-top: 1px solid #e9eee8; padding-top: 8px; }
+    .order-card .inside summary { cursor: pointer; font-weight: 700; font-size: .85rem; color: #245e4d; }
+    .order-card .logs { list-style: none; margin: 8px 0 0; padding: 0; font-size: .8rem; display: grid; gap: 6px; }
+    .order-card .logs li { background: #f6f8f4; border-radius: 8px; padding: 6px 8px; overflow-wrap: anywhere; }
+    .order-card .logs .log-note { color: #728077; background: none; padding: 0; }
+    .timing-note { font-size: .7rem; color: #728077; }
+    .verdict { background: #fff; border: 2px solid #1d2926; border-radius: 16px; padding: 16px 18px; margin: 14px 0 24px; }
+    .verdict strong { font-size: 1.6rem; letter-spacing: .02em; }
+    .verdict.same { border-color: #16664b; }
+    .verdict.diff { border-color: #9d411d; }
+    .verdict ul { margin: 8px 0 0; padding-left: 20px; }
+    .verdict p { margin: 6px 0 0; color: #51625a; }
+    .panel { background: #fff; border: 1px solid #d9e1d9; border-radius: 18px; padding: 18px; margin-bottom: 14px; }
+    .panel h2 { font-size: 1.1rem; margin-bottom: 10px; }
+    .fault-state { font-weight: 700; }
+    .footnote { font-size: .85rem; color: #67736e; }
+  </style>
+</head>
+<body data-client="web">
+  <main class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">REST VÀ gRPC</p>
+        <h1>So sánh đặt hàng</h1>
+        <p class="intro">Gửi cùng một yêu cầu <code>POST /orders</code> lần lượt tới từng bản Order, rồi so status và body sau khi chuẩn hóa.</p>
+      </div>
+    </header>
+
+    <form id="order-form" class="controls" aria-label="Yêu cầu đặt hàng">
+      <label>sku <input id="sku" name="sku" value="SKU-OK" autocomplete="off"></label>
+      <label>quantity <input id="quantity" name="quantity" value="2" inputmode="numeric" autocomplete="off"></label>
+      <button id="send" type="submit">Đặt hàng</button>
+      <button id="reset-orders" type="button" class="secondary">Xóa đơn</button>
+      <button id="refresh-logs" type="button" class="secondary">Làm mới log</button>
+      <div class="sep"></div>
+      <div class="preset-row" role="group" aria-label="Tình huống mẫu">
+        <span>Tình huống mẫu:</span>
+        <button type="button" class="secondary" data-preset="ok">Đủ hàng</button>
+        <button type="button" class="secondary" data-preset="zero">Hết hàng</button>
+        <button type="button" class="secondary" data-preset="qty0">Số lượng 0</button>
+        <button type="button" class="secondary" data-preset="badBody">Body sai</button>
+      </div>
+    </form>
+    <p class="demo-note">Tình huống đang chọn: <strong id="scenario">Đủ hàng</strong></p>
+
+    <details class="addresses">
+      <summary>Địa chỉ dịch vụ</summary>
+      <div class="grid" id="address-grid">
+        <label>Inventory REST <input id="inventory-url" value="http://localhost:4006"></label>
+      </div>
+    </details>
+
+    <section class="order-grid" id="columns" aria-label="Kết quả từng bản Order"></section>
+
+    <section id="verdict" class="verdict" aria-live="polite">
+      <strong>Chưa gửi</strong>
+      <p>Bấm "Đặt hàng" để gửi cùng một yêu cầu tới các bản Order.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="inventory-title">
+      <h2 id="inventory-title">Điều khiển Inventory</h2>
+      <div class="controls" style="border:0;padding:0;margin:0">
+        <button type="button" id="inv-reset">Nạp lại tồn kho</button>
+        <button type="button" id="inv-normal" class="secondary">Inventory bình thường</button>
+        <button type="button" id="inv-slow" class="secondary">Làm chậm Inventory 2000 ms</button>
+        <button type="button" id="inv-stop" class="secondary danger">Tắt Inventory</button>
+      </div>
+      <p>Lần bấm gần nhất: <span id="inv-last">chưa bấm</span></p>
+      <p>Trạng thái đã đặt từ trang này: <span id="inv-state" class="fault-state">chưa đặt (trang không đọc lại được trạng thái từ Inventory)</span></p>
+      <p class="demo-note">Các bản Order dùng chung tồn kho, <code>SKU-OK</code> chỉ có 10: mỗi lần bấm &quot;Đặt hàng&quot; &quot;Đủ hàng&quot; trừ 2 ở mỗi cột đang chạy (6 khi chạy cả ba cột), nên lần bấm thứ 2 đã có thể ra KHÁC. Bấm 'Nạp lại tồn kho' trước mỗi lần thử. Cần <code>ENABLE_TEST_HOOKS=1</code>.</p>
+      <p class="demo-note">"Tắt Inventory" dừng cả REST và gRPC của Inventory (cần <code>ENABLE_TEST_HOOKS=1</code>). Trang không bật lại được: chạy lại <code>LATENCY_MS=0 npm run start:measure</code> trong <code>services/</code>, chờ vài giây (kênh gRPC còn backoff) rồi bấm "Nạp lại tồn kho".</p>
+      <p class="demo-note">Trạng thái làm chậm chỉ được trang ghi nhớ, mất khi tải lại trang; sau khi tải lại, đừng suy ra trạng thái Inventory từ trang.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="history-title">
+      <h2 id="history-title">Lịch sử (10 lần gửi gần nhất)</h2>
+      <table class="demo-table">
+        <thead><tr><th>Giờ</th><th>Tình huống</th><th>Kết luận</th></tr></thead>
+        <tbody id="history"><tr><td colspan="3">Chưa có lần gửi nào</td></tr></tbody>
+      </table>
+    </section>
+
+    <p class="footnote">Trang chỉ so kết quả mà bên ngoài nhận được (status và body). Phản hồi không cho biết Order gọi Inventory bằng giao thức nào; điều đó nằm ở khung "Bên trong (từ log)" dưới mỗi cột, lấy từ log thật của Order và Inventory theo <code>requestId</code> (cần chạy web bằng <code>ENABLE_TEST_HOOKS=1 npm start</code>).</p>
+  </main>
+
+  <script type="module" src="/js/order-compare.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# khởi động lại các service ở chế độ đo
+# lệnh: restart_stack
+# bắt đầu: 2026-10-14T22:53:26+07:00
+
+user: pid 216157 cổng 4001 (log <repo>/services/logs/user.log)
+order: pid 216161 cổng 4002 (log <repo>/services/logs/order.log)
+product: pid 216165 cổng 4003 (log <repo>/services/logs/product.log)
+bff: pid 216174 cổng 4004 (log <repo>/services/logs/bff.log)
+graphql: pid 216183 cổng 4005 (log <repo>/services/logs/graphql.log)
+inventory: pid 216192 cổng 4006 (log <repo>/services/logs/inventory.log)
+order-grpc: pid 216201 cổng 4012 (log <repo>/services/logs/order-grpc.log)
+order-grpc-v1: pid 216211 cổng 4022 (log <repo>/services/logs/order-grpc-v1.log)
+sẵn sàng: user :4001
+sẵn sàng: order :4002
+sẵn sàng: product :4003
+sẵn sàng: bff :4004
+sẵn sàng: graphql :4005
+sẵn sàng: inventory :4006
+sẵn sàng: order-grpc :4012
+sẵn sàng: order-grpc-v1 :4022
+sẵn sàng: inventory-grpc :4007
+
+# [exit 0] kết thúc: 2026-10-14T22:53:29+07:00

@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luồng: hết hàng, cùng một kết quả ngoài ở hai giao thức",
+    "output": "../04-luong-het-hang.html",
+    "viewBox": [
+      956,
+      526
+    ],
+    "quality_profile": "showcase",
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Trình duyệt",
+      "sublabel": "hoặc curl"
+    },
+    {
+      "id": "order",
+      "type": "backend",
+      "label": "order-grpc :4012",
+      "sublabel": "gọi Inventory bằng gRPC"
+    },
+    {
+      "id": "inv",
+      "type": "backend",
+      "label": "inventory :4006 / :4007",
+      "sublabel": "REST :4006, gRPC :4007"
+    },
+    {
+      "id": "invdb",
+      "type": "database",
+      "label": "kartvibe_inventory",
+      "sublabel": "stock, reservations"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "browser",
+      "to": "order",
+      "y": 190,
+      "label": "POST /orders {sku: SKU-ZERO, quantity: 1}",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "order",
+      "to": "inv",
+      "y": 228,
+      "label": "gRPC Reserve (REST: POST /inventory/reservations)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m3",
+      "from": "inv",
+      "to": "invdb",
+      "y": 266,
+      "label": "UPDATE stock ... WHERE available >= 1",
+      "variant": "default"
+    },
+    {
+      "id": "m4",
+      "from": "invdb",
+      "to": "inv",
+      "y": 304,
+      "label": "0 dòng cập nhật",
+      "variant": "return"
+    },
+    {
+      "id": "m5",
+      "from": "inv",
+      "to": "order",
+      "y": 342,
+      "label": "gRPC: FAILED_PRECONDITION + x-error-code: OUT_OF_STOCK",
+      "variant": "security"
+    },
+    {
+      "id": "m6",
+      "from": "inv",
+      "to": "order",
+      "y": 380,
+      "label": "REST: 409 {code: OUT_OF_STOCK}",
+      "variant": "dashed"
+    },
+    {
+      "id": "m7",
+      "from": "order",
+      "to": "browser",
+      "y": 418,
+      "label": "409 {code: OUT_OF_STOCK}, không tạo order",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "gRPC không có mã OUT_OF_STOCK",
+      "items": [
+        "Tập status code gRPC cố định, không tự thêm được",
+        "Mã nghiệp vụ đi trong trailing metadata x-error-code"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Order phải đọc metadata",
+      "items": [
+        "FAILED_PRECONDITION sau này có thể dùng cho điều kiện khác",
+        "Nên Order dựa vào x-error-code, không chỉ vào status"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Kết quả ngoài",
+      "items": [
+        "REST và gRPC đều ra 409 OUT_OF_STOCK",
+        "Không giữ hàng, không INSERT purchase_orders"
+      ]
+    }
+  ]
+}

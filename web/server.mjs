@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { readFile, readdir } from 'node:fs/promises';
 import { dirname, extname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { findLogs } from './logs.mjs';
 
 // Phục vụ tệp tĩnh trong public/. Danh sách tệp được quét một lần lúc khởi động và chỉ trả đúng các tệp đó
 // (không ghép đường dẫn từ URL), nên không thể truy cập ra ngoài public/.
@@ -27,8 +28,19 @@ const files = new Map();
 for (const full of await scan(publicDir)) files.set('/' + relative(publicDir, full).split(sep).join('/'), full);
 files.set('/', files.get('/dashboard.html'));
 
+// Tra log theo requestId cho order-compare.html. Chỉ bật cùng các hook thử nghiệm (ENABLE_TEST_HOOKS=1),
+// vì log là dữ liệu nội bộ của các service.
+const logDir = process.env.LOG_DIR ?? join(dirname(fileURLToPath(import.meta.url)), '..', 'services', 'logs');
+
 createServer(async (req, res) => {
-  const file = files.get(new URL(req.url || '/', 'http://localhost').pathname);
+  const url = new URL(req.url || '/', 'http://localhost');
+  if (url.pathname === '/_logs' && process.env.ENABLE_TEST_HOOKS === '1') {
+    const entries = await findLogs(logDir, url.searchParams.get('requestId') ?? '');
+    res.writeHead(entries === null ? 400 : 200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+    res.end(JSON.stringify(entries === null ? { error: 'requestId không hợp lệ' } : entries));
+    return;
+  }
+  const file = files.get(url.pathname);
   if (!file) { res.writeHead(404); res.end('Not found'); return; }
   try {
     const body = await readFile(file);

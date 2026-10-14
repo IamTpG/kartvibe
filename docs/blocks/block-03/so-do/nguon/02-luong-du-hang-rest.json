@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luồng: đặt hàng đủ hàng, Order gọi Inventory bằng REST",
+    "output": "../02-luong-du-hang-rest.html",
+    "viewBox": [
+      1080,
+      602
+    ],
+    "quality_profile": "showcase",
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Trình duyệt",
+      "sublabel": "hoặc curl"
+    },
+    {
+      "id": "order",
+      "type": "backend",
+      "label": "order :4002",
+      "sublabel": "gọi Inventory bằng REST"
+    },
+    {
+      "id": "inv",
+      "type": "backend",
+      "label": "inventory REST :4006",
+      "sublabel": "cùng hàm giữ hàng với gRPC"
+    },
+    {
+      "id": "invdb",
+      "type": "database",
+      "label": "kartvibe_inventory",
+      "sublabel": "stock, reservations"
+    },
+    {
+      "id": "orddb",
+      "type": "database",
+      "label": "kartvibe_order",
+      "sublabel": "purchase_orders"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "browser",
+      "to": "order",
+      "y": 190,
+      "label": "POST /orders {sku: SKU-OK, quantity: 2}",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "order",
+      "to": "inv",
+      "y": 228,
+      "label": "POST /inventory/reservations (timeout 500 ms)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m3",
+      "from": "inv",
+      "to": "invdb",
+      "y": 266,
+      "label": "UPDATE stock ... WHERE available >= 2",
+      "variant": "default"
+    },
+    {
+      "id": "m4",
+      "from": "invdb",
+      "to": "inv",
+      "y": 304,
+      "label": "1 dòng cập nhật, available = 8",
+      "variant": "return"
+    },
+    {
+      "id": "m5",
+      "from": "inv",
+      "to": "invdb",
+      "y": 342,
+      "label": "INSERT reservations",
+      "variant": "default"
+    },
+    {
+      "id": "m6",
+      "from": "inv",
+      "to": "order",
+      "y": 380,
+      "label": "201 {reservationId: RSV-1}",
+      "variant": "return"
+    },
+    {
+      "id": "m7",
+      "from": "order",
+      "to": "orddb",
+      "y": 418,
+      "label": "INSERT purchase_orders (CONFIRMED)",
+      "variant": "default"
+    },
+    {
+      "id": "m8",
+      "from": "orddb",
+      "to": "order",
+      "y": 456,
+      "label": "orderId",
+      "variant": "return"
+    },
+    {
+      "id": "m9",
+      "from": "order",
+      "to": "browser",
+      "y": 494,
+      "label": "201 {orderId, sku, quantity, status: CONFIRMED}",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Chặng ngoài",
+      "items": [
+        "REST/JSON, không đổi khi đổi giao thức bên trong",
+        "Order chỉ kiểm hình dạng body trước khi gọi Inventory"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Chặng trong (baseline)",
+      "items": [
+        "REST: một lần POST, timeout 500 ms",
+        "Thành công là 201 kèm reservationId"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Giữ hàng nguyên tử",
+      "items": [
+        "Một câu UPDATE có điều kiện trong transaction",
+        "Hai request đồng thời không cùng giữ phần hàng cuối"
+      ]
+    }
+  ]
+}

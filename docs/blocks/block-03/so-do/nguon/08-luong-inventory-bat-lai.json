@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luồng: Inventory bật lại, kênh gRPC hồi phục chậm hơn REST",
+    "output": "../08-luong-inventory-bat-lai.html",
+    "viewBox": [
+      1080,
+      622
+    ],
+    "quality_profile": "showcase",
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Trình duyệt",
+      "sublabel": "hoặc curl"
+    },
+    {
+      "id": "order",
+      "type": "backend",
+      "label": "order :4002",
+      "sublabel": "gọi Inventory bằng REST"
+    },
+    {
+      "id": "ordergrpc",
+      "type": "backend",
+      "label": "order-grpc :4012",
+      "sublabel": "gọi Inventory bằng gRPC"
+    },
+    {
+      "id": "inv",
+      "type": "backend",
+      "label": "inventory",
+      "sublabel": "vừa bật lại"
+    }
+  ],
+  "segments": [
+    {
+      "from": 174,
+      "to": 304,
+      "label": "Order gọi bằng REST: dùng được ngay"
+    },
+    {
+      "from": 332,
+      "to": 538,
+      "label": "Order gọi bằng gRPC: kênh còn backoff"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "browser",
+      "to": "order",
+      "y": 204,
+      "label": "POST /orders",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "order",
+      "to": "inv",
+      "y": 242,
+      "label": "POST /inventory/reservations (kết nối mới)",
+      "variant": "default"
+    },
+    {
+      "id": "m3",
+      "from": "order",
+      "to": "browser",
+      "y": 280,
+      "label": "201 hoặc 409 ngay lập tức",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "browser",
+      "to": "ordergrpc",
+      "y": 362,
+      "label": "POST /orders (ngay sau khi bật lại)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m5",
+      "from": "ordergrpc",
+      "to": "browser",
+      "y": 400,
+      "label": "503 ngay lập tức (kênh chưa kết nối lại)",
+      "variant": "dashed"
+    },
+    {
+      "id": "m6",
+      "from": "browser",
+      "to": "ordergrpc",
+      "y": 438,
+      "label": "POST /orders (vài giây sau)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m7",
+      "from": "ordergrpc",
+      "to": "inv",
+      "y": 476,
+      "label": "Reserve (kênh đã kết nối lại)",
+      "variant": "default"
+    },
+    {
+      "id": "m8",
+      "from": "ordergrpc",
+      "to": "browser",
+      "y": 514,
+      "label": "201 hoặc 409: đã hồi phục",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Khác biệt thật giữa hai giao thức",
+      "items": [
+        "REST kết nối mới mỗi lần nên không có độ trễ hồi phục",
+        "Kênh gRPC giữ trạng thái lỗi tạm thời (backoff) rồi tự kết nối lại"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Thời gian hồi phục phụ thuộc",
+      "items": [
+        "Độ dài backoff tăng theo thời gian Inventory đã tắt",
+        "Đã thấy từ tức thì đến vài lần gọi đầu bị 503"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Hệ quả khi đo và demo",
+      "items": [
+        "chay-lai.sh thăm dò đến khi hết 503 và ghi thời gian hồi phục",
+        "Demo: chờ vài giây sau khi bật lại Inventory"
+      ]
+    }
+  ]
+}

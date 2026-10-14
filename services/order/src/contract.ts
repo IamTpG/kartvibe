@@ -31,6 +31,11 @@ export const OrderSchema = z
 
 export const OrderListSchema = z.strictObject({ data: z.array(OrderSchema) }).openapi('OrderList');
 
+export const PurchaseOrderRequestSchema = z.strictObject({ sku: z.string(), quantity: z.int() }).openapi('PurchaseOrderRequest');
+export const PurchaseOrderResponseSchema = z.strictObject({
+  orderId: z.int().min(1), sku: z.string(), quantity: z.int(), status: z.literal('CONFIRMED'),
+}).openapi('PurchaseOrderResponse');
+
 export type Order = z.infer<typeof OrderSchema>;
 export type OrderList = z.infer<typeof OrderListSchema>;
 
@@ -41,7 +46,7 @@ const json = <T extends z.ZodType>(schema: T, description: string) => ({
 
 export function generateOpenApiDocument() {
   const registry = new OpenAPIRegistry();
-  for (const [name, schema] of Object.entries({ Error: ErrorSchema, Health: HealthSchema, Metrics: MetricsSchema, OrderItem: OrderItemSchema, Order: OrderSchema, OrderList: OrderListSchema })) {
+  for (const [name, schema] of Object.entries({ Error: ErrorSchema, Health: HealthSchema, Metrics: MetricsSchema, OrderItem: OrderItemSchema, Order: OrderSchema, OrderList: OrderListSchema, PurchaseOrderRequest: PurchaseOrderRequestSchema, PurchaseOrderResponse: PurchaseOrderResponseSchema })) {
     registry.register(name, schema);
   }
 
@@ -57,9 +62,22 @@ export function generateOpenApiDocument() {
       500: json(ErrorSchema, 'INTERNAL_ERROR'),
     },
   });
+  registry.registerPath({
+    method: 'post', path: '/orders', summary: 'Giữ hàng và tạo đơn mua mới',
+    request: { body: { content: { 'application/json': { schema: PurchaseOrderRequestSchema } } } },
+    responses: {
+      201: json(PurchaseOrderResponseSchema, 'Đơn đã xác nhận'),
+      400: json(ErrorSchema, 'VALIDATION_ERROR'),
+      409: json(ErrorSchema, 'OUT_OF_STOCK'),
+      503: json(ErrorSchema, 'INVENTORY_UNAVAILABLE'),
+      504: json(ErrorSchema, 'INVENTORY_TIMEOUT'),
+      500: json(ErrorSchema, 'INTERNAL_ERROR'),
+    },
+  });
   registry.registerPath({ method: 'get', path: '/health', responses: { 200: json(HealthSchema, 'Còn sống') } });
   registry.registerPath({ method: 'get', path: '/_metrics', responses: { 200: json(MetricsSchema, 'Bộ đếm') } });
   registry.registerPath({ method: 'post', path: '/_metrics/reset', responses: { 204: { description: 'Đã đặt lại bộ đếm' } } });
+  registry.registerPath({ method: 'post', path: '/_reset', description: 'Chỉ bật khi ENABLE_TEST_HOOKS=1', responses: { 204: { description: 'Đã xóa purchase_orders và đặt lại id' }, 500: json(ErrorSchema, 'INTERNAL_ERROR') } });
 
   return new OpenApiGeneratorV31(registry.definitions).generateDocument({
     openapi: '3.1.0',

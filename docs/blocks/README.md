@@ -6,7 +6,7 @@ Mỗi thư mục `block-NN/` là tài liệu của một block học: yêu cầu
 |---|---|---|---|---|
 | 1 | Cart API (REST, Prisma, Postgres) | [`block-01/`](block-01/) | [`api/`](../../api/) | bản chụp nộp bài |
 | 2 | API composition (BFF, GraphQL) | [`block-02/`](block-02/) | [`services/`](../../services/), [`web/`](../../web/), bằng chứng ở [`results/`](../../results/) | đang hoàn thiện để nộp |
-| 3 | chưa xác nhận yêu cầu | [`block-03/`](block-03/) | chưa có | ghi chú chuẩn bị |
+| 3 | REST và gRPC giữa các service | [`block-03/`](block-03/) | [`services/`](../../services/) (`inventory`, `order`, `order-v1`, `inventory-v1`, `proto`, `tools/block3`, `tools/compat`), [`web/`](../../web/) (`order-compare.html`), bằng chứng ở [`results/block-03/`](../../results/block-03/) | đã ráp và chạy thử; chờ chạy bằng chứng cuối và nộp |
 
 ## Quy ước
 

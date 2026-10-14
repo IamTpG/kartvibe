@@ -1,0 +1,17 @@
+# môi trường và phiên bản
+# lệnh: env_info
+# bắt đầu: 2026-10-14T22:53:29+07:00
+
+người chạy: team lead
+thời điểm: 2026-10-14T22:53:29+07:00
+nhánh: feat/block-03, commit: 8ce28df
+hệ điều hành: Linux 7.0.0-38-generic
+node v24.18.1, npm 11.16.0
+@grpc/grpc-js 1.14.6
+grpc-tools 1.13.1
+ts-proto 2.13.0
+@bufbuild/protobuf 2.16.0
+cấu hình đo: LATENCY_MS=0, ENABLE_TEST_HOOKS=1, mẫu đo thời gian mỗi cổng: 20
+tiến trình: bff graphql inventory order-grpc-v1 order-grpc order product user 
+
+# [exit 0] kết thúc: 2026-10-14T22:53:29+07:00

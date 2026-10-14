@@ -21,8 +21,11 @@ flowchart LR
 | Thành phần | Cổng | Database | Ghi chú |
 |---|---|---|---|
 | `user` | 4001 | `kartvibe_user` | `GET /users/:id` |
-| `order` | 4002 | `kartvibe_order` | `GET /orders?userId=`, luôn 2 truy vấn DB |
+| `order` | 4002 | `kartvibe_order` | `GET /orders?userId=`, luôn 2 truy vấn DB; `POST /orders` (gọi Inventory bằng REST khi `INVENTORY_PROTOCOL=rest`, bảng `purchase_orders`) |
+| `order-grpc` | 4012 | `kartvibe_order` | Cùng mã nguồn với `order`, `INVENTORY_PROTOCOL=grpc` |
+| `order-grpc-v1` | 4022 | `kartvibe_order` | Client cũ: `order-v1/` build từ proto v1, **đóng băng** (không build lại; `npm run verify-frozen -w kartvibe-order-v1-service`) |
 | `product` | 4003 | `kartvibe_product` | `GET /products/:id`, `GET /products?ids=` (lấy nhiều, loại id trùng, 1 truy vấn), công tắc gây lỗi `/_fault` |
+| `inventory` | 4006 (REST), 4007 (gRPC) | `kartvibe_inventory` | Một tiến trình, hai cổng: `POST /inventory/reservations` và gRPC `Reserve` (`services/proto`); giữ hàng nguyên tử; hook `/_reset`, `/_fault` |
 | `bff` | 4004 | không | `GET /bff/web/dashboard`, `GET /bff/mobile/orders` |
 | `graphql` | 4005 | không | `POST /graphql` (query `Web`, `Mobile`), công tắc `DATALOADER` |
 | `../web` | 4000 | không | Trang `dashboard.html`, `mobile.html`. **Không** do `start-all.sh` chạy: chạy riêng bằng `npm start` trong `web/`; `npm run matrix` tự bật nếu chưa chạy |
@@ -98,6 +101,31 @@ Số liệu đo nhiều lần (4 biến thể × 2 client × 2 kích thước, m
 - **Báo cáo:** `npm run report` tạo `../results/evidence/measurements.md` từ `../results/raw/`.
 
 Cách đếm các chỉ số, định nghĩa "màn hình hoàn tất", lạnh/ấm và giới hạn của phép đo: [hợp đồng chung](../docs/blocks/block-02/hop-dong-chung.md) (mục 7) và [ghi chú trình bày](../docs/blocks/block-02/TRINH-BAY.md).
+
+## Order và Inventory (REST và gRPC)
+
+`POST /orders` nhận `{ "sku", "quantity" }` và xin Inventory giữ hàng; đủ hàng thì 201 (`orderId`, `status: CONFIRMED`), thiếu hàng 409 `OUT_OF_STOCK`, dữ liệu sai 400, Inventory quá hạn 504 (`INVENTORY_TIMEOUT`), không kết nối được 503 (`INVENTORY_UNAVAILABLE`). Ba bản Order cho **cùng response ngoài** dù chặng trong khác nhau. Tồn kho mẫu (seed khi bảng rỗng): `SKU-OK` 10, `SKU-LOW` 1, `SKU-ZERO` 0. Quyết định và lý do: [ADR 0012](../docs/decisions/0012-rest-browser-grpc-noi-bo.md); hợp đồng, ánh xạ lỗi, log: [`docs/blocks/block-03/PLAN.md`](../docs/blocks/block-03/PLAN.md).
+
+```bash
+cd services
+npm install                         # một lần cho mọi workspace (kể cả inventory, order-v1, inventory-v1, tools/*)
+npm run codegen -w kartvibe-inventory-service -w kartvibe-order-service   # sinh lại mã từ services/proto (đã commit sẵn)
+LATENCY_MS=0 npm run start:measure  # tám tiến trình; đo thời gian thì LATENCY_MS=0 để độ trễ giả không làm nhiễu
+cd ../web && ENABLE_TEST_HOOKS=1 npm start   # trang http://localhost:4000/order-compare.html (ở terminal khác; hook bật khung "Bên trong (từ log)")
+```
+
+| Việc | Lệnh (từ `services/`) |
+|---|---|
+| Snapshot status và body, REST so gRPC so gRPC cũ | `node tools/block3/scenarios.mjs` |
+| Inventory chậm (504 trong thời gian hữu hạn) | `node tools/block3/slow.mjs` |
+| Inventory tắt (503): tắt rồi chạy | `bash tools/block3/stop-inventory.sh .run/inventory.pid` rồi `node tools/block3/down.mjs`; khởi động lại bằng `npm run start:measure` |
+| Payload (message đã serialize, lớp 1), thời gian phản hồi | `node --import tsx tools/block3/payload.ts`, `node tools/block3/latency.mjs --n 20` |
+| Client cũ/mới x server cũ/mới | `node tools/compat/compat.mjs --order <url> --label <tên> --expect-client <v1\|v2> --expect-available <number\|absent\|none> --order-log <file> --inventory-log <file>` |
+| Server cũ (`inventory-grpc-v1`, 4008; đặt `GRPC_PORT=4007` để `order-grpc` gọi nó sau khi dừng Inventory thật) | `npm start -w kartvibe-inventory-v1-service` |
+| Tự kiểm tra từng gói | `npm run check -w kartvibe-inventory-service`, `-w kartvibe-order-service`, `-w kartvibe-inventory-v1-service`, `-w kartvibe-tools-compat`, `-w kartvibe-tools-block3` (các `check` của Order, `tools/compat`, `tools/block3` tự dựng bản giả nên cần dừng các service đang chạy để khỏi tranh cổng) |
+| Chạy toàn bộ và thu bằng chứng vào `../results/block-03/` | `bash ../results/block-03/chay-lai.sh` (khởi động lại các service ở chế độ đo) |
+
+Các hook `POST /_reset` (Order, Inventory), `POST /_fault` (Inventory, `{"delayMs": n}`) và `POST /_shutdown` (Inventory, tắt tiến trình; dùng cho nút "Tắt Inventory" của UI demo) chỉ có khi `ENABLE_TEST_HOOKS=1`, tức khi chạy bằng `npm run start:measure`. `inventory-grpc-v1` không do `start-all.sh` chạy. Sau khi Inventory tắt rồi bật lại, kênh gRPC của Order có thể trả 503 ngay lập tức trong vài giây (backoff kết nối lại), còn REST thì không.
 
 ## Cấu hình thường dùng
 

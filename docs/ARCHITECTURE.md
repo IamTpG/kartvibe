@@ -152,6 +152,39 @@ flowchart LR
 
 Quyết định, hợp đồng và Plan: [docs/blocks/block-02/](blocks/block-02/); sơ đồ và ghi chú trình bày: [so-do-kien-truc.html](blocks/block-02/so-do-kien-truc.html).
 
+### Đặt hàng: Order và Inventory (REST ngoài, gRPC trong)
+
+`POST /orders` đi qua hai boundary: trình duyệt tới Order (REST/JSON, không đổi) và Order tới Inventory (REST làm baseline, hoặc gRPC). Quyết định và lý do: [ADR 0012](decisions/0012-rest-browser-grpc-noi-bo.md). Hợp đồng chi tiết, ánh xạ lỗi, log: [blocks/block-03/PLAN.md](blocks/block-03/PLAN.md).
+
+```mermaid
+flowchart LR
+    B["Trình duyệt<br/>web :4000<br/>order-compare.html"]
+    subgraph ORD["Order (cùng mã nguồn order/, ba cách chạy)"]
+        O1["order :4002<br/>gọi Inventory bằng REST"]
+        O2["order-grpc :4012<br/>gRPC, proto v2"]
+        O3["order-grpc-v1 :4022<br/>gRPC, proto v1 đóng băng<br/>(order-v1/)"]
+    end
+    I["inventory<br/>REST :4006, gRPC :4007<br/>một tiến trình"]
+    IV1["inventory-grpc-v1 :4008<br/>server cũ, chạy tay<br/>(inventory-v1/)"]
+    B -- "POST /orders (REST/JSON)" --> O1 & O2 & O3
+    O1 -- "REST POST /inventory/reservations" --> I
+    O2 -- "gRPC Reserve (v2)" --> I
+    O3 -- "gRPC Reserve (v1)" --> I
+    O2 -. "thử field vắng" .-> IV1
+    I --- DI[("kartvibe_inventory<br/>stock, reservations")]
+    O1 & O2 & O3 --- DO[("kartvibe_order<br/>purchase_orders")]
+```
+
+| Thành phần | Cổng | Ghi chú |
+|---|---|---|
+| `order` | 4002 | `INVENTORY_PROTOCOL=rest`; thêm `POST /orders`; `GET /orders` giữ nguyên |
+| `order-grpc` | 4012 | Cùng mã nguồn với `order`, `INVENTORY_PROTOCOL=grpc` |
+| `order-grpc-v1` | 4022 | Client cũ: mã ở `order-v1/`, sinh từ proto v1, **đóng băng** (`npm run verify-frozen`) |
+| `inventory` | 4006 REST, 4007 gRPC | Một tiến trình, database riêng `kartvibe_inventory`, giữ hàng bằng một câu lệnh có điều kiện |
+| `inventory-grpc-v1` | 4008 | Server cũ tối thiểu (mã ở `inventory-v1/`), không database, không đặt `available`; không do `start-all.sh` chạy |
+
+Hợp đồng gRPC là `services/proto/inventory/{v1,v2}` (v2 chỉ thêm `optional int32 available = 2`). Thiếu hàng là `FAILED_PRECONDITION` kèm metadata `x-error-code: OUT_OF_STOCK`, ánh xạ ra 409. Deadline mặc định 500 ms (504 khi quá hạn, 503 khi không kết nối được). Log của Order có hai dòng mỗi request (vào và ra), nối với log của Inventory bằng `requestId`.
+
 ### Quan hệ giữa hai dự án
 
 Chưa có liên kết: `services` không gọi `api` và ngược lại; dùng chung container Postgres (`kartvibe-postgres`, cổng 5434) nhưng database khác nhau (`kartvibe` cho `api`; `kartvibe_user`, `kartvibe_order`, `kartvibe_product` cho `services`). Về sau có thể dùng lại dự án nào hoặc thêm thư mục mới; khi cần liên kết sẽ có ADR riêng.
@@ -192,11 +225,13 @@ kartvibe/
     docs/                    tài liệu riêng của api
   services/                  các service và công cụ
     user/ order/ product/ bff/ graphql/   năm service, mỗi service một README
+    inventory/ order-v1/ inventory-v1/   Inventory (REST và gRPC), client cũ (Order build từ proto v1), server cũ
+    proto/inventory/{v1,v2}               hợp đồng gRPC dùng chung; mỗi service tự sinh code vào src/generated/
     start-all.sh stop-all.sh              chạy và dừng tất cả
     logs/                    log thô của các service (start-all.sh ghi stdout vào đây, không commit)
-    tools/                   công cụ kiểm tra và đo (xem tools/README.md)
-  web/                       trang dashboard, mobile và bộ chạy đo
-  results/                   bằng chứng và kết quả đo của services (evidence, verification, raw)
+    tools/                   công cụ kiểm tra và đo (xem tools/README.md); block3/ (kịch bản snapshot, lỗi, đo), compat/ (kiểm client cũ/mới)
+  web/                       trang dashboard, mobile, order-compare.html (so sánh Order REST và gRPC) và bộ chạy đo
+  results/                   bằng chứng và kết quả đo của services (evidence, verification, raw, block-03)
   docs/                      tài liệu gốc (xem docs/README.md); docs/blocks/block-NN: tài liệu theo block
 ```
 
@@ -216,7 +251,7 @@ Lộ trình môn học nhắc tới nhiều thành phần mà hệ thống chưa
 | Chủ đề trong lộ trình | Thành phần có thể cần |
 |---|---|
 | Tổng hợp dữ liệu cho dashboard | **Đã làm** trong `services/` và `web/` (BFF, GraphQL, trang web) |
-| REST cho browser, gRPC giữa các service | một service nội bộ thứ hai (ví dụ tồn kho) |
+| REST cho browser, gRPC giữa các service | **Đã làm** trong `services/`: Inventory và `POST /orders` của Order (xem mục "Đặt hàng" ở trên) |
 | Xử lý order bất đồng bộ, outbox (các block về broker) | message broker, `worker` |
 | Cache, stampede | Redis |
 | Timeout, retry khi dịch vụ ngoài lỗi | dịch vụ giả lập (shipping, payment) |

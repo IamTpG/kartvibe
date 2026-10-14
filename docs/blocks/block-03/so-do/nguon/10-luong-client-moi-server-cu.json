@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luồng: client mới (proto v2) gọi server cũ (proto v1)",
+    "output": "../10-luong-client-moi-server-cu.html",
+    "viewBox": [
+      900,
+      480
+    ],
+    "quality_profile": "showcase",
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Trình duyệt",
+      "sublabel": "hoặc curl"
+    },
+    {
+      "id": "order",
+      "type": "backend",
+      "label": "order-grpc :4012",
+      "sublabel": "client mới, proto v2"
+    },
+    {
+      "id": "inv",
+      "type": "backend",
+      "label": "inventory-grpc-v1 :4008",
+      "sublabel": "server cũ, proto v1, không DB"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "browser",
+      "to": "order",
+      "y": 190,
+      "label": "POST /orders {SKU-OK, 2}",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "order",
+      "to": "inv",
+      "y": 228,
+      "label": "Reserve(sku, quantity), x-client-version: v2",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m3",
+      "from": "inv",
+      "to": "order",
+      "y": 266,
+      "label": "reply v1: reservation_id (không có field 2)",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "order",
+      "to": "browser",
+      "y": 304,
+      "label": "201 {orderId, ..., CONFIRMED}; log: available = absent",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Field vắng",
+      "items": [
+        "Client mới thấy available là undefined",
+        "Order ghi \"absent\" vào log, không suy ra 0"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Vì sao optional",
+      "items": [
+        "Có presence nên 0 và vắng phân biệt được",
+        "Giữ phần hàng cuối cho available = 0 có mặt"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Chỉ ở dòng thành công",
+      "items": [
+        "Lời gọi lỗi không có reply nên không ghi available",
+        "compat.mjs chỉ kiểm dòng thành công"
+      ]
+    }
+  ]
+}

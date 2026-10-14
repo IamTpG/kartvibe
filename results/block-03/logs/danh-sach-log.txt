@@ -1,0 +1,11 @@
+# thu log của các service
+# lệnh: copy_logs
+# bắt đầu: 2026-10-14T22:54:00+07:00
+
+  order.log: 89 dòng
+  order-grpc.log: 98 dòng
+  order-grpc-v1.log: 38 dòng
+  inventory.log: 168 dòng
+  inventory-grpc-v1.log: 4 dòng
+
+# [exit 0] kết thúc: 2026-10-14T22:54:00+07:00

@@ -1,0 +1,40 @@
+# Inventory tắt: 503 trong thời gian hữu hạn
+# lệnh: down_step
+# bắt đầu: 2026-10-14T22:53:41+07:00
+
+======================================================================
+[stop-inventory] Yêu cầu tắt Inventory Service
+  - Đường dẫn file PID: <repo>/services/.run/inventory.pid
+======================================================================
+[stop-inventory] Tìm thấy PID: 216192
+[stop-inventory] Gửi tín hiệu dừng (SIGTERM) tới process group 216192 (PID 216192)...
+[stop-inventory] THÀNH CÔNG: Inventory đã tắt (cổng 4006 không còn trả lời) và đã xóa file PID.
+Lưu ý: Tiến trình sẽ KHÔNG tự khởi động lại. Bây giờ bạn có thể chạy 'npm run down' để kiểm thử kịch bản Inventory down.
+======================================================================
+[down] Bắt đầu kiểm tra kịch bản Inventory tắt tại: 2026-10-14T15:53:42.513Z
+  - Kiểm tra trạng thái Inventory tại: http://localhost:4006
+======================================================================
+[down] Xác nhận: Inventory đã tắt (không phản hồi /health). Bắt đầu gọi Order...
+
+[2026-10-14T15:53:42.553Z] Order REST (http://localhost:4002) khi Inventory tắt:
+  - Status: 503
+  - Body:   {"code":"INVENTORY_UNAVAILABLE","message":"Inventory unavailable"}
+  - Thời gian phản hồi: 16 ms (ngưỡng: < 2000 ms)
+  ✓ [PASS] Đạt 503 INVENTORY_UNAVAILABLE trong thời gian hữu hạn (16 ms)
+
+[2026-10-14T15:53:42.569Z] Order gRPC (http://localhost:4012) khi Inventory tắt:
+  - Status: 503
+  - Body:   {"code":"INVENTORY_UNAVAILABLE","message":"Inventory unavailable"}
+  - Thời gian phản hồi: 5 ms (ngưỡng: < 2000 ms)
+  ✓ [PASS] Đạt 503 INVENTORY_UNAVAILABLE trong thời gian hữu hạn (5 ms)
+
+======================================================================
+[down] KẾT QUẢ KỊCH BẢN DOWN: PASS
+======================================================================
+
+
+== khởi động lại Inventory và đo thời gian hồi phục của kênh gRPC
+cổng 4012 hồi phục: HTTP 409 sau 6 lần thử, 1.576232199 s
+cổng 4022 hồi phục: HTTP 409 sau 1 lần thử, .017890588 s
+
+# [exit 0] kết thúc: 2026-10-14T22:53:45+07:00

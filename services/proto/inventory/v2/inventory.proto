@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+// Giữ nguyên package và tên service của v1: tên lời gọi là
+// /kartvibe.inventory.Inventory/Reserve, đổi package thì client v1 không gọi được.
+package kartvibe.inventory;
+
+service Inventory {
+  rpc Reserve(ReserveRequest) returns (ReserveReply);
+}
+
+message ReserveRequest {
+  string sku = 1;
+  int32 quantity = 2;
+}
+
+message ReserveReply {
+  string reservation_id = 1;
+  // Thêm ở v2: số lượng còn lại sau khi giữ. Có presence (optional).
+  optional int32 available = 2;
+}

@@ -1,0 +1,12 @@
+[2026-10-14T15:53:45.775Z] compat.mjs label=client-moi_server-moi
+[2026-10-14T15:53:45.778Z] kỳ vọng: clientVersion=v2, available=number
+[2026-10-14T15:53:45.778Z] order-log=<repo>/services/logs/order-grpc.log
+[2026-10-14T15:53:45.778Z] inventory-log=<repo>/services/logs/inventory.log
+[2026-10-14T15:53:45.778Z] (a) POST http://localhost:4012/orders x-request-id=compat-client-moi_server-moi-287c82e8-aabb-48f7-ad7b-e8613e72e911 body={"sku":"SKU-OK","quantity":2}
+[2026-10-14T15:53:45.840Z]     response 201 {"orderId":1,"sku":"SKU-OK","quantity":2,"status":"CONFIRMED"}
+[2026-10-14T15:53:45.840Z] PASS (b) POST /orders trả 201: thực tế 201
+[2026-10-14T15:53:45.840Z]     inventory-log: {"ts":"2026-10-14T15:53:45.827Z","service":"inventory","requestId":"compat-client-moi_server-moi-287c82e8-aabb-48f7-ad7b-e8613e72e911","method":"gRPC","path":"/kartvibe.inventory.Inventory/Reserve","status":0,"ms":5,"protocol":"grpc","direction":"inbound","operation":"Reserve","clientVersion":"v2","grpcStatus":"OK","reservationId":"RSV-1"}
+[2026-10-14T15:53:45.840Z] PASS (c) log Inventory có requestId và clientVersion = v2: clientVersion="v2" (1 dòng khớp)
+[2026-10-14T15:53:45.841Z]     order-log: {"ts":"2026-10-14T15:53:45.829Z","service":"order","requestId":"compat-client-moi_server-moi-287c82e8-aabb-48f7-ad7b-e8613e72e911","method":"gRPC","path":"/kartvibe.inventory.Inventory/Reserve","status":0,"ms":8,"direction":"outbound","protocol":"grpc","operation":"Reserve","clientVersion":"v2","available":8,"grpcStatus":"OK","reservationId":"RSV-1"}
+[2026-10-14T15:53:45.841Z] PASS (d) log Order (outbound) có requestId và available = number: available: 8; protocol=grpc, grpcStatus=OK
+[2026-10-14T15:53:45.841Z] KẾT QUẢ PASS (3/3 điều kiện đạt) label=client-moi_server-moi

@@ -1,26 +1,32 @@
 # Block 3: REST và gRPC giữa các service
 
-> **Đây là ghi chú chuẩn bị, chưa phải bản chụp nộp bài.** Nội dung dựa trên phần tóm tắt trong kế hoạch môn học; yêu cầu chi tiết của giảng viên có thể khác.
+Đề bài: `../w03/BT_Block 3_ REST va gRPC.html` và `block-03-rest-grpc.pdf` (ngoài repo, cạnh thư mục repo). Bài chuyển giao tiếp nội bộ giữa
+Order API và Inventory Service từ REST sang gRPC, **giữ nguyên API mà browser dùng**, thêm một field vào schema, kiểm tra client cũ,
+rồi quan sát payload và developer experience.
+
+## Tài liệu của block
+
+| File | Nội dung |
+|---|---|
+| [`PLAN.md`](PLAN.md) | Quyết định đã chốt (D1 đến D15, kèm phương án đã không chọn), hợp đồng chung, phân việc, truy vết tiêu chí của đề |
+| [`REPORT.md`](REPORT.md) | Báo cáo: Problem, Solution, Demo, Evidence, Trade-off, giới hạn của phép đo |
+| [`so-do/`](so-do/) | Sơ đồ kiến trúc và chín luồng (HTML tự đứng một mình, vẽ bằng archify) |
+| [`giao-viec/`](giao-viec/) | Gói giao việc cho bốn thành viên (W1 đến W4), phần của team lead (W5) và script đóng gói |
+| [`../../decisions/0012-rest-browser-grpc-noi-bo.md`](../../decisions/0012-rest-browser-grpc-noi-bo.md) | ADR: REST cho browser, gRPC giữa Order và Inventory |
+| [`../../../results/block-03/`](../../../results/block-03/) | Bằng chứng; chạy lại bằng `results/block-03/chay-lai.sh` |
+
+## Mã tương ứng
+
+`services/inventory` (REST 4006, gRPC 4007), `services/order` (`order` 4002 và `order-grpc` 4012, cùng mã nguồn), `services/order-v1`
+(client cũ, 4022, đóng băng), `services/inventory-v1` (server cũ, 4008), `services/proto` (hợp đồng gRPC), `services/tools/block3`
+(kịch bản snapshot, lỗi, đo), `services/tools/compat` (kiểm client cũ/mới), `web/public/order-compare.html` (trang so sánh).
+Sơ đồ: [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md), mục "Đặt hàng". Cách chạy: [`../../../services/README.md`](../../../services/README.md).
 
 ## Trạng thái xác nhận
 
-| Điều chưa rõ | Đã xác nhận với giảng viên? |
-|---|---|
-| Inventory Service có sẵn hay nhóm tự dựng | chưa |
-| Order gọi Inventory những thao tác nào (kiểm tra tồn kho, giữ hàng...) | chưa |
-| Dùng thư viện/công cụ gRPC nào | chưa |
-| "Kiểm tra client cũ" làm bằng cách nào | chưa |
-
-## Kế hoạch ghi gì
-
-- **Chủ đề:** REST cho browser, gRPC giữa các service.
-- **Bài thực hành:** chuyển kết nối từ Order sang Inventory từ REST sang gRPC, giữ API cho browser. Thêm field, kiểm tra client cũ, so sánh payload và trải nghiệm phát triển.
-- **Bằng chứng:** demo cùng một luồng nghiệp vụ qua REST ở browser và gRPC nội bộ; giải thích ưu điểm và giới hạn.
-- **Kết luận kỹ thuật:** chọn giao thức theo nơi tích hợp và nhu cầu; API cho browser không cần dùng cùng giao thức với service nội bộ.
-
-## Kịch bản phỏng đoán (chưa xác nhận)
-
-Order Service cần biết tồn kho trước khi tạo đơn, nên gọi Inventory Service (ví dụ `CheckStock(sku)` hoặc `Reserve(sku, quantity)`). Hiện tại lời gọi này là REST/JSON; bài thực hành đổi nó sang gRPC trong khi browser vẫn gọi REST như cũ.
+Yêu cầu lấy từ đề bài thật (không còn là phỏng đoán). Các điểm đề để nhóm tự quyết đã được chốt trong `PLAN.md`: cách biểu diễn thiếu hàng ở gRPC
+(`FAILED_PRECONDITION` kèm `x-error-code`), field thêm vào (`optional int32 available = 2`), cách chứng minh client cũ (Order build từ proto v1, đóng băng
+bằng hash), đại lượng đo payload (message đã serialize), công cụ gRPC (`grpc-tools`, `ts-proto`, `@grpc/grpc-js`, phiên bản ghim).
 
 ## Khái niệm
 
@@ -79,15 +85,3 @@ Không nên kết luận về hiệu năng từ một lần chạy hay từ dữ
 3. Cấm tái sử dụng số hoặc tên của field đã xóa, để dữ liệu cũ không bị hiểu thành field khác.
 4. Lợi thế: hợp đồng chặt và sinh code, payload nhỏ/nhanh hơn, có streaming. Giới hạn: không gọi trực tiếp từ browser, khó đọc và debug hơn, cần công cụ riêng.
 </details>
-
-## Checklist khi duyệt kết quả của agent
-- [ ] Hợp đồng `.proto` nằm ở một chỗ, và cả hai phía sinh code từ cùng file đó?
-- [ ] Đã thử client cũ gọi server mới (và ngược lại) sau khi thêm field?
-- [ ] Browser vẫn gọi REST như cũ, chỉ lời gọi nội bộ đổi sang gRPC?
-- [ ] Có số liệu so sánh payload và nêu rõ điều kiện đo?
-- [ ] Giải thích được giới hạn của gRPC trong bài toán này?
-
-## Chuẩn bị trước (không phụ thuộc yêu cầu thật)
-- [ ] Đọc khái niệm trên và tự trả lời 4 câu hỏi.
-- [ ] Viết thử một file `.proto` nhỏ và sinh code (không gắn vào dự án).
-- [ ] Làm thử một lần "thêm field" và quan sát hành vi của client cũ.

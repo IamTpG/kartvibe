@@ -1,0 +1,10 @@
+# đồng thời: một thành công khi giữ phần hàng cuối
+# lệnh: conc_step
+# bắt đầu: 2026-10-14T22:53:50+07:00
+
+10 request song song vào SKU-LOW (tồn 1) trên từng cổng; kỳ vọng đúng 1 thành công (201) và 9 hết hàng (409)
+cổng 4002:       1 201       9 409 
+cổng 4012:       1 201       9 409 
+cổng 4022:       1 201       9 409 
+
+# [exit 0] kết thúc: 2026-10-14T22:53:50+07:00

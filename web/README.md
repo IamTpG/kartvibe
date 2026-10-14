@@ -1,15 +1,18 @@
-# Web (`web`): dashboard và mobile
+# Web (`web`): dashboard, mobile và so sánh Order
 
 ## Cấu trúc
 
 ```
 web/
-  server.mjs                 server tĩnh: chỉ phục vụ các tệp trong public/ (quét lúc khởi động)
+  server.mjs                 server tĩnh: chỉ phục vụ các tệp trong public/ (quét lúc khởi động); thêm /_logs khi ENABLE_TEST_HOOKS=1
+  logs.mjs                   tra log của service theo requestId (cho /_logs; test ở test/logs.test.mjs)
   public/
-    dashboard.html mobile.html
+    dashboard.html mobile.html order-compare.html
     css/style.css
     js/app.js                tải dữ liệu ba chế độ và vẽ
     js/demo.js               bảng số liệu phía service, lịch sử so sánh, nút lỗi Product
+    js/order-compare.js      trang order-compare: gửi cùng một POST /orders tới các bản Order, điều khiển Inventory
+    js/order-compare-logic.js chuẩn hóa, so sánh phản hồi và tóm tắt dòng log (hàm thuần; test ở test/order-compare-logic.test.mjs)
     measure/measure-client.js  bộ đo dùng chung cho trình duyệt và Node (tools/ import tệp này)
     measure/runner.js        bảng chạy đo trong trang
 ```
@@ -23,6 +26,7 @@ Web là một server tĩnh nhỏ, chạy riêng khỏi các service (không do `
 ```sh
 node --check web/public/js/app.js
 node --check web/server.mjs
+node --check web/logs.mjs
 cd web
 npm start
 ```
@@ -57,3 +61,12 @@ Mỗi trang có ba chế độ: baseline REST, BFF, GraphQL. Baseline gọi tu�
 Nút **Tải dữ liệu** đếm request nghiệp vụ và số byte thân phản hồi ở browser. Mốc `performance.mark('screen-complete')` được đặt sau khi DOM đã render tất cả đơn/product. Bản mobile chỉ in chuỗi URL thumbnail, không tải ảnh. Bộ đo có thể gọi `window.Dashboard.loadDashboard()` và nhận `{data, clientRequests, payloadBytes, completeMs, partial}`. Hỗ trợ `?mode=bff&userId=1&auto=1`.
 
 Các URL service dùng hostname của trang và cổng 4001–4005 theo hợp đồng. Để đo, đặt tab ở foreground, tắt cache trong DevTools, reset metrics của từng service trước mỗi lượt và không tính việc tải file tĩnh.
+
+## Trang `order-compare.html`
+
+Gửi **cùng một** `POST /orders` tới các bản Order (REST `4002`, gRPC `4012`, gRPC cũ `4022` nếu đang chạy), tuần tự, rồi hiện status, body và thời gian đo ở trình duyệt (chỉ để tham khảo). Kết luận **GIỐNG NHAU** hoặc **KHÁC** sau khi thay `orderId`; cột bắt buộc không trả lời thì tính là KHÁC. Mở http://localhost:4000/order-compare.html (sau `npm start`).
+
+- Trang gọi **Order** (có CORS) và ba hook của **Inventory** (`POST :4006/_reset` nạp lại tồn kho, `POST :4006/_fault` làm chậm, `POST :4006/_shutdown` tắt cả REST và gRPC; nút **Tắt Inventory** hỏi xác nhận và trang không bật lại được, phải chạy lại `LATENCY_MS=0 npm run start:measure` trong `services/`), nên cần `ENABLE_TEST_HOOKS=1` (`npm run start:measure` trong `services/`). Các bản Order dùng chung tồn kho: bấm "Nạp lại tồn kho" trước mỗi lần thử.
+- Phản hồi ở trên **không chứng minh** giao thức bên trong là gRPC; chỉ log chứng minh được. Vì vậy mỗi cột có khung **Bên trong (từ log)**: trang gọi `GET /_logs?requestId=…` của `web/server.mjs` (đọc các `services/logs/*.log` theo `requestId`, `LOG_DIR` đổi được thư mục) và hiện các dòng của Order và Inventory (`protocol`, `grpcStatus` hoặc status, `errorCode`, `clientVersion`, `available`). Endpoint này **chỉ bật khi chạy `ENABLE_TEST_HOOKS=1 npm start`** (không có thì trả 404 và trang báo cách bật). Dòng log Inventory của request quá hạn tới muộn hơn: bấm **Làm mới log**. Khung này không thay bằng chứng ở `results/block-03/`.
+- Test của tra log: `node --test web/test/logs.test.mjs`.
+- Test của hàm so sánh: `node --test web/test/order-compare-logic.test.mjs` (Node báo cảnh báo `MODULE_TYPELESS_PACKAGE_JSON`, vô hại; đừng thêm `"type": "module"` vào `web/package.json` vì `measure-client.js` dùng chung với Node dưới dạng CommonJS).

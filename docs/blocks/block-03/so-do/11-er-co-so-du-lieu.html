@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sơ đồ ER: stock, reservations và purchase_orders</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f6f7fb; --panel: #ffffff; --text: #1f2430; --muted: #5d6578; --border: #d6dae6;
+    --db-head: #ff3300; --db-head-text: #ffffff; --db-row: #fff1ed; --db-row-alt: #ffe0d6; --db-line: #ff9a80;
+    --boundary: #94a0bd; --link: #0a0a0a; --pk: #1c8a5b; --warn: #c2410c;
+  }
+  :root[data-theme="light"] { color-scheme: light; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1320; --panel: #171c2e; --text: #e6e9f2; --muted: #9aa3ba; --border: #2b3350;
+      --db-head: #ff3300; --db-head-text: #ffffff; --db-row: #2b1c18; --db-row-alt: #231612; --db-line: #8a3a24;
+      --boundary: #5a6486; --link: #f2f2f2; --pk: #4ade80; --warn: #fb923c;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0f1320; --panel: #171c2e; --text: #e6e9f2; --muted: #9aa3ba; --border: #2b3350;
+    --db-head: #ff3300; --db-head-text: #ffffff; --db-row: #2b1c18; --db-row-alt: #231612; --db-line: #8a3a24;
+    --boundary: #5a6486; --link: #f2f2f2; --pk: #4ade80; --warn: #fb923c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, "Segoe UI", Roboto, "Noto Sans", "DejaVu Sans", Arial, sans-serif; }
+  .mono, .t-name, .t-col, .t-type, .t-pk, .t-cons { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, "DejaVu Sans Mono", monospace; }
+  .shell { max-width: 2400px; margin: 0 auto; padding: 14px 16px 16px; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  h1 { font-size: 21px; margin: 0; line-height: 1.3; }
+  #theme-toggle { flex: none; font: inherit; font-size: 13px; color: var(--text); background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 7px 14px; cursor: pointer; }
+  #theme-toggle:hover { border-color: var(--db-head); }
+  #theme-toggle:focus-visible { outline: 2px solid var(--db-head); outline-offset: 2px; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 8px; }
+  svg { display: block; width: 100%; height: auto; max-height: calc(100vh - 110px); }
+  .t-name { font-size: 15px; font-weight: 700; fill: var(--db-head-text); }
+  .t-col { font-size: 13px; fill: var(--text); }
+  .t-type { font-size: 12px; fill: var(--muted); }
+  .t-pk { font-size: 11px; font-weight: 700; fill: var(--pk); }
+  .t-cons { font-size: 11px; fill: var(--muted); }
+  .b-label { font-size: 13px; font-weight: 700; fill: var(--muted); }
+  .b-db { font-size: 22px; font-weight: 700; fill: var(--muted); }
+  .b-sub { font-size: 11px; fill: var(--muted); }
+  .b-leg { font-size: 18px; font-weight: 700; fill: var(--muted); }
+  .l-leg { font-size: 14px; fill: var(--muted); }
+  .l-leg-pk { font-size: 14px; }
+  .l-label { font-size: 12px; fill: var(--link); font-weight: 600; }
+  .l-note { font-size: 11px; fill: var(--muted); }
+  .l-card { font-size: 12px; font-weight: 700; fill: var(--link); }
+</style>
+<script>
+  // Mặc định giao diện sáng (không theo hệ thống); lựa chọn đã lưu của nút sáng/tối được ưu tiên.
+  document.documentElement.setAttribute('data-theme', 'light');
+  try {
+    var saved = localStorage.getItem('er-theme');
+    if (saved === 'light' || saved === 'dark') document.documentElement.setAttribute('data-theme', saved);
+  } catch (e) { /* không có localStorage: giữ giao diện sáng */ }
+</script>
+</head>
+<body>
+<main class="shell">
+  <div class="topbar">
+    <h1>Sơ đồ ER: ba bảng của đặt hàng (stock, reservations, purchase_orders)</h1>
+    <button id="theme-toggle" type="button" aria-label="Đổi giao diện sáng hoặc tối"></button>
+  </div>
+  <div class="panel">
+    <svg viewBox="0 0 1100 540" role="img" aria-label="Sơ đồ quan hệ thực thể của ba bảng stock, reservations và purchase_orders trong hai database">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="var(--link)"/>
+        </marker>
+      </defs>
+
+      <!-- Ranh giới database -->
+      <rect x="16" y="14" width="676" height="506" rx="14" fill="none" stroke="var(--boundary)" stroke-width="1.5" stroke-dasharray="6 5"/>
+      <text class="b-db" x="34" y="44">database kartvibe_inventory</text>
+      <text class="b-sub" x="34" y="64">service inventory (REST :4006, gRPC :4007)</text>
+      <rect x="712" y="14" width="372" height="506" rx="14" fill="none" stroke="var(--boundary)" stroke-width="1.5" stroke-dasharray="6 5"/>
+      <text class="b-db" x="730" y="44">database kartvibe_order</text>
+      <text class="b-sub" x="730" y="64">service order (ba bản dùng chung)</text>
+
+      <!-- stock -->
+      <g transform="translate(40,100)">
+        <rect width="270" height="106" rx="8" fill="var(--db-row)" stroke="var(--db-line)"/>
+        <path d="M0 8a8 8 0 0 1 8-8h254a8 8 0 0 1 8 8v26H0z" fill="var(--db-head)"/>
+        <text class="t-name" x="14" y="23">stock</text>
+        <rect y="34" width="270" height="36" fill="var(--db-row-alt)"/>
+        <text class="t-pk" x="12" y="57">PK</text>
+        <text class="t-col" x="40" y="57">sku</text><text class="t-type" x="116" y="57">text</text>
+        <text class="t-col" x="40" y="93">available</text><text class="t-type" x="116" y="93">int</text><text class="t-cons" x="144" y="93">NOT NULL, CHECK ≥ 0</text>
+      </g>
+
+      <!-- reservations -->
+      <g transform="translate(346,100)">
+        <rect width="320" height="176" rx="8" fill="var(--db-row)" stroke="var(--db-line)"/>
+        <path d="M0 8a8 8 0 0 1 8-8h304a8 8 0 0 1 8 8v26H0z" fill="var(--db-head)"/>
+        <text class="t-name" x="14" y="23">reservations</text>
+        <rect y="34" width="320" height="36" fill="var(--db-row-alt)"/>
+        <text class="t-pk" x="12" y="57">PK</text>
+        <text class="t-col" x="40" y="57">id</text><text class="t-type" x="132" y="57">serial</text>
+        <text class="t-col" x="40" y="93">sku</text><text class="t-type" x="132" y="93">text</text><text class="t-cons" x="226" y="93">NOT NULL</text>
+        <rect y="106" width="320" height="36" fill="var(--db-row-alt)"/>
+        <text class="t-col" x="40" y="129">quantity</text><text class="t-type" x="132" y="129">int</text><text class="t-cons" x="226" y="129">NOT NULL</text>
+        <text class="t-col" x="40" y="165">created_at</text><text class="t-type" x="132" y="165">timestamptz</text><text class="t-cons" x="226" y="165">DEFAULT now()</text>
+      </g>
+
+      <!-- purchase_orders -->
+      <g transform="translate(724,100)">
+        <rect width="352" height="248" rx="8" fill="var(--db-row)" stroke="var(--db-line)"/>
+        <path d="M0 8a8 8 0 0 1 8-8h336a8 8 0 0 1 8 8v26H0z" fill="var(--db-head)"/>
+        <text class="t-name" x="14" y="23">purchase_orders</text>
+        <rect y="34" width="352" height="36" fill="var(--db-row-alt)"/>
+        <text class="t-pk" x="12" y="57">PK</text>
+        <text class="t-col" x="40" y="57">id</text><text class="t-type" x="176" y="57">serial</text>
+        <text class="t-col" x="40" y="93">sku</text><text class="t-type" x="176" y="93">text</text><text class="t-cons" x="260" y="93">NOT NULL</text>
+        <rect y="106" width="352" height="36" fill="var(--db-row-alt)"/>
+        <text class="t-col" x="40" y="129">quantity</text><text class="t-type" x="176" y="129">int</text><text class="t-cons" x="260" y="129">NOT NULL</text>
+        <text class="t-col" x="40" y="165">reservation_id</text><text class="t-type" x="176" y="165">text</text><text class="t-cons" x="260" y="165">NOT NULL</text>
+        <rect y="178" width="352" height="36" fill="var(--db-row-alt)"/>
+        <text class="t-col" x="40" y="201">status</text><text class="t-type" x="176" y="201">text</text><text class="t-cons" x="260" y="201">NOT NULL</text>
+        <text class="t-col" x="40" y="237">created_at</text><text class="t-type" x="176" y="237">timestamptz</text><text class="t-cons" x="260" y="237">DEFAULT now()</text>
+      </g>
+
+      <!-- Quan hệ 1: reservations.sku -> stock.sku (cùng database, không có khóa ngoại) -->
+      <path d="M346 193 H328 V153 H314" fill="none" stroke="var(--link)" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arr)"/>
+      <text class="l-card" x="343" y="183" text-anchor="end">N</text>
+      <text class="l-card" x="324" y="146" text-anchor="end">1</text>
+      <text class="l-label" x="52" y="262">reservations.sku → stock.sku</text>
+      <text class="l-note" x="52" y="278">tham chiếu logic: không có khóa ngoại;</text>
+      <text class="l-note" x="52" y="293">mã bảo đảm (UPDATE trước INSERT, cùng transaction)</text>
+
+      <!-- Quan hệ 2: purchase_orders.reservation_id -> reservations.id (khác database) -->
+      <path d="M724 265 H702 V157 H672" fill="none" stroke="var(--link)" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arr)"/>
+      <text class="l-card" x="722" y="286" text-anchor="end">0..1</text>
+      <text class="l-card" x="688" y="150" text-anchor="middle">1</text>
+      <text class="l-label" x="52" y="352">purchase_orders.reservation_id → reservations.id</text>
+      <text class="l-note" x="52" y="368">tham chiếu logic qua chuỗi 'RSV-' + id (ví dụ RSV-1); khác database</text>
+      <text class="l-note" x="52" y="383">nên không thể có khóa ngoại</text>
+
+      <!-- Chú giải -->
+      <g transform="translate(40,408)">
+        <rect width="636" height="102" rx="10" fill="none" stroke="var(--border)"/>
+        <text class="b-leg" x="16" y="27">Chú giải</text>
+        <path d="M16 52 H72" stroke="var(--link)" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arr)"/>
+        <text class="l-leg" x="90" y="57">tham chiếu logic (giá trị khớp nhau, database không ép buộc)</text>
+        <text class="t-pk l-leg-pk" x="16" y="86">PK</text>
+        <text class="l-leg" x="48" y="86">khóa chính;  N, 1, 0..1: số lượng ở mỗi đầu;  hệ thống không có khóa ngoại nào</text>
+      </g>
+      <text class="l-note" x="730" y="388">Ghi chú: sku của purchase_orders cũng tham</text>
+      <text class="l-note" x="730" y="403">chiếu logic tới stock.sku (không vẽ, để đỡ rối).</text>
+      <text class="l-note" x="730" y="428">Hai bảng orders và order_items của bài trước</text>
+      <text class="l-note" x="730" y="443">cũng nằm trong kartvibe_order nhưng không liên</text>
+      <text class="l-note" x="730" y="458">quan tới bài này.</text>
+    </svg>
+  </div>
+
+</main>
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('theme-toggle');
+    var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    function current() {
+      return root.getAttribute('data-theme') || (media && media.matches ? 'dark' : 'light');
+    }
+    function render() {
+      var dark = current() === 'dark';
+      btn.textContent = dark ? 'Chế độ sáng' : 'Chế độ tối';
+      btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    }
+    btn.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('er-theme', next); } catch (e) { /* không lưu được: chỉ áp cho lần xem này */ }
+      render();
+    });
+    if (media && media.addEventListener) media.addEventListener('change', render);
+    render();
+  })();
+</script>
+</body>
+</html>

@@ -40,6 +40,19 @@ Thuật ngữ dùng trong tài liệu và mã. Cột "Trong mã" cho biết tên
 | Row lock | Khóa dòng bằng `SELECT ... FOR UPDATE` để các thao tác trên cùng một giỏ chạy tuần tự. Xem [ADR 0008](decisions/0008-row-lock-cart.md) |
 | Race condition | Hai thao tác đồng thời cho kết quả sai do xen kẽ |
 
+## Giao tiếp giữa service (REST và gRPC)
+
+| Thuật ngữ | Ý nghĩa |
+|---|---|
+| gRPC | Gọi hàm từ xa chạy trên HTTP/2, dùng Protobuf; trình duyệt không gọi trực tiếp được. Xem [ADR 0012](decisions/0012-rest-browser-grpc-noi-bo.md) |
+| Protobuf (`.proto`) | Ngôn ngữ mô tả message và service, cùng định dạng nhị phân; từ file `.proto` sinh code cho cả hai phía |
+| Field number (tag) | Số định danh field trên dây; tên field không nằm trong payload. Đổi số hoặc kiểu field là thay đổi phá vỡ |
+| Presence | Biết một field đã được đặt hay chưa; `optional` cho presence, nên `0` và vắng phân biệt được |
+| Deadline | Thời điểm tối đa client chờ một lời gọi gRPC; quá hạn thì client nhận `DEADLINE_EXCEEDED` |
+| Trailing metadata | Cặp key-value đi kèm kết quả lời gọi gRPC (ở đây `x-error-code`) |
+| Wire-compatible / business-compatible | Giải mã được với nhau (wire) khác với hiểu giống nhau (nghiệp vụ); Protobuf chỉ bảo đảm vế đầu |
+| Client cũ | Client build từ proto trước khi thêm field và không build lại; vẫn phải chạy với server mới |
+
 ## Quy trình tài liệu
 
 | Thuật ngữ | Ý nghĩa |

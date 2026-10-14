@@ -12,7 +12,7 @@ import openapiTS, { astToString } from 'openapi-typescript';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const check = process.argv.includes('--check');
-const providers = ['user', 'order', 'product', 'bff', 'graphql'];
+const providers = ['user', 'order', 'product', 'bff', 'graphql', 'inventory'];
 const consumers = { bff: ['user', 'order', 'product'], graphql: ['user', 'order', 'product'] };
 const BANNER = (provider) => `// KHÔNG SỬA TAY. Sinh từ ${provider}/openapi.json bằng \`npm run contracts\` (services/).\n// Kiểu của hợp đồng mà ${provider} công bố; bên tiêu thụ không import mã của ${provider}.\n\n`;
 
