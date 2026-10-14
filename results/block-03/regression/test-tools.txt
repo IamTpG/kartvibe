@@ -1,0 +1,29 @@
+# test:tools
+# lệnh: bash -c cd '<repo>/services' && npm run test:tools
+# bắt đầu: 2026-10-14T22:53:54+07:00
+
+
+> kartvibe-services@1.0.0 test:tools
+> node --test tools/tests/measure.test.mjs tools/tests/contracts.test.mjs
+
+✔ hợp đồng chấp nhận dữ liệu đúng (83.727936ms)
+✔ hợp đồng chấp nhận product null khi lỗi một phần (0.585556ms)
+✔ hợp đồng bắt service giả thiếu trường (ví dụ product không có sku/description) (0.498134ms)
+✔ hợp đồng bắt trường thừa và sai kiểu (7.76987ms)
+✔ mobile chỉ được có trường mobile (không có price, createdAt, user) (13.47818ms)
+✔ route hoặc schema không khai báo thì báo lỗi rõ (0.755433ms)
+✔ collector persists validated records and summary detects incomplete or mislabeled matrix (70.246067ms)
+✔ default loader uses sequential per-item baseline and exact GraphQL mobile query (1.571536ms)
+✔ contract comparison checks actual mobile keys, values, order and GraphQL errors (2.854608ms)
+✔ apiFetch counts UTF-8 body bytes and business calls only (2.437916ms)
+✔ series waits for render, excludes metrics time and preserves cold/warm records (4.18926ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 242.733062
+
+# [exit 0] kết thúc: 2026-10-14T22:53:54+07:00

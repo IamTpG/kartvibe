@@ -1,0 +1,35 @@
+# snapshot status và body, REST (4002) so gRPC (4012) so gRPC cũ (4022)
+# lệnh: snap_step
+# bắt đầu: 2026-10-14T22:53:32+07:00
+
+======================================================================
+[scenarios] Bắt đầu chạy bộ kịch bản và lưu snapshot tại: 2026-10-14T15:53:32.210Z
+  - ORDER_REST_URL: http://localhost:4002
+  - ORDER_GRPC_URL: http://localhost:4012
+  - INVENTORY_URL:  http://localhost:4006
+  - ORDER_OLD_URL:  http://localhost:4022 -> Đang chạy (sẽ kiểm tra snapshot thứ 3)
+======================================================================
+
+----------------------------------------------------------------------
+[2026-10-14T15:53:32.254Z] Kịch bản: "ok" (Đủ hàng {sku:"SKU-OK", quantity:2} -> 201)
+  ✓ [PASS] REST vs gRPC đối chiếu khớp hoàn toàn (Status 201)
+  ✓ [PASS] REST vs grpc-v1 đối chiếu khớp
+----------------------------------------------------------------------
+[2026-10-14T15:53:32.432Z] Kịch bản: "out-of-stock" (Thiếu hàng {sku:"SKU-ZERO", quantity:1} -> 409 OUT_OF_STOCK)
+  ✓ [PASS] REST vs gRPC đối chiếu khớp hoàn toàn (Status 409)
+  ✓ [PASS] REST vs grpc-v1 đối chiếu khớp
+----------------------------------------------------------------------
+[2026-10-14T15:53:32.491Z] Kịch bản: "invalid-quantity" (Số lượng không hợp lệ {sku:"SKU-OK", quantity:0} -> 400 VALIDATION_ERROR)
+  ✓ [PASS] REST vs gRPC đối chiếu khớp hoàn toàn (Status 400)
+  ✓ [PASS] REST vs grpc-v1 đối chiếu khớp
+----------------------------------------------------------------------
+[2026-10-14T15:53:32.529Z] Kịch bản: "invalid-body" (Body không phải JSON -> 400)
+  ✓ [PASS] REST vs gRPC đối chiếu khớp hoàn toàn (Status 400)
+  ✓ [PASS] REST vs grpc-v1 đối chiếu khớp
+
+======================================================================
+[scenarios] KẾT QUẢ: TẤT CẢ KỊCH BẢN ĐÃ PASS! Snapshots được lưu tại: <repo>/services/tools/block3/snapshots
+======================================================================
+
+
+# [exit 0] kết thúc: 2026-10-14T22:53:32+07:00

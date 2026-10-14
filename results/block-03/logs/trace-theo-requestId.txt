@@ -1,0 +1,24 @@
+# log lời gọi nội bộ: REST (trước) và gRPC (sau), cùng requestId
+# lệnh: trace_step
+# bắt đầu: 2026-10-14T22:53:32+07:00
+
+{"orderId":1,"sku":"SKU-OK","quantity":2,"status":"CONFIRMED"} HTTP 201
+{"orderId":2,"sku":"SKU-OK","quantity":2,"status":"CONFIRMED"} HTTP 201
+{"orderId":3,"sku":"SKU-OK","quantity":2,"status":"CONFIRMED"} HTTP 201
+
+== requestId evidence-rest (mỗi dòng: service, direction, protocol, status, clientVersion, available)
+[order.log] {"service": "order", "direction": "outbound", "protocol": "rest", "method": "POST", "path": "/inventory/reservations", "status": 201, "clientVersion": "v2", "reservationId": "RSV-1"}
+[order.log] {"service": "order", "direction": "inbound", "method": "POST", "path": "/orders", "status": 201}
+[inventory.log] {"service": "inventory", "direction": "inbound", "protocol": "rest", "method": "POST", "path": "/inventory/reservations", "status": 201, "clientVersion": "v2", "reservationId": "RSV-1"}
+
+== requestId evidence-grpc (mỗi dòng: service, direction, protocol, status, clientVersion, available)
+[order-grpc.log] {"service": "order", "direction": "outbound", "protocol": "grpc", "method": "gRPC", "path": "/kartvibe.inventory.Inventory/Reserve", "status": 0, "grpcStatus": "OK", "clientVersion": "v2", "available": 6, "reservationId": "RSV-2"}
+[order-grpc.log] {"service": "order", "direction": "inbound", "method": "POST", "path": "/orders", "status": 201}
+[inventory.log] {"service": "inventory", "direction": "inbound", "protocol": "grpc", "method": "gRPC", "path": "/kartvibe.inventory.Inventory/Reserve", "status": 0, "grpcStatus": "OK", "clientVersion": "v2", "reservationId": "RSV-2"}
+
+== requestId evidence-grpc-v1 (mỗi dòng: service, direction, protocol, status, clientVersion, available)
+[order-grpc-v1.log] {"service": "order", "direction": "outbound", "protocol": "grpc", "method": "gRPC", "path": "/kartvibe.inventory.Inventory/Reserve", "status": 0, "grpcStatus": "OK", "clientVersion": "v1", "reservationId": "RSV-3"}
+[order-grpc-v1.log] {"service": "order", "direction": "inbound", "method": "POST", "path": "/orders", "status": 201}
+[inventory.log] {"service": "inventory", "direction": "inbound", "protocol": "grpc", "method": "gRPC", "path": "/kartvibe.inventory.Inventory/Reserve", "status": 0, "grpcStatus": "OK", "clientVersion": "v1", "reservationId": "RSV-3"}
+
+# [exit 0] kết thúc: 2026-10-14T22:53:33+07:00

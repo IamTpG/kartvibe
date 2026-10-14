@@ -1,0 +1,3 @@
+# Kết quả sinh ra khi chạy các kịch bản; bằng chứng nộp được thu vào results/block-03/ bởi results/block-03/chay-lai.sh.
+out/
+snapshots/

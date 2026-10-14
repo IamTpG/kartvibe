@@ -17,3 +17,4 @@ Trạng thái: đề xuất · chấp nhận · bị thay thế bởi NNNN
 | [0009](0009-log-stdout-moc-do-sau-co.md) | Log ra stdout, gom ngoài mã sản phẩm; móc đo và test sau cờ môi trường | chấp nhận |
 | [0010](0010-mot-repo-hai-du-an-doc-lap.md) | Một repo, hai dự án độc lập (`api` và `services` + `web`) | chấp nhận |
 | [0011](0011-hop-dong-openapi-do-service-so-huu.md) | Hợp đồng do từng service sở hữu: Zod → OpenAPI 3.1, bên tiêu thụ sinh kiểu từ spec | chấp nhận |
+| [0012](0012-rest-browser-grpc-noi-bo.md) | REST/JSON cho browser, gRPC giữa Order và Inventory | chấp nhận |

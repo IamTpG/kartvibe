@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luồng: Inventory tắt, Order trả 503 trong thời gian hữu hạn",
+    "output": "../07-luong-inventory-tat.html",
+    "viewBox": [
+      1080,
+      622
+    ],
+    "quality_profile": "showcase",
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Trình duyệt",
+      "sublabel": "hoặc curl"
+    },
+    {
+      "id": "order",
+      "type": "backend",
+      "label": "order :4002",
+      "sublabel": "gọi Inventory bằng REST"
+    },
+    {
+      "id": "ordergrpc",
+      "type": "backend",
+      "label": "order-grpc :4012",
+      "sublabel": "gọi Inventory bằng gRPC"
+    },
+    {
+      "id": "inv",
+      "type": "backend",
+      "label": "inventory",
+      "sublabel": "đã tắt"
+    }
+  ],
+  "segments": [
+    {
+      "from": 174,
+      "to": 342,
+      "label": "Bản Order gọi bằng REST"
+    },
+    {
+      "from": 370,
+      "to": 538,
+      "label": "Bản Order gọi bằng gRPC"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "browser",
+      "to": "order",
+      "y": 204,
+      "label": "POST /orders",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "order",
+      "to": "inv",
+      "y": 242,
+      "label": "POST /inventory/reservations",
+      "variant": "default"
+    },
+    {
+      "id": "m3",
+      "from": "inv",
+      "to": "order",
+      "y": 280,
+      "label": "không kết nối được (ECONNREFUSED)",
+      "variant": "dashed"
+    },
+    {
+      "id": "m4",
+      "from": "order",
+      "to": "browser",
+      "y": 318,
+      "label": "503 INVENTORY_UNAVAILABLE (khoảng 46 ms)",
+      "variant": "return"
+    },
+    {
+      "id": "m5",
+      "from": "browser",
+      "to": "ordergrpc",
+      "y": 400,
+      "label": "POST /orders",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m6",
+      "from": "ordergrpc",
+      "to": "inv",
+      "y": 438,
+      "label": "Reserve",
+      "variant": "default"
+    },
+    {
+      "id": "m7",
+      "from": "inv",
+      "to": "ordergrpc",
+      "y": 476,
+      "label": "UNAVAILABLE",
+      "variant": "dashed"
+    },
+    {
+      "id": "m8",
+      "from": "ordergrpc",
+      "to": "browser",
+      "y": 514,
+      "label": "503 INVENTORY_UNAVAILABLE (khoảng 30 ms)",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Không để request treo",
+      "items": [
+        "Cả hai giao thức trả 503 trong khoảng chục đến vài chục ms",
+        "Cùng status và body theo hợp đồng ngoài"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Ánh xạ lỗi",
+      "items": [
+        "gRPC UNAVAILABLE hoặc REST ECONNREFUSED",
+        "đều thành 503 INVENTORY_UNAVAILABLE"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Cách dừng khi demo",
+      "items": [
+        "bash services/tools/block3/stop-inventory.sh services/.run/inventory.pid",
+        "Script dừng cả process group và kiểm cổng 4006 đã đóng"
+      ]
+    }
+  ]
+}

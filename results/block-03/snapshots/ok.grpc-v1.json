@@ -1,0 +1,17 @@
+{
+  "scenario": "ok",
+  "mode": "grpc-v1",
+  "timestamp": "2026-10-14T15:53:32.254Z",
+  "status": 201,
+  "headers": {
+    "access-control-allow-origin": "*",
+    "content-type": "application/json; charset=utf-8",
+    "x-powered-by": "Express"
+  },
+  "body": {
+    "orderId": "<ID>",
+    "sku": "SKU-OK",
+    "quantity": 2,
+    "status": "CONFIRMED"
+  }
+}

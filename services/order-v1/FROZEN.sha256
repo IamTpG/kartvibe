@@ -1,0 +1,5 @@
+789b940230472113804db02829f4c198348aed497c044a76b31ff059d122918b  proto/inventory/v1/inventory.proto
+38839a85733ed617a2c1afce49118e1190a3c917a9e333561248ac7a5c752421  src/generated/inventory.ts
+0fd8ac62ac5eda433ebabb419ae36085372d8bca19faa85228afd40275f89944  src/inventory/grpc-client.ts
+6576aa36043d0cd397ae650a12828b5a5b8e243e20bd6a64f06c2c161a977d18  src/index.ts
+1.14.6  @grpc/grpc-js

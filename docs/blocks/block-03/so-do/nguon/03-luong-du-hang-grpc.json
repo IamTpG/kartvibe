@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luồng: đặt hàng đủ hàng, Order gọi Inventory bằng gRPC",
+    "output": "../03-luong-du-hang-grpc.html",
+    "viewBox": [
+      1080,
+      602
+    ],
+    "quality_profile": "showcase",
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Trình duyệt",
+      "sublabel": "hoặc curl"
+    },
+    {
+      "id": "order",
+      "type": "backend",
+      "label": "order-grpc :4012",
+      "sublabel": "gọi Inventory bằng gRPC"
+    },
+    {
+      "id": "inv",
+      "type": "backend",
+      "label": "inventory gRPC :4007",
+      "sublabel": "proto v2"
+    },
+    {
+      "id": "invdb",
+      "type": "database",
+      "label": "kartvibe_inventory",
+      "sublabel": "stock, reservations"
+    },
+    {
+      "id": "orddb",
+      "type": "database",
+      "label": "kartvibe_order",
+      "sublabel": "purchase_orders"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "browser",
+      "to": "order",
+      "y": 190,
+      "label": "POST /orders {sku: SKU-OK, quantity: 2}",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "order",
+      "to": "inv",
+      "y": 228,
+      "label": "Reserve(sku, quantity), deadline 500 ms",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m3",
+      "from": "inv",
+      "to": "invdb",
+      "y": 266,
+      "label": "UPDATE stock ... WHERE available >= 2",
+      "variant": "default"
+    },
+    {
+      "id": "m4",
+      "from": "invdb",
+      "to": "inv",
+      "y": 304,
+      "label": "1 dòng cập nhật, available = 8",
+      "variant": "return"
+    },
+    {
+      "id": "m5",
+      "from": "inv",
+      "to": "invdb",
+      "y": 342,
+      "label": "INSERT reservations",
+      "variant": "default"
+    },
+    {
+      "id": "m6",
+      "from": "inv",
+      "to": "order",
+      "y": 380,
+      "label": "OK {reservation_id: RSV-1, available: 8}",
+      "variant": "return"
+    },
+    {
+      "id": "m7",
+      "from": "order",
+      "to": "orddb",
+      "y": 418,
+      "label": "INSERT purchase_orders (CONFIRMED)",
+      "variant": "default"
+    },
+    {
+      "id": "m8",
+      "from": "orddb",
+      "to": "order",
+      "y": 456,
+      "label": "orderId",
+      "variant": "return"
+    },
+    {
+      "id": "m9",
+      "from": "order",
+      "to": "browser",
+      "y": 494,
+      "label": "201 {orderId, sku, quantity, status: CONFIRMED}",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Metadata đi kèm lời gọi",
+      "items": [
+        "x-request-id nối log hai service",
+        "x-client-version: v2 cho biết client build từ proto nào"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Reply v2",
+      "items": [
+        "Có thêm field 2: optional int32 available",
+        "Order ghi available = 8 vào log, không đưa ra API ngoài"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Response ngoài giống hệt REST",
+      "items": [
+        "Cùng status, cùng body (trừ orderId)",
+        "Chỉ log chứng minh chặng trong là gRPC"
+      ]
+    }
+  ]
+}

@@ -1,103 +1,50 @@
-# Order Service (Port 4002)
+# Order Service
 
-Service quản lý đơn hàng (API composition).
+Order exposes the existing `GET /orders` API and adds `POST /orders`. The latter reserves stock through Inventory using REST or gRPC, selected once at startup, then saves a confirmed purchase order. Both modes return the same external JSON contract.
 
-## 1. Yêu cầu môi trường
-- Node.js >= 18
-- PostgreSQL chạy tại `localhost:5434` (database: `kartvibe_order`, user: `postgres`, password: `postgres`).
+## Requirements and installation
 
-## 2. Cài đặt và Khởi chạy
+Use Node.js 22 or newer and PostgreSQL on `localhost:5434`. The local test configuration uses database `kartvibe_order`, user `postgres`, and password `postgres` (dummy data only). Create the database once, then install dependencies:
 
 ```bash
-# Cài đặt dependencies
-npm install
-
-# Khởi tạo bảng và seed dữ liệu (cấu hình S: 5 đơn, k=3 items; hoặc L: 50 đơn, k=4 items)
-npm run seed:s
-# hoặc
-npm run seed:l
-
-# Khởi chạy service
-npm start
-# hoặc chế độ dev (watch mode)
-npm run dev
+docker run -d --name kartvibe-postgres -e POSTGRES_PASSWORD=postgres -p 5434:5432 postgres:17
+docker exec kartvibe-postgres psql -U postgres -c "CREATE DATABASE kartvibe_order"
+npm ci
+npm run codegen
+npm run build
 ```
 
-## 3. Các biến môi trường hỗ trợ
-- `PORT`: Cổng dịch vụ (mặc định: `4002`).
-- `LATENCY_MS`: Độ trễ giả lập cho request nghiệp vụ (mặc định `0`; `npm run start:measure` đặt `30`).
-- `PGHOST`: Host Postgres (mặc định: `localhost`).
-- `PGPORT`: Port Postgres (mặc định: `5434`).
-- `PGUSER`: Username (mặc định: `postgres`).
-- `PGPASSWORD`: Password (mặc định: `postgres`).
-- `PGDATABASE`: Database (mặc định: `kartvibe_order`).
+The service creates `purchase_orders` at startup. The existing `orders` and `order_items` tables are only populated by `npm run seed:s` or `npm run seed:l` for `GET /orders`.
 
-## 4. Kiểm thử các Endpoint (Curl Samples)
+## Run
 
-### Health Check
+Start Inventory at REST port 4006 and gRPC port 4007. From two terminals in this directory, run:
+
 ```bash
-curl -i http://localhost:4002/health
-# Trả về: 200 {"status":"ok"}
+PORT=4002 INVENTORY_PROTOCOL=rest npm start
+PORT=4012 INVENTORY_PROTOCOL=grpc npm start
 ```
 
-### Lấy danh sách đơn hàng của User
+`INVENTORY_PROTOCOL` defaults to `rest`; other values fail at startup. `INVENTORY_REST_URL` defaults to `http://localhost:4006`, `INVENTORY_GRPC_ADDR` to `localhost:4007`, and `INVENTORY_DEADLINE_MS` to `500`. `DATABASE_URL` or the usual `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` variables configure PostgreSQL. `PORT` defaults to `4002`. `LATENCY_MS` is retained from the original service. Setting `ENABLE_TEST_HOOKS=1` enables `POST /_reset` to truncate `purchase_orders` and reset its sequence.
+
 ```bash
-curl -i -H "x-request-id: test-req-order-1" http://localhost:4002/orders?userId=1
-```
-Trả về (theo mẫu S):
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "userId": 1,
-      "status": "PENDING",
-      "createdAt": "2026-01-01T00:00:00.000Z",
-      "items": [
-        { "productId": 8, "quantity": 2 },
-        { "productId": 9, "quantity": 3 },
-        { "productId": 10, "quantity": 1 }
-      ]
-    },
-    {
-      "id": 2,
-      "userId": 1,
-      "status": "PAID",
-      "createdAt": "2026-01-02T00:00:00.000Z",
-      "items": [
-        { "productId": 5, "quantity": 3 },
-        { "productId": 6, "quantity": 1 },
-        { "productId": 7, "quantity": 2 }
-      ]
-    }
-  ]
-}
+curl -i -H 'content-type: application/json' -d '{"sku":"SKU-OK","quantity":2}' http://localhost:4002/orders
+curl -i 'http://localhost:4002/orders?userId=1'
 ```
 
-### Kiểm tra trường hợp user không có đơn
+`POST /orders` returns `201 {"orderId":1,"sku":"SKU-OK","quantity":2,"status":"CONFIRMED"}` on success. Error responses have `code` and `message`; documented statuses are 400, 409, 503, 504, and 500. The exact contract is in `openapi.json`, generated with `npm run openapi`.
+
+## Verification
+
 ```bash
-curl -i http://localhost:4002/orders?userId=999
-# Trả về: 200 {"data":[]}
+npm run build
+npm run check
 ```
 
-### Kiểm tra trường hợp thiếu hoặc sai `userId`
-```bash
-curl -i http://localhost:4002/orders
-# Trả về: 400 {"code":"VALIDATION_ERROR","message":"userId query parameter is required"}
+`check` starts local fake REST and gRPC Inventory servers and runs both Order modes. It needs the local PostgreSQL database, unused ports 4002/4012/4006/4007, and no real Inventory running. It verifies success, out of stock, invalid shape and range, malformed JSON, deadline, unavailable Inventory, unknown errors, external response parity, request logging, header propagation, database rows, and reset behavior. Test hooks are enabled only in the spawned test processes.
 
-curl -i http://localhost:4002/orders?userId=xyz
-# Trả về: 400 {"code":"VALIDATION_ERROR","message":"userId must be a valid integer"}
-```
+The protobuf contract is the shared `services/proto/inventory/v2/inventory.proto` (override the directory with `PROTO_DIR`). `npm run codegen` writes `src/generated/inventory.ts`; generated code is included in this delivery. All `ReserveReply` presence handling and the `v2` client version constant are in `src/inventory/grpc-client.ts` so the team can build an old client from proto v1 by changing that one file after code generation.
 
-### Đọc bộ đếm Metrics
-```bash
-curl -i http://localhost:4002/_metrics
-# Trả về: 200 {"service":"order","requests":1,"dbQueries":2}
-```
-*(Ghi chú: Mỗi request `/orders?userId=...` thực thi đúng 2 truy vấn DB: 1 lấy danh sách orders, 1 lấy danh sách order_items)*
+When Inventory reserves stock but the Order database insert later fails, Order logs the reservation ID and returns 500. The assignment intentionally has no compensating release or idempotency flow.
 
-### Reset bộ đếm Metrics
-```bash
-curl -i -X POST http://localhost:4002/_metrics/reset
-# Trả về: 204 No Content
-```
+The gRPC client rejects integers outside protobuf `int32` before encoding them. This prevents a large JSON integer from wrapping into a different stock quantity; Inventory still validates representable quantities against its 1–1000 business range.

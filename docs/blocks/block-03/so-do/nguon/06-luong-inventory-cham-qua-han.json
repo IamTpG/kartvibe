@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luồng: Inventory chậm, Order quá hạn nhưng hàng vẫn bị giữ",
+    "output": "../06-luong-inventory-cham-qua-han.html",
+    "viewBox": [
+      993,
+      546
+    ],
+    "quality_profile": "showcase",
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Trình duyệt",
+      "sublabel": "hoặc curl"
+    },
+    {
+      "id": "order",
+      "type": "backend",
+      "label": "order-grpc :4012",
+      "sublabel": "gọi Inventory bằng gRPC"
+    },
+    {
+      "id": "inv",
+      "type": "backend",
+      "label": "inventory",
+      "sublabel": "đang bị làm chậm 2000 ms"
+    },
+    {
+      "id": "invdb",
+      "type": "database",
+      "label": "kartvibe_inventory",
+      "sublabel": "stock, reservations"
+    }
+  ],
+  "segments": [
+    {
+      "from": 174,
+      "to": 304,
+      "label": "0 đến 0,5 s: Order bỏ cuộc"
+    },
+    {
+      "from": 332,
+      "to": 462,
+      "label": "Khoảng 2 s: Inventory vẫn xử lý xong"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "browser",
+      "to": "order",
+      "y": 204,
+      "label": "POST /orders {SKU-OK, 2}",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "order",
+      "to": "inv",
+      "y": 242,
+      "label": "Reserve, deadline 500 ms",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m3",
+      "from": "order",
+      "to": "browser",
+      "y": 280,
+      "label": "504 INVENTORY_TIMEOUT (sau khoảng 0,51 s)",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "inv",
+      "to": "invdb",
+      "y": 362,
+      "label": "UPDATE stock + INSERT reservations",
+      "variant": "default"
+    },
+    {
+      "id": "m5",
+      "from": "invdb",
+      "to": "inv",
+      "y": 400,
+      "label": "available = 8, reservations = 1",
+      "variant": "return"
+    },
+    {
+      "id": "m6",
+      "from": "inv",
+      "to": "order",
+      "y": 438,
+      "label": "OK (không còn ai chờ: Order đã hủy lời gọi)",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Quá hạn không có nghĩa là chưa chạy",
+      "items": [
+        "Khách nhận 504 nhưng tồn kho vẫn bị trừ",
+        "Đã quan sát ở cả REST và gRPC"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Vì sao không bù trừ",
+      "items": [
+        "Ngoài phạm vi của đề",
+        "Retry tự động sẽ cần idempotency, thuộc block sau"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Bằng chứng",
+      "items": [
+        "DB: reservations tăng sau khi Order đã trả 504",
+        "Log Inventory có dòng của request bị bỏ cuộc (ms khoảng 2000)"
+      ]
+    }
+  ]
+}

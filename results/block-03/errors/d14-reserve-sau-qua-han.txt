@@ -1,0 +1,16 @@
+# D14: Reserve đã chạy hay chưa khi Order thấy quá hạn
+# lệnh: d14_step
+# bắt đầu: 2026-10-14T22:53:37+07:00
+
+Làm chậm Inventory 2000 ms, đặt hàng qua gRPC; deadline của Order là 500 ms.
+trước: reservations=0 SKU-OK=10
+{"code":"INVENTORY_TIMEOUT","message":"Inventory request timed out"} HTTP 504
+Order trả lời sau .518771620 s
+sau 3 s: reservations=1 SKU-OK=8
+
+Nếu reservations tăng dù Order đã trả 504 thì Reserve ĐÃ chạy xong sau khi client bỏ cuộc (D14: không bù trừ).
+
+log Inventory cho requestId d14-probe:
+{"ts":"2026-10-14T15:53:39.794Z","service":"inventory","requestId":"d14-probe","method":"gRPC","path":"/kartvibe.inventory.Inventory/Reserve","status":0,"ms":2005,"protocol":"grpc","direction":"inbound","operation":"Reserve","clientVersion":"v2","grpcStatus":"OK","reservationId":"RSV-1"}
+
+# [exit 0] kết thúc: 2026-10-14T22:53:41+07:00

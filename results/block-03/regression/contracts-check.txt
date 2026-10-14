@@ -1,0 +1,11 @@
+# contracts:check
+# lệnh: bash -c cd '<repo>/services' && npm run contracts:check
+# bắt đầu: 2026-10-14T22:53:52+07:00
+
+
+> kartvibe-services@1.0.0 contracts:check
+> node tools/contracts.mjs --check
+
+Hợp đồng khớp mã: openapi.json và kiểu sinh ra đều đúng.
+
+# [exit 0] kết thúc: 2026-10-14T22:53:54+07:00

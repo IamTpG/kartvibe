@@ -8,7 +8,8 @@
 |---|---|
 | `api`: REST API giỏ hàng (sản phẩm, giỏ, mục trong giỏ, tính tổng tiền) | Có, đã qua bộ test nghiệm thu |
 | `services` + `web`: ba service (User, Order, Product), BFF, GraphQL, hai trang web, công cụ đo | Có, đã qua bộ kiểm tra hợp đồng; số đo nhiều lần chưa hoàn tất |
-| Đăng nhập, checkout, thanh toán, trừ tồn kho | Chưa làm |
+| `services`: Inventory (REST và gRPC), `POST /orders` của Order (gọi Inventory bằng REST hoặc gRPC), client cũ build từ proto v1, trang `order-compare.html` | Có, đã ráp và chạy thử; bằng chứng ở `results/block-03/` |
+| Đăng nhập, checkout, thanh toán | Chưa làm |
 | Worker, broker, cache | Chưa làm, sẽ thêm khi cần |
 
 Kiến trúc và các thành phần có thể thêm: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
@@ -97,9 +98,9 @@ Mở http://localhost:4000/dashboard.html, chọn chế độ (Baseline, BFF, Gr
 ```
 kartvibe/
   api/        REST API (mã nguồn, migration, seed, test nghiệm thu, tài liệu riêng)
-  services/   user, order, product, bff, graphql, công cụ kiểm tra và đo (tools/)
-  web/        Trang dashboard, mobile và bộ chạy đo
-  results/    Bằng chứng và kết quả đo của services
+  services/   user, order, product, bff, graphql, inventory, order-v1, inventory-v1, proto (hợp đồng gRPC), công cụ kiểm tra và đo (tools/)
+  web/        Trang dashboard, mobile, order-compare.html và bộ chạy đo
+  results/    Bằng chứng và kết quả đo của services (block-03/: chạy lại bằng results/block-03/chay-lai.sh)
   docs/       Tài liệu gốc của dự án; docs/blocks/block-NN: tài liệu theo từng block
 ```
 

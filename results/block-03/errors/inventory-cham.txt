@@ -1,0 +1,32 @@
+# Inventory chậm 2000 ms: 504 trong thời gian hữu hạn
+# lệnh: slow_step
+# bắt đầu: 2026-10-14T22:53:33+07:00
+
+======================================================================
+[slow] Bắt đầu kịch bản Inventory chậm (delayMs: 2000) tại: 2026-10-14T15:53:33.996Z
+======================================================================
+[slow] Gửi POST http://localhost:4006/_fault { delayMs: 2000 }...
+[slow] Đã làm chậm Inventory. Bắt đầu gọi Order trên cả hai cổng...
+
+[2026-10-14T15:53:34.053Z] Order REST (http://localhost:4002) kết quả:
+  - Status: 504
+  - Body:   {"code":"INVENTORY_TIMEOUT","message":"Inventory request timed out"}
+  - Thời gian đo được: 512 ms (Ngưỡng cho phép: < 1500 ms)
+  ✓ [PASS] Đạt 504 INVENTORY_TIMEOUT và thời gian kết thúc hữu hạn (512 ms)
+
+[2026-10-14T15:53:34.566Z] Order gRPC (http://localhost:4012) kết quả:
+  - Status: 504
+  - Body:   {"code":"INVENTORY_TIMEOUT","message":"Inventory request timed out"}
+  - Thời gian đo được: 504 ms (Ngưỡng cho phép: < 1500 ms)
+  ✓ [PASS] Đạt 504 INVENTORY_TIMEOUT và thời gian kết thúc hữu hạn (504 ms)
+
+[slow] Khôi phục Inventory về trạng thái bình thường: { delayMs: 0 }...
+[slow] Đã khôi phục Inventory (delayMs: 0) thành công.
+[slow] Chờ 2500 ms cho các lần giữ hàng trễ của Inventory hoàn tất (D14), rồi nạp lại tồn kho...
+[slow] POST http://localhost:4006/_reset -> HTTP 204
+======================================================================
+[slow] KẾT QUẢ KỊCH BẢN SLOW: PASS
+======================================================================
+
+
+# [exit 0] kết thúc: 2026-10-14T22:53:37+07:00

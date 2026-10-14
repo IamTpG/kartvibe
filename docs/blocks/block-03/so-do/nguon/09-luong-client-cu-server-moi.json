@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luồng: client cũ (proto v1) gọi server mới (proto v2)",
+    "output": "../09-luong-client-cu-server-moi.html",
+    "viewBox": [
+      900,
+      488
+    ],
+    "quality_profile": "showcase",
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Trình duyệt",
+      "sublabel": "hoặc curl"
+    },
+    {
+      "id": "order",
+      "type": "backend",
+      "label": "order-grpc-v1 :4022",
+      "sublabel": "build từ proto v1, đóng băng"
+    },
+    {
+      "id": "inv",
+      "type": "backend",
+      "label": "inventory",
+      "sublabel": "proto v2, có field 2"
+    },
+    {
+      "id": "invdb",
+      "type": "database",
+      "label": "kartvibe_inventory",
+      "sublabel": "stock, reservations"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "browser",
+      "to": "order",
+      "y": 190,
+      "label": "POST /orders {SKU-OK, 2}",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "order",
+      "to": "inv",
+      "y": 228,
+      "label": "Reserve(sku, quantity), x-client-version: v1",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m3",
+      "from": "inv",
+      "to": "invdb",
+      "y": 266,
+      "label": "UPDATE stock + INSERT reservations",
+      "variant": "default"
+    },
+    {
+      "id": "m4",
+      "from": "invdb",
+      "to": "inv",
+      "y": 304,
+      "label": "available = 8",
+      "variant": "return"
+    },
+    {
+      "id": "m5",
+      "from": "inv",
+      "to": "order",
+      "y": 342,
+      "label": "reply v2: reservation_id, available = 8",
+      "variant": "return"
+    },
+    {
+      "id": "m6",
+      "from": "order",
+      "to": "browser",
+      "y": 380,
+      "label": "201 {orderId, ..., CONFIRMED}: bỏ qua field 2 lạ",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Vì sao chạy được",
+      "items": [
+        "Tag là danh tính field; client v1 không biết tag 2",
+        "Protobuf bỏ qua field lạ khi giải mã"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Chứng minh chưa build lại",
+      "items": [
+        "npm run verify-frozen kiểm FROZEN.sha256",
+        "Log Inventory: clientVersion = v1; log Order cũ không có khóa available"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Giới hạn",
+      "items": [
+        "Tương thích wire, chưa phải tương thích nghiệp vụ",
+        "Đổi nghĩa field cũ (ví dụ quantity) vẫn lọt"
+      ]
+    }
+  ]
+}

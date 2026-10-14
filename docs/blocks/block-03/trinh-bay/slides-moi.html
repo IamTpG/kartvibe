@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Block 3: REST và gRPC giữa các service</title>
+<!-- Phông chữ: Archivo (tiêu đề), Nunito (thân bài), IBM Plex Mono (mã) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap">
+<style>
+/* === VIEWPORT-BASE (bắt buộc của skill, giữ nguyên) === */
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   Include this ENTIRE file in every presentation.
+   Slides are authored at 1920×1080 and scaled as a whole.
+   =========================================== */
+
+/* 1. Lock the browser viewport */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 2. Full-window deck viewport */
+.deck-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 3. Fixed 16:9 design canvas.
+   JavaScript sets transform: translate(...) scale(...). */
+.deck-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: var(--slide-bg, #fff);
+}
+
+/* 4. Slides stack inside the fixed stage.
+   Content must be laid out at 1920×1080, not reflowed per device. */
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: var(--slide-bg, #fff);
+}
+
+.slide.active,
+.slide.visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* 5. Keep media inside authored slide bounds */
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* 6. Presentation chrome stays outside the slide design system */
+.deck-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+/* 7. Print one fixed-size slide per page */
+@media print {
+    html,
+    body {
+        width: 1920px;
+        height: auto;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-viewport {
+        position: static;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-stage {
+        position: static;
+        width: auto;
+        height: auto;
+        transform: none !important;
+        background: none;
+    }
+
+    .slide {
+        position: relative;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: 1920px;
+        height: 1080px;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+
+    .deck-controls {
+        display: none !important;
+    }
+}
+
+/* 8. Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+}
+
+/* === GIAO DIỆN SWISS MODERN === */
+
+:root{
+  --paper:#ffffff; --ink:#0a0a0a; --red:#ff3300; --grey:#5c5c5c; --hair:#d8d8d8; --soft:#f3f3f3;
+  --stage-bg:#0a0a0a; --slide-bg:#ffffff;
+  --f-disp:'Archivo',sans-serif; --f-body:'Nunito',sans-serif; --f-mono:'IBM Plex Mono',monospace;
+  --body:36px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--f-body);color:var(--ink)}
+/* === NỀN LƯỚI === */
+.grid{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(#0000000c 1px,transparent 1px),linear-gradient(90deg,#0000000c 1px,transparent 1px);
+  background-size:120px 120px}
+/* === ĐẦU TRANG: số slide + nhãn phần + tiêu đề === */
+.hd{position:absolute;left:96px;right:96px;top:52px;height:104px;display:flex;align-items:center;gap:36px}
+.hdno{flex:none;width:104px;height:104px;background:var(--red);color:#fff;font:800 50px/104px var(--f-disp);text-align:center;letter-spacing:-2px}
+.tt{min-width:0}
+.sec{font:700 22px/1 var(--f-disp);letter-spacing:6px;text-transform:uppercase;color:var(--red);margin-bottom:10px}
+h2{font:800 60px/1.08 var(--f-disp);letter-spacing:-1.5px}
+.hd + .bd{position:absolute;left:96px;right:96px;top:196px;bottom:56px;overflow:hidden}
+.slide.frame .hd{top:28px;height:88px}
+.slide.frame .hdno{width:88px;height:88px;font-size:42px;line-height:88px}
+.slide.frame h2{font-size:48px}
+.slide.frame .sec{margin-bottom:6px}
+.slide.frame .bd{position:absolute;left:0;right:0;top:132px;bottom:0;padding:0;overflow:hidden;border-top:6px solid var(--ink)}
+.slide.frame iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+.slide.frame .grid{display:none}
+/* === CHỮ THÂN BÀI === */
+.bd{font-size:var(--body);line-height:1.42}
+.bd p{margin:10px 0}
+.bd .sub{color:var(--grey)}
+.bd b{font-weight:800}
+.bd h3{font:800 40px/1.2 var(--f-disp);letter-spacing:-.5px;margin:22px 0 8px}
+.bd ul,.bd ol{margin:10px 0 10px 40px}
+.bd li{margin:8px 0}
+.bd li::marker{color:var(--red)}
+.bd code{font:500 .86em var(--f-mono);background:var(--soft);padding:1px 8px;border-bottom:3px solid var(--red)}
+.bd .note{color:var(--red)}
+.bd .blank{color:var(--grey)}
+/* câu hỏi / kết luận */
+.bd .q{border-left:12px solid var(--red);background:var(--soft);padding:14px 26px;margin:20px 0;font-weight:700}
+/* === HÌNH Ô CHỮ (slide 1) === */
+.flow{display:flex;align-items:center;justify-content:center;margin:6px 0 14px}
+.flow .rowlabel{font:800 30px var(--f-disp);color:var(--grey);width:130px;text-align:right;margin-right:26px;text-transform:uppercase;letter-spacing:2px}
+.flow .node{border:5px solid var(--ink);background:#fff;padding:12px 34px;font:800 34px var(--f-disp)}
+.flow .hop{display:flex;flex-direction:column;align-items:center;min-width:300px;font:600 30px var(--f-body);color:var(--grey);border-bottom:6px solid var(--ink);margin:0 10px;padding-bottom:4px;position:relative}
+.flow .hop b{font:800 30px var(--f-disp);color:var(--ink)}
+.flow .hop::after{content:"";position:absolute;right:-4px;bottom:-15px;border-left:24px solid var(--ink);border-top:12px solid transparent;border-bottom:12px solid transparent}
+.flow .hop.new{border-bottom-color:var(--red)}
+.flow .hop.new::after{border-left-color:var(--red)}
+.flow .hop.new b,.flow .hop.new span{color:var(--red);font-weight:800}
+
+/* === SƠ ĐỒ TRƯỚC/SAU (slide 1) === */
+.hops{margin:0 0 14px}
+.hrow{display:flex;align-items:center;padding:30px 0}
+.hrow + .hrow{border-top:3px solid var(--ink)}
+.hlab{flex:none;width:150px;font:800 30px var(--f-disp);letter-spacing:3px;text-transform:uppercase;color:var(--grey)}
+.hrow.after .hlab{color:var(--red)}
+.hn{flex:none;width:270px;height:92px;border:5px solid var(--ink);background:#fff;font:800 38px/82px var(--f-disp);text-align:center}
+.ha{flex:1;position:relative;height:92px;margin:0 8px}
+.ha .hc{position:absolute;left:0;right:0;top:-18px;text-align:center;font:800 26px var(--f-body);color:var(--ink)}
+.ha .ln{position:absolute;left:0;right:20px;top:50px;height:6px;background:var(--ink)}
+.ha .ln::after{content:"";position:absolute;right:-20px;top:-12px;border-left:26px solid var(--ink);border-top:15px solid transparent;border-bottom:15px solid transparent}
+.ha .hp{position:absolute;left:50%;top:50px;transform:translate(-50%,-50%);background:#fff;border:4px solid var(--ink);padding:0 22px;font:800 30px/46px var(--f-disp)}
+.ha.new .ln{background:var(--red)}
+.ha.new .ln::after{border-left-color:var(--red)}
+.ha.new .hc{color:var(--red)}
+.ha.new .hp{background:var(--red);border-color:var(--red);color:#fff}
+/* === BẢNG === */
+.bd table{width:100%;border-collapse:collapse;font-size:var(--body);margin:12px 0}
+.bd th{background:var(--ink);color:#fff;font:800 .86em var(--f-disp);letter-spacing:1px;text-transform:uppercase;text-align:left;padding:12px 18px}
+.bd td{padding:8px 18px;border-bottom:2px solid var(--ink);vertical-align:top}
+.bd td.b{font-weight:800;white-space:nowrap}
+.bd table.dense{font-size:var(--body)}
+/* === KHỐI MÃ === */
+.cols{display:flex;gap:40px;margin:48px 0 14px}
+.cols>div{flex:1;min-width:0}
+.cols h4{font:700 26px var(--f-disp);letter-spacing:4px;text-transform:uppercase;color:var(--grey);margin-bottom:10px}
+pre.code{margin:0;background:var(--soft);border-left:12px solid var(--ink);padding:22px 28px;font:500 34px/1.5 var(--f-mono);overflow:hidden}
+pre.code .add{display:block;margin:0 -28px;padding:0 28px;background:#c9f0d4;border-left:12px solid #1b8a3a;margin-left:-40px;padding-left:40px;font-weight:700}
+/* === TRADE-OFF: vấn đề + lựa chọn + ưu/nhược === */
+.prob{font-size:40px;margin:0 0 10px}
+.optshead{margin:18px 0 8px}
+ul.opts{list-style:none;margin:0;padding:0}
+ul.opts li{margin:16px 0;padding:18px 30px;border:3px solid var(--hair);background:#fff}
+ul.opts li::marker{content:''}
+ul.opts li.yes{border:5px solid var(--ink);background:var(--soft);position:relative}
+ul.opts li.yes::after{content:'ĐÃ CHỌN';position:absolute;right:0;top:0;background:var(--red);color:#fff;font:800 20px var(--f-disp);letter-spacing:4px;padding:6px 16px}
+ul.opts li>b{display:block;font:800 38px/1.25 var(--f-disp);margin-bottom:8px;letter-spacing:-.4px;padding-right:200px}
+ul.opts .pm{padding-left:44px;text-indent:-44px;line-height:1.38;margin-top:6px}
+ul.opts .plus{display:inline-block;width:44px;text-indent:0;font-weight:800;color:var(--ink)}
+ul.opts .minus{display:inline-block;width:44px;text-indent:0;font-weight:800;color:var(--red)}
+ul.opts li.no>b{color:var(--grey)}
+/* === DEMO: danh sách luồng === */
+ol.flowlist{font-size:1em}
+/* === BÌA, Q&A, TRANG TIÊU ĐỀ PHỤ LỤC === */
+.cover,.qa,.appendix-title{background:#fff}
+.cv-bar,.qa-bar{position:absolute;left:0;top:0;width:480px;height:1080px;background:var(--red)}
+.cv-num,.qa-num{position:absolute;left:60px;bottom:60px;font:800 300px/1 var(--f-disp);color:#fff;letter-spacing:-12px}
+.cv-kick{position:absolute;left:640px;top:130px;font:700 34px var(--f-disp);letter-spacing:8px;text-transform:uppercase;color:var(--red)}
+.cv-h1{position:absolute;left:640px;top:280px;width:1260px;font:800 150px/1.04 var(--f-disp);letter-spacing:-5px}
+.cv-rule{position:absolute;left:640px;top:860px;width:340px;height:14px;background:var(--ink)}
+.cv-sub{position:absolute;left:640px;top:910px;width:1100px;font:400 46px/1.3 var(--f-body)}
+.cv-tri,.qa-tri{position:absolute;right:80px;bottom:80px;width:0;height:0;border-left:90px solid transparent;border-bottom:90px solid var(--red)}
+.qa-h1{position:absolute;left:640px;top:330px;font:800 340px/1 var(--f-disp);letter-spacing:-14px}
+.ap-body{position:absolute;left:640px;top:200px;right:140px;font-size:44px;line-height:1.5}
+.ap-body h1{font:800 150px/1 var(--f-disp);letter-spacing:-6px;margin-bottom:20px}
+.ap-body ol{margin-left:50px}
+.ap-body li::marker{color:var(--red);font-weight:800}
+.ap-body .sub{color:var(--grey);font-size:34px}
+/* === ĐIỀU KHIỂN (ngoài sân khấu) === */
+.deck-controls{display:flex;gap:10px;align-items:center;background:#0a0a0acc;color:#fff;padding:8px 14px;font:600 15px var(--f-body);opacity:.4;transition:opacity .2s}
+.deck-controls:hover{opacity:1}
+.deck-controls button{font:inherit;background:#fff;color:#0a0a0a;border:0;padding:4px 14px;cursor:pointer}
+.deck-controls button:hover{background:var(--red);color:#fff}
+.progress{position:fixed;left:0;bottom:0;height:5px;background:var(--red);z-index:1001;transition:width .3s}
+.keyhint{position:fixed;left:14px;bottom:14px;font:600 13px var(--f-body);color:#3a3a3a;background:#ffffffd9;padding:4px 10px;border:1px solid #d8d8d8;z-index:1000}
+/* === CHẾ ĐỘ SỬA CHỮ === */
+.edit-hotzone{position:fixed;top:0;left:0;width:60px;height:60px;z-index:10000}
+.edit-toggle{position:fixed;top:12px;left:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:10001;background:#fff;border:2px solid #0a0a0a;padding:6px 12px;font:700 14px var(--f-body);cursor:pointer}
+.edit-toggle.show,.edit-toggle.active{opacity:1;pointer-events:auto}
+body.editing [contenteditable]{outline:2px dashed var(--red);outline-offset:4px}
+
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+<section class="slide cover" data-title="Bìa">
+  <div class="grid"></div>
+  <div class="cv-bar"><div class="cv-num">03</div></div>
+  <div class="cv-kick">Block 3 · Phát triển ứng dụng web nâng cao</div>
+  <h1 class="cv-h1">REST và gRPC giữa các service</h1>
+  <div class="cv-rule"></div>
+  <div class="cv-sub">Đặt hàng đi qua hai chặng: Client, Order, Inventory</div>
+  <div class="cv-tri"></div>
+</section>
+<section class="slide content text" data-title="Bài toán: đặt hàng đi qua hai chặng">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">01</div>
+    <div class="tt"><div class="sec">Problem</div><h2>Bài toán: đặt hàng đi qua hai chặng</h2></div>
+  </header>
+  <div class="bd">
+    <div class="hops">
+      <div class="hrow">
+        <div class="hlab">Trước</div>
+        <div class="hn">Client</div>
+        <div class="ha"><span class="hc">Chặng 1</span><i class="ln"></i><span class="hp">REST</span></div>
+        <div class="hn">Order</div>
+        <div class="ha"><span class="hc">Chặng 2</span><i class="ln"></i><span class="hp">REST</span></div>
+        <div class="hn">Inventory</div>
+      </div>
+      <div class="hrow after">
+        <div class="hlab">Sau</div>
+        <div class="hn">Client</div>
+        <div class="ha"><span class="hc">Chặng 1</span><i class="ln"></i><span class="hp">REST</span></div>
+        <div class="hn">Order</div>
+        <div class="ha new"><span class="hc">Chặng 2</span><i class="ln"></i><span class="hp">gRPC</span></div>
+        <div class="hn">Inventory</div>
+      </div>
+    </div>
+    <h3>Phải đạt</h3>
+    <ul>
+      <li><b>API ngoài không đổi</b> khi đổi giao thức: cùng status và body, cả đường đủ hàng lẫn thiếu hàng.</li>
+      <li><b>Client build từ hợp đồng cũ</b>, chưa build lại, vẫn đặt hàng được với server mới.</li>
+      <li><b>Inventory chậm hoặc tắt</b>: request vẫn kết thúc trong thời gian hữu hạn.</li>
+    </ul>
+    <div class="q">Đổi chặng 2 thì chặng 1 có phải đổi theo không? Thêm field vào schema thì client cũ có còn chạy không?</div>
+  </div>
+</section>
+<section class="slide content text" data-title="Phạm vi: vì sao chỉ đổi chặng 2">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">02</div>
+    <div class="tt"><div class="sec">Problem</div><h2>Phạm vi: vì sao chỉ đổi chặng 2</h2></div>
+  </header>
+  <div class="bd">
+    <ul>
+      <li>Chặng 1 có consumer mình không kiểm soát, nên URL, status và body phải giữ nguyên.</li>
+      <li>Trình duyệt không gọi gRPC trực tiếp (cần gRPC-Web và proxy); REST/JSON dùng được từ mọi client và dễ debug.</li>
+      <li>Chặng 2 là nội bộ: Order và Inventory đều nằm trong hệ thống của mình, nên mình quyết định được giao thức ở cả hai đầu.</li>
+    </ul>
+  </div>
+</section>
+<section class="slide content frame" data-title="Kiến trúc">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">03</div>
+    <div class="tt"><div class="sec">Solution</div><h2>Kiến trúc</h2></div>
+  </header>
+  <div class="bd">
+<iframe data-src="../so-do/01-kien-truc.html?theme=light&present=1" title="Sơ đồ kiến trúc"></iframe>
+  </div>
+</section>
+<section class="slide content frame" data-title="Cơ sở dữ liệu: ba bảng">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">04</div>
+    <div class="tt"><div class="sec">Solution</div><h2>Cơ sở dữ liệu: ba bảng</h2></div>
+  </header>
+  <div class="bd">
+<iframe data-src="../so-do/11-er-co-so-du-lieu.html" title="ER cơ sở dữ liệu"></iframe>
+  </div>
+</section>
+<section class="slide content frame" data-title="Một lần đặt hàng đủ hàng, từng bước">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">05</div>
+    <div class="tt"><div class="sec">Solution</div><h2>Một lần đặt hàng đủ hàng, từng bước</h2></div>
+  </header>
+  <div class="bd">
+<iframe data-src="../so-do/03-luong-du-hang-grpc.html?theme=light&present=1" title="Đủ hàng qua gRPC"></iframe>
+  </div>
+</section>
+<section class="slide content text" data-title="Thêm field mà client cũ không vỡ">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">06</div>
+    <div class="tt"><div class="sec">Solution</div><h2>Thêm field mà client cũ không vỡ</h2></div>
+  </header>
+  <div class="bd">
+    <p>Giả sử hệ thống cần thêm tính năng cảnh báo sắp hết hàng, Order cần thêm <code>available</code> (số lượng còn lại) để báo cho Client hoặc service khác ngay khi số lượng giảm.</p>
+    <p>Hợp đồng gRPC giữa Order và Inventory là một file <code>.proto</code>. Lúc này Inventory cần trả thêm <code>available</code> trong <code>ReserveReply</code>.</p>
+    <div class="cols">
+      <div><h4>Phiên bản 1 (client cũ biết)</h4><pre class="code">package kartvibe.inventory;
+
+message ReserveReply {
+  string reservation_id = 1;
+}</pre></div>
+      <div><h4>Phiên bản 2 (server mới)</h4><pre class="code">package kartvibe.inventory;
+
+message ReserveReply {
+  string reservation_id = 1;
+<span class="add">  optional int32 available = 2;</span>}</pre></div>
+    </div> 
+  </div>
+</section>
+<section class="slide content frame" data-title="Client cũ gặp server mới">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">07</div>
+    <div class="tt"><div class="sec">Solution</div><h2>Client cũ gặp server mới</h2></div>
+  </header>
+  <div class="bd">
+<iframe data-src="../so-do/09-luong-client-cu-server-moi.html?theme=light&present=1" title="Client cũ, server mới"></iframe>
+  </div>
+</section>
+<section class="slide content frame" data-title="Cách xử lý khi hết hàng">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">08</div>
+    <div class="tt"><div class="sec">Solution</div><h2>Cách xử lý khi hết hàng</h2></div>
+  </header>
+  <div class="bd">
+<iframe data-src="../so-do/04-luong-het-hang.html?theme=light&present=1" title="Luồng hết hàng"></iframe>
+  </div>
+</section>
+<section class="slide content frame" data-title="Cách xử lý khi Inventory chậm hoặc tắt">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">09</div>
+    <div class="tt"><div class="sec">Solution</div><h2>Cách xử lý khi Inventory chậm hoặc tắt</h2></div>
+  </header>
+  <div class="bd">
+<iframe data-src="../so-do/06-luong-inventory-cham-qua-han.html?theme=light&present=1" title="Inventory chậm, quá hạn"></iframe>
+  </div>
+</section>
+<section class="slide content text" data-title="Demo: các luồng sẽ chạy">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">10</div>
+    <div class="tt"><div class="sec">Demo</div><h2>Demo: các luồng sẽ chạy</h2></div>
+  </header>
+  <div class="bd">
+    <table>
+      <tr><th>#</th><th>Luồng</th></tr>
+      <tr><td class="b">1</td><td><b>Đủ hàng, status và body của API ngoài không đổi trước và sau khi đổi sang gRPC</b></td></tr><tr><td class="b">2</td><td><b>Client cũ (build từ proto cũ) với server mới: field mới không được đọc nhưng không lỗi</b></td></tr><tr><td class="b">3</td><td><b>Client mới với server mới: field mới được đọc đúng</b></td></tr><tr><td class="b">4</td><td><b>Thiếu hàng (không thành 500 tùy tiện, ánh xạ sang response ngoài)</b></td></tr><tr><td class="b">5</td><td><b>Inventory chậm: request kết thúc trong thời gian hữu hạn</b></td></tr><tr><td class="b">6</td><td><b>Inventory tắt: request kết thúc trong thời gian hữu hạn</b></td></tr><tr><td class="b">7</td><td>Client mới với server cũ (trả về thiếu field)</td></tr>
+    </table>
+  </div>
+</section>
+<section class="slide content text" data-title="Bằng chứng">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">11</div>
+    <div class="tt"><div class="sec">Evidence</div><h2>Bằng chứng</h2></div>
+  </header>
+  <div class="bd">
+    <table class="dense" style="font-size:30px">
+      <tr><th>Điều khẳng định</th><th>Bằng chứng</th><th>Kết quả</th></tr>
+      <tr><td>API ngoài không đổi khi đổi giao thức</td><td>snapshot status và body: REST, gRPC, gRPC cũ</td><td>4 kịch bản: REST = gRPC = gRPC cũ</td></tr><tr><td>Chặng trong thật sự là gRPC</td><td>log theo <code>requestId</code>: <code>protocol</code>, <code>grpcStatus</code>, <code>clientVersion</code></td><td><code>grpcStatus: OK</code>; Inventory ghi cùng <code>requestId</code></td></tr><tr><td>Thêm field không làm vỡ client cũ</td><td>diff proto (chỉ thêm tag 2); <code>verify-frozen</code>; <code>compat</code></td><td>Diff chỉ thêm <code>available = 2</code>; client v1: 201</td></tr><tr><td>Field vắng được xử lý đúng</td><td><code>available</code> có mặt (kể cả 0) hoặc <code>"absent"</code></td><td><code>8</code>; còn 0: có mặt; server cũ: <code>"absent"</code></td></tr><tr><td>Lỗi và thời gian hữu hạn</td><td>504 khi chậm, 503 khi tắt, kèm thời gian</td><td>Chậm: 504 sau 512 / 504 ms; tắt: 503 sau 16 / 5 ms (REST / gRPC)</td></tr><tr><td>Payload (message đã serialize, lớp 1)</td><td>request và reply, JSON so Protobuf</td><td>Request 29 → 10 B; reply 25 → 7 B (JSON → Protobuf)</td></tr>
+    </table>
+    <p class="sub">Số chạy thật của nhóm, kèm lệnh và thời điểm, trong <code>results/block-03/</code>. Payload đo cùng một lớp cho cả hai bên.</p>
+  </div>
+</section>
+<section class="slide content text" data-title="Giới hạn của phép đo và của hệ thống">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">12</div>
+    <div class="tt"><div class="sec">Evidence</div><h2>Giới hạn của phép đo và của hệ thống</h2></div>
+  </header>
+  <div class="bd">
+    <h3>Phép đo</h3>
+    <ul>
+      <li>Một máy, <code>localhost</code>, dữ liệu nhỏ: chênh lệch nhỏ giữa REST và gRPC không đủ để kết luận về hiệu năng.</li>
+      <li>Ít mẫu (tối thiểu 5, đề xuất của bài tập); lần đầu mỗi cổng gồm cả chi phí kết nối.</li>
+      <li>Payload đo ở <b>lớp 1</b> (message đã serialize); không đo header HTTP, không so khác lớp.</li>
+      <li>Thời gian trên trang demo đo ở trình duyệt, chỉ để tham khảo.</li>
+    </ul>
+    <h3>Hệ thống</h3>
+    <ul>
+      <li>Mỗi đơn một mặt hàng; không có idempotency, không hoàn hàng khi quá hạn.</li>
+    </ul>
+  </div>
+</section>
+<section class="slide content text" data-title="Thiếu hàng: báo lỗi giữa hai chặng">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">13</div>
+    <div class="tt"><div class="sec">Trade-off</div><h2>Thiếu hàng: báo lỗi giữa hai chặng</h2></div>
+  </header>
+  <div class="bd">
+    <p class="prob"><b>Vấn đề:</b> Báo "hết hàng" từ Inventory sang Order để Client vẫn nhận 409 ở cả REST và gRPC</p>
+    <p class="optshead"><b>Các lựa chọn:</b></p>
+    <ul class="opts">
+      <li class="yes"><b>A. gRPC: <code>FAILED_PRECONDITION</code> kèm metadata <code>x-error-code: OUT_OF_STOCK</code>; REST: 409</b><div class="pm"><span class="plus">+</span> Đối xứng với REST 409; dùng cơ chế lỗi của gRPC; reply chỉ chứa dữ liệu khi thành công</div><div class="pm"><span class="minus">−</span> Phải tự quy ước thêm khóa <code>x-error-code</code> (gRPC không có mã <code>OUT_OF_STOCK</code>)</div></li>
+      <li class="no"><b>B. Trả thành công, báo hết hàng bằng field trong reply (ví dụ <code>reserved=false</code>)</b><div class="pm"><span class="plus">+</span> Không cần quy ước khóa metadata tự đặt; mọi thứ nằm trong reply</div><div class="pm"><span class="minus">−</span> Reply phải có thêm field trạng thái; hai đường xử lý hai kiểu; lỗi lẫn với thành công (status vẫn <code>OK</code>)</div></li>
+    </ul>
+  </div>
+</section>
+<section class="slide content text" data-title="Field mới available: có optional hay không">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">14</div>
+    <div class="tt"><div class="sec">Trade-off</div><h2>Field mới <code>available</code>: có <code>optional</code> hay không</h2></div>
+  </header>
+  <div class="bd">
+    <p class="prob"><b>Vấn đề:</b> Làm sao phân biệt <code>available = 0</code> (còn 0 hàng) với trường hợp server không gửi <code>available</code>?</p>
+    <p class="optshead"><b>Các lựa chọn:</b></p>
+    <ul class="opts">
+      <li class="yes"><b>A. <code>optional</code>; khi vắng thì ghi <code>absent</code>, không suy ra 0</b><div class="pm"><span class="plus">+</span> Phân biệt được "bằng 0" và "không có thông tin"</div><div class="pm"><span class="minus">−</span> Client phải xử lý thêm trường hợp vắng</div></li>
+      <li class="no"><b>B. Không <code>optional</code>, vắng được hiểu là 0</b><div class="pm"><span class="plus">+</span> Đơn giản</div><div class="pm"><span class="minus">−</span> Server cũ bị hiểu thành "hết hàng"</div></li>
+    </ul>
+  </div>
+</section>
+<section class="slide content text" data-title="Package khi thêm field">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">15</div>
+    <div class="tt"><div class="sec">Trade-off</div><h2>Package khi thêm field</h2></div>
+  </header>
+  <div class="bd">
+    <p class="prob"><b>Vấn đề:</b> Phiên bản 2 đặt ở package nào để client cũ vẫn chạy</p>
+    <p class="optshead"><b>Các lựa chọn:</b></p>
+    <ul class="opts">
+      <li class="yes"><b>A. Giữ nguyên package cho cả hai phiên bản</b><div class="pm"><span class="plus">+</span> Địa chỉ lời gọi không đổi, client cũ vẫn gọi được</div><div class="pm"><span class="minus">−</span> Tương thích wire chưa chắc tương thích nghiệp vụ</div></li>
+      <li class="no"><b>B. Đặt phiên bản 2 ở package khác</b><div class="pm"><span class="plus">+</span> Tách hẳn hai phiên bản</div><div class="pm"><span class="minus">−</span> Client cũ không gọi được (đã thử); phải chạy song song hai package</div></li>
+    </ul>
+  </div>
+</section>
+<section class="slide content text" data-title="Quá hạn mà hàng vẫn bị giữ">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">16</div>
+    <div class="tt"><div class="sec">Trade-off</div><h2>Quá hạn mà hàng vẫn bị giữ</h2></div>
+  </header>
+  <div class="bd">
+    <p class="prob"><b>Vấn đề:</b> Order đặt deadline 500 ms rồi bỏ cuộc, nhưng Inventory vẫn xử lý xong và giữ hàng</p>
+    <p class="optshead"><b>Các lựa chọn:</b></p>
+    <ul class="opts">
+      <li class="yes"><b>A. Deadline 500 ms, không bù trừ, chỉ ghi log</b><div class="pm"><span class="plus">+</span> Mọi request kết thúc trong thời gian hữu hạn; đơn giản, đúng phạm vi bài</div><div class="pm"><span class="minus">−</span> Hàng bị giữ mà không có đơn, và không có cách nhả</div></li>
+      <li class="no"><b>B. Bù trừ (hoàn hàng) hoặc idempotency</b><div class="pm"><span class="plus">+</span> Không để hàng bị giữ vô ích</div><div class="pm"><span class="minus">−</span> Cần cơ chế bù trừ và idempotency; ngoài phạm vi (Block 7 và 9)</div></li>
+    </ul>
+  </div>
+</section>
+<section class="slide content text" data-title="Hai bản Order để so sánh">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">17</div>
+    <div class="tt"><div class="sec">Trade-off</div><h2>Hai bản Order để so sánh</h2></div>
+  </header>
+  <div class="bd">
+    <p class="prob"><b>Vấn đề:</b> Khác biệt giữa REST và gRPC ở chặng 2 phải chỉ do giao thức</p>
+    <p class="optshead"><b>Các lựa chọn:</b></p>
+    <ul class="opts">
+      <li class="yes"><b>A. Hai tiến trình Order cùng mã nguồn, chọn giao thức lúc khởi động</b><div class="pm"><span class="plus">+</span> Khác biệt chỉ do giao thức; log tách theo tên tiến trình</div><div class="pm"><span class="minus">−</span> Nhiều tiến trình, dùng chung database nên kịch bản phải chạy tuần tự</div></li>
+      <li class="no"><b>B. Một bản Order, chọn giao thức theo từng request (flag)</b><div class="pm"><span class="plus">+</span> Chỉ một tiến trình</div><div class="pm"><span class="minus">−</span> Thêm đường điều khiển ẩn vào API ngoài, vi phạm nguyên tắc giữ nguyên chặng 1</div></li>
+    </ul>
+  </div>
+</section>
+<section class="slide content text" data-title="Đo payload">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">18</div>
+    <div class="tt"><div class="sec">Trade-off</div><h2>Đo payload</h2></div>
+  </header>
+  <div class="bd">
+    <p class="prob"><b>Vấn đề:</b> So sánh kích thước dữ liệu REST và gRPC bằng đại lượng nào cho công bằng</p>
+    <p class="optshead"><b>Các lựa chọn:</b></p>
+    <ul class="opts">
+      <li class="yes"><b>A. Lớp 1: message đã serialize (JSON body so với message Protobuf)</b><div class="pm"><span class="plus">+</span> Cùng một đại lượng cho cả hai bên, đúng yêu cầu của đề</div><div class="pm"><span class="minus">−</span> Không phải byte trên dây (không có header, khung HTTP/2)</div></li>
+      <li class="no"><b>B. Wire bytes (lớp 3)</b><div class="pm"><span class="plus">+</span> Sát thực tế mạng</div><div class="pm"><span class="minus">−</span> Header HTTP/1.1 và HTTP/2 làm chênh lệch khó diễn giải; cần bắt gói</div></li>
+    </ul>
+  </div>
+</section>
+<section class="slide qa" data-title="Q&amp;A">
+  <div class="grid"></div>
+  <div class="qa-bar"><div class="qa-num">19</div></div>
+  <h1 class="qa-h1">Q&amp;A</h1>
+  <div class="qa-tri"></div>
+</section>
+<section class="slide appendix-title" data-appendix="1" data-title="Phụ lục">
+  <div class="grid"></div>
+  <div class="qa-bar"><div class="qa-num">A</div></div>
+  <div class="ap-body">    <h1>Phụ lục</h1>
+    <p class="sub">Dùng phím <b>A</b> để tới đây, <b>Home</b> để về đầu. Các mục dưới là các slide tiếp theo.</p>
+    <ol class="toc">
+      <li>P1a. Đủ hàng qua REST (02), đối chiếu slide 5</li>
+      <li>P2. Dữ liệu sai, validate hai tầng (05)</li>
+      <li>P3a, P3b. Inventory tắt, bật lại (07, 08)</li>
+      <li>P4. Client mới, server cũ (10)</li>
+    </ol></div>
+  <div class="qa-tri"></div>
+</section>
+<section class="slide content frame" data-title="Đủ hàng qua REST">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">P1a</div>
+    <div class="tt"><div class="sec">Phụ lục</div><h2>Đủ hàng qua REST</h2></div>
+  </header>
+  <div class="bd">
+<iframe data-src="../so-do/02-luong-du-hang-rest.html?theme=light&present=1" title="Đủ hàng REST"></iframe>
+  </div>
+</section>
+<section class="slide content frame" data-title="Dữ liệu sai: validate hai tầng">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">P2</div>
+    <div class="tt"><div class="sec">Phụ lục</div><h2>Dữ liệu sai: validate hai tầng</h2></div>
+  </header>
+  <div class="bd">
+<iframe data-src="../so-do/05-luong-du-lieu-sai.html?theme=light&present=1" title="Dữ liệu sai"></iframe>
+  </div>
+</section>
+<section class="slide content frame" data-title="Inventory tắt">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">P3a</div>
+    <div class="tt"><div class="sec">Phụ lục</div><h2>Inventory tắt</h2></div>
+  </header>
+  <div class="bd">
+<iframe data-src="../so-do/07-luong-inventory-tat.html?theme=light&present=1" title="Inventory tắt"></iframe>
+  </div>
+</section>
+<section class="slide content frame" data-title="Inventory bật lại">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">P3b</div>
+    <div class="tt"><div class="sec">Phụ lục</div><h2>Inventory bật lại</h2></div>
+  </header>
+  <div class="bd">
+<iframe data-src="../so-do/08-luong-inventory-bat-lai.html?theme=light&present=1" title="Inventory bật lại"></iframe>
+  </div>
+</section>
+<section class="slide content frame" data-title="Client mới, server cũ">
+  <div class="grid"></div>
+  <header class="hd">
+    <div class="hdno">P4</div>
+    <div class="tt"><div class="sec">Phụ lục</div><h2>Client mới, server cũ</h2></div>
+  </header>
+  <div class="bd">
+<iframe data-src="../so-do/10-luong-client-moi-server-cu.html?theme=light&present=1" title="Client mới, server cũ"></iframe>
+  </div>
+</section>
+</main>
+</div>
+<div class="deck-controls"><button data-a="prev">←</button><span class="counter"></span><button data-a="next">→</button><button data-a="app">Phụ lục</button></div>
+<div class="progress"></div>
+<div class="keyhint">← → chuyển slide · A phụ lục · F toàn màn hình · E sửa chữ</div>
+<div class="edit-hotzone"></div><button class="edit-toggle" id="editToggle" title="Sửa chữ (E)">Sửa chữ</button>
+<script>
+
+/* === ĐIỀU KHIỂN BỘ SLIDE === */
+class SlidePresentation {
+  constructor() {
+    this.slides = [...document.querySelectorAll('.slide')];
+    this.stage = document.getElementById('deckStage');
+    this.viewport = document.querySelector('.deck-viewport');
+    this.cur = 0;
+    this.appendixAt = this.slides.findIndex(s => s.dataset.appendix);
+    this.setupScale(); this.setupKeys(); this.setupTouch(); this.setupControls();
+    const h = parseInt((location.hash || '').slice(1), 10);
+    this.show(Number.isFinite(h) && h >= 1 && h <= this.slides.length ? h - 1 : 0);
+  }
+  setupScale() {
+    const f = () => {
+      const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      const x = (window.innerWidth - 1920 * k) / 2, y = (window.innerHeight - 1080 * k) / 2;
+      this.stage.style.transform = `translate(${x}px, ${y}px) scale(${k})`;
+    };
+    f(); window.addEventListener('resize', f);
+  }
+  load(slide) {
+    slide.querySelectorAll('iframe[data-src]').forEach(fr => { if (!fr.getAttribute('src')) fr.setAttribute('src', fr.getAttribute('data-src')); });
+  }
+  show(i) {
+    this.cur = Math.max(0, Math.min(i, this.slides.length - 1));
+    this.slides.forEach((s, k) => { s.classList.toggle('active', k === this.cur); s.classList.toggle('visible', k === this.cur); });
+    this.load(this.slides[this.cur]);
+    if (this.slides[this.cur + 1]) this.load(this.slides[this.cur + 1]);
+    try { history.replaceState(null, '', '#' + (this.cur + 1)); } catch (e) {}
+    this.counter.textContent = (this.cur + 1) + ' / ' + this.slides.length;
+    this.progress.style.width = ((this.cur + 1) / this.slides.length * 100) + '%';
+    try { document.activeElement && document.activeElement.blur(); window.focus(); } catch (e) {}
+  }
+  next() { this.show(this.cur + 1); } prev() { this.show(this.cur - 1); }
+  setupKeys() {
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.altKey || document.body.classList.contains('editing')) return;
+      const k = e.key;
+      if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') this.next();
+      else if (k === 'ArrowLeft' || k === 'PageUp') this.prev();
+      else if (k === 'Home') this.show(0);
+      else if (k === 'End') this.show(this.slides.length - 1);
+      else if (k === 'a' || k === 'A') this.show(this.appendixAt);
+      else if (k === 'f' || k === 'F') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); }
+      else return;
+      e.preventDefault();
+    });
+  }
+  setupTouch() {
+    let x0 = null;
+    document.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 60) (dx < 0 ? this.next() : this.prev()); x0 = null; });
+  }
+  setupControls() {
+    const c = document.querySelector('.deck-controls');
+    c.querySelector('[data-a="prev"]').onclick = () => this.prev();
+    c.querySelector('[data-a="next"]').onclick = () => this.next();
+    c.querySelector('[data-a="app"]').onclick = () => this.show(this.appendixAt);
+    this.counter = c.querySelector('.counter');
+    this.progress = document.querySelector('.progress');
+  }
+}
+const deck = new SlidePresentation();
+
+/* === SỬA CHỮ TRỰC TIẾP (phím E hoặc góc trên bên trái; Ctrl+S để lưu file) === */
+const editor = {
+  active: false,
+  sel: 'h1,h2,h3,p,li,td,th,b,.sec,.cv-kick,.cv-sub',
+  toggle() {
+    this.active = !this.active;
+    document.body.classList.toggle('editing', this.active);
+    document.querySelectorAll('.slide ' + this.sel.split(',').join(',.slide ')).forEach(el => {
+      if (this.active) el.setAttribute('contenteditable', 'true'); else el.removeAttribute('contenteditable');
+    });
+    document.getElementById('editToggle').classList.toggle('active', this.active);
+  },
+  save() {
+    const was = this.active; if (was) this.toggle();
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' })); a.download = 'slides-moi.html'; a.click();
+    if (was) this.toggle();
+  }
+};
+const hz = document.querySelector('.edit-hotzone'), et = document.getElementById('editToggle');
+let hideT = null;
+hz.addEventListener('mouseenter', () => { clearTimeout(hideT); et.classList.add('show'); });
+hz.addEventListener('mouseleave', () => { hideT = setTimeout(() => { if (!editor.active) et.classList.remove('show'); }, 400); });
+et.addEventListener('mouseenter', () => clearTimeout(hideT));
+et.addEventListener('mouseleave', () => { hideT = setTimeout(() => { if (!editor.active) et.classList.remove('show'); }, 400); });
+et.addEventListener('click', () => editor.toggle());
+hz.addEventListener('click', () => editor.toggle());
+document.addEventListener('keydown', e => {
+  if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) editor.toggle();
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && editor.active) { e.preventDefault(); editor.save(); }
+});
+
+</script>
+</body>
+</html>

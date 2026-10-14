@@ -1,0 +1,33 @@
+{
+  "name": "kartvibe-inventory-service",
+  "version": "1.0.0",
+  "description": "Inventory Service (REST & gRPC)",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "openapi": "tsx src/openapi.ts",
+    "codegen": "node scripts/codegen.mjs",
+    "check": "tsx test/check.ts"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.16.0",
+    "@grpc/grpc-js": "1.14.6",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.3",
+    "@types/pg": "^8.23.1",
+    "grpc-tools": "1.13.1",
+    "ts-proto": "2.13.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "zod": "^4.6.5"
+  }
+}

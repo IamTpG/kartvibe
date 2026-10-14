@@ -5,14 +5,23 @@ import crypto from 'crypto';
 import { executeQuery, metrics } from './db.js';
 import { logEvent, logRequest } from './logger.js';
 import type { Order } from './contract.js';
+import { RestInventoryClient } from './inventory/rest-client.js';
+import { GrpcInventoryClient, clientVersion } from './inventory/grpc-client.js';
+import { InventoryError, externalErrors } from './inventory/types.js';
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4002;
 const LATENCY_MS = process.env.LATENCY_MS !== undefined ? parseInt(process.env.LATENCY_MS, 10) : 0;
+const protocol = process.env.INVENTORY_PROTOCOL || 'rest';
+if (protocol !== 'rest' && protocol !== 'grpc') throw new Error(`Invalid INVENTORY_PROTOCOL: ${protocol} (expected rest or grpc)`);
+const deadlineMs = Number(process.env.INVENTORY_DEADLINE_MS ?? 500);
+if (!Number.isInteger(deadlineMs) || deadlineMs <= 0) throw new Error('INVENTORY_DEADLINE_MS must be a positive integer');
+const inventory = protocol === 'grpc'
+  ? new GrpcInventoryClient(process.env.INVENTORY_GRPC_ADDR || 'localhost:4007')
+  : new RestInventoryClient(process.env.INVENTORY_REST_URL || 'http://localhost:4006');
 
 // CORS
 app.use(cors({ origin: '*' }));
-app.use(express.json());
 
 // Request ID & Timing middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -21,7 +30,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   (req as any).requestId = requestId;
   (req as any).startTime = Date.now();
 
-  const isExcluded = req.path === '/health' || req.path.startsWith('/_metrics');
+  const isExcluded = req.path === '/health' || req.path.startsWith('/_metrics') || req.path === '/_reset';
 
   if (!isExcluded) {
     metrics.requests += 1;
@@ -38,6 +47,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
         path: req.originalUrl,
         status: res.statusCode,
         ms: duration,
+        direction: 'inbound',
       });
     }
   });
@@ -45,9 +55,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+app.use(express.json());
+app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
+  if (err && typeof err === 'object' && 'type' in err && err.type === 'entity.parse.failed') {
+    return res.status(400).json({ code: 'VALIDATION_ERROR', message: 'Invalid JSON body' });
+  }
+  next(err);
+});
+
 // Middleware giả lập độ trễ LATENCY_MS cho các request nghiệp vụ
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const isExcluded = req.path === '/health' || req.path.startsWith('/_metrics');
+  const isExcluded = req.path === '/health' || req.path.startsWith('/_metrics') || req.path === '/_reset';
   if (isExcluded || LATENCY_MS <= 0) {
     return next();
   }
@@ -73,6 +91,74 @@ app.get('/_metrics', (req: Request, res: Response) => {
 app.post('/_metrics/reset', (req: Request, res: Response) => {
   metrics.reset();
   res.status(204).send();
+});
+
+if (process.env.ENABLE_TEST_HOOKS === '1') {
+  app.post('/_reset', async (_req: Request, res: Response) => {
+    try {
+      await executeQuery('TRUNCATE TABLE purchase_orders RESTART IDENTITY');
+      res.status(204).send();
+    } catch (error) {
+      console.error('[Order reset error]', error);
+      res.status(500).json({ code: 'INTERNAL_ERROR', message: 'Internal server error' });
+    }
+  });
+}
+
+app.post('/orders', async (req: Request, res: Response) => {
+  const body: unknown = req.body;
+  if (body === null || typeof body !== 'object' || Array.isArray(body) ||
+      !('sku' in body) || typeof body.sku !== 'string' ||
+      !('quantity' in body) || typeof body.quantity !== 'number' || !Number.isInteger(body.quantity)) {
+    return res.status(400).json({ code: 'VALIDATION_ERROR', message: 'sku must be a string and quantity must be an integer' });
+  }
+  const { sku, quantity } = body as { sku: string; quantity: number };
+  const requestId = (req as any).requestId as string;
+  const started = Date.now();
+  let reservationId: string | undefined;
+  let available: number | 'absent' | undefined; // undefined: chưa có reply (lời gọi lỗi) nên không ghi vào log
+  let outcome = 0;
+  let grpcStatus: string | undefined;
+  let errorCode: string | undefined;
+  try {
+    const result = await inventory.reserve(sku, quantity, { requestId, deadlineMs });
+    reservationId = result.reservationId;
+    available = result.available ?? 'absent'; // reply thành công mà vắng available: server cũ không gửi field
+    outcome = protocol === 'grpc' ? 0 : 201;
+  } catch (error) {
+    const failure = error instanceof InventoryError ? error : new InventoryError(
+      'INTERNAL_ERROR', protocol === 'grpc' ? 2 : 500, protocol === 'grpc' ? 'UNKNOWN' : undefined,
+    );
+    errorCode = failure.kind;
+    grpcStatus = failure.grpcStatus;
+    outcome = failure.upstreamStatus;
+  } finally {
+    logRequest({
+      ts: new Date().toISOString(), service: 'order', requestId,
+      method: protocol === 'grpc' ? 'gRPC' : 'POST',
+      path: protocol === 'grpc' ? '/kartvibe.inventory.Inventory/Reserve' : '/inventory/reservations',
+      status: outcome, ms: Date.now() - started,
+      direction: 'outbound', protocol, operation: 'Reserve',
+      clientVersion,
+      ...(protocol === 'grpc' ? { ...(available !== undefined ? { available } : {}), grpcStatus: grpcStatus ?? 'OK' } : {}),
+      ...(errorCode ? { errorCode } : {}), ...(reservationId ? { reservationId } : {}),
+    });
+  }
+
+  if (errorCode) {
+    const mapped = externalErrors[errorCode as keyof typeof externalErrors];
+    return res.status(mapped.status).json({ code: errorCode, message: mapped.message });
+  }
+  try {
+    const saved = await executeQuery<{ id: number }>(
+      'INSERT INTO purchase_orders (sku, quantity, reservation_id, status) VALUES ($1, $2, $3, $4) RETURNING id',
+      [sku, quantity, reservationId, 'CONFIRMED'],
+    );
+    return res.status(201).json({ orderId: saved.rows[0].id, sku, quantity, status: 'CONFIRMED' });
+  } catch (error) {
+    console.error('[Order DB error after reservation]', { requestId, reservationId, error });
+    return res.status(500).json({ code: 'INTERNAL_ERROR', message: 'Internal server error' });
+  }
 });
 
 // 3. Nghiệp vụ: GET /orders?userId=1
@@ -153,6 +239,13 @@ app.get('/orders', async (req: Request, res: Response) => {
   }
 });
 
-app.listen(PORT, () => {
-  logEvent(`Order listening on :${PORT}`, { latencyMs: LATENCY_MS });
+executeQuery(`CREATE TABLE IF NOT EXISTS purchase_orders (
+  id serial PRIMARY KEY, sku text NOT NULL, quantity int NOT NULL,
+  reservation_id text NOT NULL, status text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+)`).then(() => app.listen(PORT, () => {
+  logEvent(`Order listening on :${PORT}`, { latencyMs: LATENCY_MS, protocol });
+})).catch((error) => {
+  console.error('[Order startup error]', error);
+  process.exit(1);
 });

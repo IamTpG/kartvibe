@@ -1,0 +1,68 @@
+# ma trận tương thích client cũ/mới x server cũ/mới (compat.mjs)
+# lệnh: compat_step
+# bắt đầu: 2026-10-14T22:53:45+07:00
+
+### 1. order-grpc-v1 (client cũ, proto v1) x Inventory thật (v2): client v1, available không có
+[2026-10-14T15:53:45.642Z] compat.mjs label=client-cu_server-moi
+[2026-10-14T15:53:45.645Z] kỳ vọng: clientVersion=v1, available=none
+[2026-10-14T15:53:45.645Z] order-log=<repo>/services/logs/order-grpc-v1.log
+[2026-10-14T15:53:45.645Z] inventory-log=<repo>/services/logs/inventory.log
+[2026-10-14T15:53:45.645Z] (a) POST http://localhost:4022/orders x-request-id=compat-client-cu_server-moi-3ee996ee-09bb-45f6-b582-73e9d3a3f958 body={"sku":"SKU-OK","quantity":2}
+[2026-10-14T15:53:45.702Z]     response 201 {"orderId":1,"sku":"SKU-OK","quantity":2,"status":"CONFIRMED"}
+[2026-10-14T15:53:45.703Z] PASS (b) POST /orders trả 201: thực tế 201
+[2026-10-14T15:53:45.703Z]     inventory-log: {"ts":"2026-10-14T15:53:45.691Z","service":"inventory","requestId":"compat-client-cu_server-moi-3ee996ee-09bb-45f6-b582-73e9d3a3f958","method":"gRPC","path":"/kartvibe.inventory.Inventory/Reserve","status":0,"ms":4,"protocol":"grpc","direction":"inbound","operation":"Reserve","clientVersion":"v1","grpcStatus":"OK","reservationId":"RSV-1"}
+[2026-10-14T15:53:45.703Z] PASS (c) log Inventory có requestId và clientVersion = v1: clientVersion="v1" (1 dòng khớp)
+[2026-10-14T15:53:45.703Z]     order-log: {"ts":"2026-10-14T15:53:45.694Z","service":"order","requestId":"compat-client-cu_server-moi-3ee996ee-09bb-45f6-b582-73e9d3a3f958","method":"gRPC","path":"/kartvibe.inventory.Inventory/Reserve","status":0,"ms":8,"direction":"outbound","protocol":"grpc","operation":"Reserve","clientVersion":"v1","grpcStatus":"OK","reservationId":"RSV-1"}
+[2026-10-14T15:53:45.703Z] PASS (d) log Order (outbound) có requestId và available = none: available: không có field; protocol=grpc, grpcStatus=OK
+[2026-10-14T15:53:45.703Z] KẾT QUẢ PASS (3/3 điều kiện đạt) label=client-cu_server-moi
+(đã lưu <repo>/results/block-03/compat/compat-2026-10-14T15-53-45-703Z-client-cu_server-moi.txt)
+
+### 2. order-grpc (client mới) x Inventory thật (v2): client v2, available là số
+[2026-10-14T15:53:45.775Z] compat.mjs label=client-moi_server-moi
+[2026-10-14T15:53:45.778Z] kỳ vọng: clientVersion=v2, available=number
+[2026-10-14T15:53:45.778Z] order-log=<repo>/services/logs/order-grpc.log
+[2026-10-14T15:53:45.778Z] inventory-log=<repo>/services/logs/inventory.log
+[2026-10-14T15:53:45.778Z] (a) POST http://localhost:4012/orders x-request-id=compat-client-moi_server-moi-287c82e8-aabb-48f7-ad7b-e8613e72e911 body={"sku":"SKU-OK","quantity":2}
+[2026-10-14T15:53:45.840Z]     response 201 {"orderId":1,"sku":"SKU-OK","quantity":2,"status":"CONFIRMED"}
+[2026-10-14T15:53:45.840Z] PASS (b) POST /orders trả 201: thực tế 201
+[2026-10-14T15:53:45.840Z]     inventory-log: {"ts":"2026-10-14T15:53:45.827Z","service":"inventory","requestId":"compat-client-moi_server-moi-287c82e8-aabb-48f7-ad7b-e8613e72e911","method":"gRPC","path":"/kartvibe.inventory.Inventory/Reserve","status":0,"ms":5,"protocol":"grpc","direction":"inbound","operation":"Reserve","clientVersion":"v2","grpcStatus":"OK","reservationId":"RSV-1"}
+[2026-10-14T15:53:45.840Z] PASS (c) log Inventory có requestId và clientVersion = v2: clientVersion="v2" (1 dòng khớp)
+[2026-10-14T15:53:45.841Z]     order-log: {"ts":"2026-10-14T15:53:45.829Z","service":"order","requestId":"compat-client-moi_server-moi-287c82e8-aabb-48f7-ad7b-e8613e72e911","method":"gRPC","path":"/kartvibe.inventory.Inventory/Reserve","status":0,"ms":8,"direction":"outbound","protocol":"grpc","operation":"Reserve","clientVersion":"v2","available":8,"grpcStatus":"OK","reservationId":"RSV-1"}
+[2026-10-14T15:53:45.841Z] PASS (d) log Order (outbound) có requestId và available = number: available: 8; protocol=grpc, grpcStatus=OK
+[2026-10-14T15:53:45.841Z] KẾT QUẢ PASS (3/3 điều kiện đạt) label=client-moi_server-moi
+(đã lưu <repo>/results/block-03/compat/compat-2026-10-14T15-53-45-841Z-client-moi_server-moi.txt)
+
+### 2b. giữ phần hàng cuối (SKU-LOW): available = 0 phải CÓ MẶT và bằng 0
+{"orderId":1,"sku":"SKU-LOW","quantity":1,"status":"CONFIRMED"} HTTP 201
+available có mặt: True | giá trị: 0
+
+### 3. order-grpc (client mới) x inventory-grpc-v1 (server cũ, proto v1): client v2, available = absent
+======================================================================
+[stop-inventory] Yêu cầu tắt Inventory Service
+  - Đường dẫn file PID: <repo>/services/.run/inventory.pid
+======================================================================
+[stop-inventory] Tìm thấy PID: 217433
+[stop-inventory] Gửi tín hiệu dừng (SIGTERM) tới process group 217433 (PID 217433)...
+[stop-inventory] THÀNH CÔNG: Inventory đã tắt (cổng 4006 không còn trả lời) và đã xóa file PID.
+Lưu ý: Tiến trình sẽ KHÔNG tự khởi động lại. Bây giờ bạn có thể chạy 'npm run down' để kiểm thử kịch bản Inventory down.
+cổng 4012 hồi phục: HTTP 409 sau 1 lần thử, .019428127 s
+cổng 4022 hồi phục: HTTP 409 sau 1 lần thử, .015800612 s
+[2026-10-14T15:53:48.067Z] compat.mjs label=client-moi_server-cu
+[2026-10-14T15:53:48.070Z] kỳ vọng: clientVersion=v2, available=absent
+[2026-10-14T15:53:48.070Z] order-log=<repo>/services/logs/order-grpc.log
+[2026-10-14T15:53:48.070Z] inventory-log=<repo>/services/logs/inventory-grpc-v1.log
+[2026-10-14T15:53:48.070Z] (a) POST http://localhost:4012/orders x-request-id=compat-client-moi_server-cu-f4c45b22-90b5-45f1-b918-edc61a92b8e2 body={"sku":"SKU-OK","quantity":2}
+[2026-10-14T15:53:48.124Z]     response 201 {"orderId":2,"sku":"SKU-OK","quantity":2,"status":"CONFIRMED"}
+[2026-10-14T15:53:48.124Z] PASS (b) POST /orders trả 201: thực tế 201
+[2026-10-14T15:53:48.124Z]     inventory-log: {"ts":"2026-10-14T15:53:48.115Z","service":"inventory-grpc-v1","requestId":"compat-client-moi_server-cu-f4c45b22-90b5-45f1-b918-edc61a92b8e2","method":"gRPC","path":"/kartvibe.inventory.Inventory/Reserve","protocol":"grpc","direction":"inbound","operation":"Reserve","clientVersion":"v2","status":0,"grpcStatus":"OK","ms":0.7,"reservationId":"v1-res-1"}
+[2026-10-14T15:53:48.124Z] PASS (c) log Inventory có requestId và clientVersion = v2: clientVersion="v2" (1 dòng khớp)
+[2026-10-14T15:53:48.125Z]     order-log: {"ts":"2026-10-14T15:53:48.116Z","service":"order","requestId":"compat-client-moi_server-cu-f4c45b22-90b5-45f1-b918-edc61a92b8e2","method":"gRPC","path":"/kartvibe.inventory.Inventory/Reserve","status":0,"ms":3,"direction":"outbound","protocol":"grpc","operation":"Reserve","clientVersion":"v2","available":"absent","grpcStatus":"OK","reservationId":"v1-res-1"}
+[2026-10-14T15:53:48.125Z] PASS (d) log Order (outbound) có requestId và available = absent: available: "absent"; protocol=grpc, grpcStatus=OK
+[2026-10-14T15:53:48.125Z] KẾT QUẢ PASS (3/3 điều kiện đạt) label=client-moi_server-cu
+(đã lưu <repo>/results/block-03/compat/compat-2026-10-14T15-53-48-125Z-client-moi_server-cu.txt)
+
+### khôi phục Inventory thật
+cổng 4012 hồi phục: HTTP 409 sau 1 lần thử, .025392304 s
+cổng 4022 hồi phục: HTTP 409 sau 1 lần thử, .017940302 s
+
+# [exit 0] kết thúc: 2026-10-14T22:53:50+07:00

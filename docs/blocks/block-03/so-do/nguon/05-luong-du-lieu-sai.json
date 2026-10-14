@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luồng: dữ liệu sai, validate chia hai tầng",
+    "output": "../05-luong-du-lieu-sai.html",
+    "viewBox": [
+      993,
+      546
+    ],
+    "quality_profile": "showcase",
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Trình duyệt",
+      "sublabel": "hoặc curl"
+    },
+    {
+      "id": "order",
+      "type": "backend",
+      "label": "order",
+      "sublabel": "kiểm hình dạng"
+    },
+    {
+      "id": "inv",
+      "type": "backend",
+      "label": "inventory",
+      "sublabel": "kiểm miền giá trị"
+    }
+  ],
+  "segments": [
+    {
+      "from": 174,
+      "to": 266,
+      "label": "Tầng 1: sai hình dạng (Order chặn)"
+    },
+    {
+      "from": 294,
+      "to": 462,
+      "label": "Tầng 2: sai miền giá trị (Inventory chặn)"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "browser",
+      "to": "order",
+      "y": 204,
+      "label": "POST /orders {sku: SKU-OK, quantity: \"2\"}",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "order",
+      "to": "browser",
+      "y": 242,
+      "label": "400 VALIDATION_ERROR, không gọi Inventory",
+      "variant": "return"
+    },
+    {
+      "id": "m3",
+      "from": "browser",
+      "to": "order",
+      "y": 324,
+      "label": "POST /orders {sku: SKU-OK, quantity: 0}",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m4",
+      "from": "order",
+      "to": "inv",
+      "y": 362,
+      "label": "Reserve(SKU-OK, 0)",
+      "variant": "default"
+    },
+    {
+      "id": "m5",
+      "from": "inv",
+      "to": "order",
+      "y": 400,
+      "label": "INVALID_ARGUMENT (REST: 400)",
+      "variant": "return"
+    },
+    {
+      "id": "m6",
+      "from": "order",
+      "to": "browser",
+      "y": 438,
+      "label": "400 VALIDATION_ERROR",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Tầng 1 ở Order",
+      "items": [
+        "Body là JSON object, sku là chuỗi, quantity là số nguyên",
+        "Sai thì 400 ngay, không tốn lời gọi nội bộ"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Tầng 2 ở Inventory",
+      "items": [
+        "sku không rỗng và tối đa 64 ký tự",
+        "quantity từ 1 đến 1000"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Vì sao chia hai tầng",
+      "items": [
+        "Nhánh INVALID_ARGUMENT chạy được từ đầu đến cuối",
+        "Ánh xạ lỗi gRPC sang 400 được kiểm chứng thật"
+      ]
+    }
+  ]
+}

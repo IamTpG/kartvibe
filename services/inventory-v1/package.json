@@ -1,0 +1,27 @@
+{
+  "name": "kartvibe-inventory-v1-service",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Server cũ tối thiểu (D12): gRPC Inventory build từ proto v1, không bao giờ đặt available.",
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "build": "tsc --noEmit",
+    "codegen": "node scripts/codegen.mjs",
+    "freeze": "node scripts/freeze.mjs --write",
+    "verify-frozen": "node scripts/freeze.mjs",
+    "test": "node --import tsx --test --test-reporter=spec test/*.test.ts",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.16.0",
+    "@grpc/grpc-js": "1.14.6",
+    "tsx": "4.23.15"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "grpc-tools": "1.13.1",
+    "ts-proto": "2.13.0",
+    "typescript": "7.0.2"
+  }
+}

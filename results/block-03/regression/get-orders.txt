@@ -1,0 +1,7 @@
+# GET /orders của Block 2 vẫn đúng
+# lệnh: bash -c cd '<repo>/services' && npm run seed:s -w kartvibe-order-service >/dev/null 2>&1; curl -s 'localhost:4002/orders?userId=1' | python3 -I -c "import sys,json;d=json.load(sys.stdin)['data'];print(len(d),'đơn; đơn đầu:',d[0]['id'],d[0]['status'],len(d[0]['items']),'items'); sys.exit(0 if len(d)==5 and d[0]['id']==1 and d[0]['status']=='PENDING' and len(d[0]['items'])==3 else 1)"
+# bắt đầu: 2026-10-14T22:53:59+07:00
+
+5 đơn; đơn đầu: 1 PENDING 3 items
+
+# [exit 0] kết thúc: 2026-10-14T22:54:00+07:00

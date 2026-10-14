@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Block 3: Order và Inventory, REST ở ngoài và gRPC ở trong",
+    "output": "../01-kien-truc.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1180,
+      640
+    ],
+    "views": [
+      {
+        "id": "chang-ngoai",
+        "label": "Chặng ngoài (REST)",
+        "focus": [
+          "browser",
+          "web",
+          "order",
+          "ordergrpc",
+          "orderv1"
+        ],
+        "note": "Client gọi cùng một POST /orders tới ba bản Order; API ngoài không đổi."
+      },
+      {
+        "id": "chang-trong",
+        "label": "Chặng trong (gRPC)",
+        "focus": [
+          "order",
+          "ordergrpc",
+          "orderv1",
+          "inventory",
+          "invdb"
+        ],
+        "note": "Order hỏi Inventory giữ hàng: REST làm baseline, gRPC với proto v2, và client cũ với proto v1."
+      },
+      {
+        "id": "server-cu",
+        "label": "Server cũ",
+        "focus": [
+          "ordergrpc",
+          "inventory",
+          "invv1"
+        ],
+        "note": "Dừng Inventory thật, chạy server proto v1 ở cổng 4007: order-grpc (client mới) gặp reply không có field 2."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "web :4000",
+      "sublabel": "order-compare.html",
+      "pos": [
+        40,
+        90
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Client",
+      "sublabel": "trình duyệt hoặc bên thứ 3",
+      "pos": [
+        40,
+        300
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "order",
+      "type": "backend",
+      "label": "order :4002",
+      "sublabel": "gọi Inventory bằng REST",
+      "pos": [
+        330,
+        90
+      ],
+      "size": [
+        190,
+        64
+      ]
+    },
+    {
+      "id": "ordergrpc",
+      "type": "backend",
+      "label": "order-grpc :4012",
+      "sublabel": "gRPC, proto v2",
+      "pos": [
+        330,
+        300
+      ],
+      "size": [
+        190,
+        64
+      ]
+    },
+    {
+      "id": "orderv1",
+      "type": "backend",
+      "label": "order-grpc-v1 :4022",
+      "sublabel": "proto v1, đóng băng",
+      "pos": [
+        330,
+        510
+      ],
+      "size": [
+        190,
+        64
+      ],
+      "tag": "client cũ"
+    },
+    {
+      "id": "inventory",
+      "type": "backend",
+      "label": "inventory",
+      "sublabel": "REST :4006, gRPC :4007",
+      "pos": [
+        650,
+        300
+      ],
+      "size": [
+        190,
+        64
+      ],
+      "tag": "một tiến trình"
+    },
+    {
+      "id": "invdb",
+      "type": "database",
+      "label": "kartvibe_inventory",
+      "sublabel": "stock, reservations",
+      "pos": [
+        950,
+        300
+      ],
+      "size": [
+        190,
+        64
+      ]
+    },
+    {
+      "id": "orderdb",
+      "type": "database",
+      "label": "kartvibe_order",
+      "sublabel": "purchase_orders",
+      "pos": [
+        650,
+        90
+      ],
+      "size": [
+        190,
+        64
+      ]
+    },
+    {
+      "id": "invv1",
+      "type": "backend",
+      "label": "inventory-grpc-v1 :4008",
+      "sublabel": "server cũ, chạy tay",
+      "pos": [
+        650,
+        510
+      ],
+      "size": [
+        190,
+        64
+      ],
+      "tag": "server cũ"
+    }
+  ],
+  "connections": [
+    {
+      "id": "web-serves",
+      "from": "web",
+      "to": "browser",
+      "label": "trang HTML",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "to-order",
+      "from": "browser",
+      "to": "order",
+      "label": "POST /orders",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "to-ordergrpc",
+      "from": "browser",
+      "to": "ordergrpc",
+      "label": "POST /orders",
+      "variant": "emphasis"
+    },
+    {
+      "id": "to-orderv1",
+      "from": "browser",
+      "to": "orderv1",
+      "label": "POST /orders",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "order-saves",
+      "from": "order",
+      "to": "orderdb",
+      "label": "ghi đơn (cả 3 bản Order)"
+    },
+    {
+      "id": "order-to-inv",
+      "from": "order",
+      "to": "inventory",
+      "label": "REST",
+      "fromSide": "right",
+      "toSide": "top"
+    },
+    {
+      "id": "grpc-to-inv",
+      "from": "ordergrpc",
+      "to": "inventory",
+      "label": "gRPC v2",
+      "variant": "emphasis"
+    },
+    {
+      "id": "v1-to-inv",
+      "from": "orderv1",
+      "to": "inventory",
+      "label": "gRPC v1",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "inv-sql",
+      "from": "inventory",
+      "to": "invdb",
+      "label": "SQL"
+    },
+    {
+      "id": "replaces",
+      "from": "inventory",
+      "to": "invv1",
+      "label": "thay bằng server cũ ở cổng 4007",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Hai boundary",
+      "items": [
+        "Client tới Order: REST/JSON, giữ nguyên",
+        "Order tới Inventory: REST (baseline) hoặc gRPC"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Cùng mã nguồn Order",
+      "items": [
+        "order và order-grpc chỉ khác INVENTORY_PROTOCOL",
+        "order-grpc-v1 là bản build từ proto v1, không build lại"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Hợp đồng gRPC",
+      "items": [
+        "services/proto/inventory v1 và v2, cùng package",
+        "v2 chỉ thêm optional int32 available = 2"
+      ]
+    }
+  ]
+}

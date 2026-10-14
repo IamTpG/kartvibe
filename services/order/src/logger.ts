@@ -6,6 +6,14 @@ export interface LogEntry {
   path: string;
   status: number;
   ms: number;
+  direction?: 'inbound' | 'outbound';
+  protocol?: 'rest' | 'grpc';
+  operation?: string;
+  grpcStatus?: string;
+  clientVersion?: string;
+  available?: number | 'absent';
+  errorCode?: string;
+  reservationId?: string;
 }
 
 // Mỗi lời gọi nghiệp vụ một dòng JSON ra stdout. Nơi lưu log do môi trường chạy quyết định

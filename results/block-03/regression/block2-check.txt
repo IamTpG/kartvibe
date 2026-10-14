@@ -1,0 +1,105 @@
+# Block 2: check hợp đồng (80 kiểm tra)
+# lệnh: bash -c cd '<repo>/services' && npm run check -- --size S
+# bắt đầu: 2026-10-14T22:53:57+07:00
+
+
+> kartvibe-services@1.0.0 check
+> node tools/check-contract.mjs --size S
+
+== Kiểm tra hợp đồng chung, dữ liệu S: 5 đơn, 15 item ==
+
+[user :4001]
+  PASS  /health → 200 {"status":"ok"}
+  PASS  /_metrics có service, requests, dbQueries
+  PASS  POST /_metrics/reset → 204 và về 0
+  PASS  CORS: Access-Control-Allow-Origin: *
+  PASS  GET /users/1 → {id:1, name:"Người dùng 1"}
+  PASS  GET /users/1 khớp hợp đồng user GET /users/{id} → 200
+  PASS  trả lại header x-request-id
+  PASS  1 request, 1 truy vấn DB
+  PASS  GET /users/99999 → 404 {code, message}
+  PASS  404 của user khớp hợp đồng user GET /users/{id} → 404
+
+[order :4002]
+  PASS  /health → 200 {"status":"ok"}
+  PASS  /_metrics có service, requests, dbQueries
+  PASS  POST /_metrics/reset → 204 và về 0
+  PASS  CORS: Access-Control-Allow-Origin: *
+  PASS  GET /orders?userId=1 → 5 đơn
+  PASS  GET /orders?userId=1 khớp hợp đồng order GET /orders → 200
+  PASS  sắp xếp theo id tăng dần
+  PASS  đơn 1: đúng khóa, status, createdAt
+  PASS  items của đơn 1 khớp công thức (thứ tự item_index)
+  PASS  status theo công thức (id - 1) % 5
+  PASS  trả lại header x-request-id
+  PASS  1 request, đúng 2 truy vấn DB
+  PASS  userId sai kiểu → 400 VALIDATION_ERROR
+  PASS  400 của order khớp hợp đồng order GET /orders → 400
+  PASS  người dùng không có đơn → 200 {"data":[]}
+
+[product :4003]
+  PASS  /health → 200 {"status":"ok"}
+  PASS  /_metrics có service, requests, dbQueries
+  PASS  POST /_metrics/reset → 204 và về 0
+  PASS  CORS: Access-Control-Allow-Origin: *
+  PASS  móc test của Product đang bật (ENABLE_TEST_HOOKS=1)
+  PASS  GET /products/8 đúng trường và giá trị theo công thức
+  PASS  GET /products/8 khớp hợp đồng product GET /products/{id} → 200
+  PASS  lấy một product: 1 request, 1 truy vấn
+  PASS  product không có → 404 {code, message}
+  PASS  404 của product khớp hợp đồng product GET /products/{id} → 404
+  PASS  GET /products?ids=9,8,10,8 → 3 product, loại trùng, sắp id tăng dần
+  PASS  product trong lô đúng trường và giá trị
+  PASS  GET /products?ids= khớp hợp đồng product GET /products → 200
+  PASS  lấy nhiều id: đúng 1 request, 1 truy vấn
+  PASS  trả lại header x-request-id
+  PASS  id không tồn tại bị bỏ qua (không lỗi)
+  PASS  ids sai định dạng → 400 VALIDATION_ERROR
+  PASS  hơn 200 id → 400
+  PASS  POST /_fault {"error":true} → trả trạng thái
+  PASS  khi error: cả hai endpoint trả 500 INTERNAL_ERROR
+  PASS  500 của product khớp hợp đồng product GET /products/{id} → 500
+  PASS  khi latencyMs=400: chậm thêm ≥ 400 ms
+  PASS  POST /_fault {} xóa lỗi
+  PASS  GET /_fault trả trạng thái hiện tại
+
+[bff :4004]
+  PASS  /health → 200 {"status":"ok"}
+  PASS  /_metrics có service, requests, dbQueries
+  PASS  POST /_metrics/reset → 204 và về 0
+  PASS  CORS: Access-Control-Allow-Origin: *
+  PASS  web: 200, partial=false, errors rỗng
+  PASS  web khớp hợp đồng bff GET /bff/web/dashboard → 200
+  PASS  web: user đúng
+  PASS  web: đủ 5 đơn
+  PASS  web: tên và giá product đúng
+  PASS  web: BFF gọi User 1, Order 1, Product 1 lần (lấy nhiều id, loại trùng)
+  PASS  mobile: 200, partial=false
+  PASS  mobile (CHỈ có id, status, items[].product.{name, thumbnail}) khớp hợp đồng bff GET /bff/mobile/orders → 200
+  PASS  mobile: đủ 5 đơn
+  PASS  mobile: không gọi User; Product 1 lần
+  PASS  Product lỗi: partial=true, errors[0].code=PRODUCT_UNAVAILABLE, có productIds
+  PASS  Product lỗi: product null ở mọi item, phần còn lại vẫn đủ
+  PASS  web khi Product lỗi (một phần) khớp hợp đồng bff GET /bff/web/dashboard → 200
+  PASS  Product lỗi: không điền tên/giá giả
+  PASS  Product chậm 1500 ms: hết thời gian chờ → partial
+
+[graphql :4005]
+  PASS  /health → 200 {"status":"ok"}
+  PASS  /_metrics có service, requests, dbQueries
+  PASS  POST /_metrics/reset → 204 và về 0
+  PASS  CORS: Access-Control-Allow-Origin: *
+  PASS  web: 200, đủ đơn, không lỗi
+  PASS  web data khớp hợp đồng graphql/WebData
+  PASS  DATALOADER đã bật: Product chỉ 1 lời gọi (không tăng theo số đơn)
+  PASS  DATALOADER tắt: N+1, Product 15 lời gọi
+  PASS  dữ liệu hai chế độ giống nhau
+  PASS  mobile data (chỉ các trường mobile) khớp hợp đồng graphql/MobileData
+
+[đối chiếu BFF ↔ GraphQL]
+  PASS  web: dữ liệu BFF giống hệt data của GraphQL
+  PASS  mobile: dữ liệu BFF giống hệt data của GraphQL
+
+Kết quả: 80 đạt, 0 thất bại. Đã bỏ qua: không
+
+# [exit 0] kết thúc: 2026-10-14T22:53:59+07:00

@@ -1,0 +1,31 @@
+# đóng băng client cũ (order-v1) và server cũ (inventory-v1)
+# lệnh: frozen_step
+# bắt đầu: 2026-10-14T22:53:31+07:00
+
+== order-v1
+PASS proto/inventory/v1/inventory.proto khớp FROZEN.sha256
+PASS src/generated/inventory.ts khớp FROZEN.sha256
+PASS src/inventory/grpc-client.ts khớp FROZEN.sha256
+PASS src/index.ts khớp FROZEN.sha256
+PASS @grpc/grpc-js 1.14.6 khớp phiên bản đã đóng băng (1.14.6)
+PASS proto v1 bản sao trong order-v1 trùng services/proto/inventory/v1
+PASS sinh lại từ proto v1 cho đúng mã đã commit
+
+== FROZEN.sha256 của order-v1
+789b940230472113804db02829f4c198348aed497c044a76b31ff059d122918b  proto/inventory/v1/inventory.proto
+38839a85733ed617a2c1afce49118e1190a3c917a9e333561248ac7a5c752421  src/generated/inventory.ts
+0fd8ac62ac5eda433ebabb419ae36085372d8bca19faa85228afd40275f89944  src/inventory/grpc-client.ts
+6576aa36043d0cd397ae650a12828b5a5b8e243e20bd6a64f06c2c161a977d18  src/index.ts
+1.14.6  @grpc/grpc-js
+
+== inventory-v1
+PASS src/generated/inventory.ts khớp FROZEN.sha256
+PASS <repo>/services/proto/inventory/v1/inventory.proto khớp FROZEN.sha256
+PASS sinh lại từ proto v1 cho đúng mã đã commit
+
+== FROZEN.sha256 của inventory-v1
+789b940230472113804db02829f4c198348aed497c044a76b31ff059d122918b  proto/inventory/v1/inventory.proto
+38839a85733ed617a2c1afce49118e1190a3c917a9e333561248ac7a5c752421  src/generated/inventory.ts
+
+
+# [exit 0] kết thúc: 2026-10-14T22:53:32+07:00

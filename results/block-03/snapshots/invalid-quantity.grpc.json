@@ -1,0 +1,15 @@
+{
+  "scenario": "invalid-quantity",
+  "mode": "grpc",
+  "timestamp": "2026-10-14T15:53:32.491Z",
+  "status": 400,
+  "headers": {
+    "access-control-allow-origin": "*",
+    "content-type": "application/json; charset=utf-8",
+    "x-powered-by": "Express"
+  },
+  "body": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid reservation request"
+  }
+}

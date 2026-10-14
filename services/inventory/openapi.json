@@ -1,0 +1,256 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Inventory Service",
+    "version": "1.0.0",
+    "description": "Quản lý tồn kho và giữ hàng (REST & gRPC)."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4006"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false,
+        "description": "Lỗi chung của service; không lộ stack trace."
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "Metrics": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string"
+          },
+          "requests": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dbQueries": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "service",
+          "requests",
+          "dbQueries"
+        ],
+        "additionalProperties": false,
+        "description": "Bộ đếm phục vụ đo; không tính /health và /_metrics."
+      },
+      "ReserveRequest": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        },
+        "required": [
+          "sku",
+          "quantity"
+        ],
+        "additionalProperties": false,
+        "description": "Yêu cầu giữ hàng tồn kho."
+      },
+      "ReserveResponse": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reservationId"
+        ],
+        "additionalProperties": false,
+        "description": "Kết quả giữ hàng thành công."
+      },
+      "FaultRequest": {
+        "type": "object",
+        "properties": {
+          "delayMs": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "delayMs"
+        ],
+        "additionalProperties": false,
+        "description": "Cài đặt độ trễ giả lập."
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/inventory/reservations": {
+      "post": {
+        "summary": "Giữ hàng trong kho (nguyên tử)",
+        "description": "Trừ tồn bằng câu lệnh có điều kiện. Đủ hàng trả 201, hết hàng 409, sai dữ liệu 400.",
+        "requestBody": {
+          "description": "Thông tin sku và quantity",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReserveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Giữ hàng thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReserveResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: sku hoặc quantity ngoài miền",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "OUT_OF_STOCK: Hết hàng hoặc không đủ số lượng",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR: Lỗi cơ sở dữ liệu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Kiểm tra trạng thái service",
+        "responses": {
+          "200": {
+            "description": "Còn sống",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_metrics": {
+      "get": {
+        "summary": "Lấy số đo request và db queries",
+        "responses": {
+          "200": {
+            "description": "Bộ đếm",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Metrics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_metrics/reset": {
+      "post": {
+        "summary": "Đặt lại bộ đếm số đo",
+        "responses": {
+          "204": {
+            "description": "Đã đặt lại bộ đếm"
+          }
+        }
+      }
+    },
+    "/_reset": {
+      "post": {
+        "summary": "Khôi phục dữ liệu tồn kho về fixture ban đầu",
+        "responses": {
+          "204": {
+            "description": "Đã đặt lại tồn kho"
+          }
+        }
+      }
+    },
+    "/_fault": {
+      "post": {
+        "summary": "Bơm độ trễ giả lập cho cả REST và gRPC",
+        "requestBody": {
+          "description": "Độ trễ delayMs",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FaultRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Đã cài đặt độ trễ"
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}

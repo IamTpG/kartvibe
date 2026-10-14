@@ -1,0 +1,15 @@
+{
+  "scenario": "out-of-stock",
+  "mode": "grpc-v1",
+  "timestamp": "2026-10-14T15:53:32.432Z",
+  "status": 409,
+  "headers": {
+    "access-control-allow-origin": "*",
+    "content-type": "application/json; charset=utf-8",
+    "x-powered-by": "Express"
+  },
+  "body": {
+    "code": "OUT_OF_STOCK",
+    "message": "Out of stock"
+  }
+}

@@ -8,7 +8,12 @@
     "order",
     "product",
     "bff",
-    "graphql"
+    "graphql",
+    "inventory",
+    "tools/block3",
+    "order-v1",
+    "inventory-v1",
+    "tools/compat"
   ],
   "scripts": {
     "seed:s": "npm run seed:s -w user -w order -w product",
